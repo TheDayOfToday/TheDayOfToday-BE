@@ -1,7 +1,7 @@
-package com.example.thedayoftoday.repository;
+package com.example.thedayoftoday.domain.repository;
 
-import com.example.thedayoftoday.entity.Diary;
-import com.example.thedayoftoday.entity.Sentimentalanalysis;
+import com.example.thedayoftoday.domain.entity.Diary;
+import com.example.thedayoftoday.domain.entity.Sentimentalanalysis;
 import org.springframework.data.jpa.repository.JpaRepository;
 import java.time.LocalDateTime;
 import java.util.List;

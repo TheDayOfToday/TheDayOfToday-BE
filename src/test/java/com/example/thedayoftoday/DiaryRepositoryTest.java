@@ -1,10 +1,10 @@
 package com.example.thedayoftoday;
 
-import com.example.thedayoftoday.entity.Diary;
-import com.example.thedayoftoday.entity.Sentimentalanalysis;
-import com.example.thedayoftoday.entity.User;
-import com.example.thedayoftoday.entity.enumType.Moodmeter;
-import com.example.thedayoftoday.repository.DiaryRepository;
+import com.example.thedayoftoday.domain.entity.Diary;
+import com.example.thedayoftoday.domain.entity.Sentimentalanalysis;
+import com.example.thedayoftoday.domain.entity.User;
+import com.example.thedayoftoday.domain.entity.enumType.Moodmeter;
+import com.example.thedayoftoday.domain.repository.DiaryRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

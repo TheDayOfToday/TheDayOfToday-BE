@@ -1,4 +1,4 @@
-package com.example.thedayoftoday.entity.enumType;
+package com.example.thedayoftoday.domain.entity.enumType;
 
 public enum NoticeType {
 
