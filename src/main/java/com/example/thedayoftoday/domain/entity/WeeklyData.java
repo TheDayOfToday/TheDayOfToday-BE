@@ -1,6 +1,6 @@
-package com.example.thedayoftoday.entity;
+package com.example.thedayoftoday.domain.entity;
 
-import com.example.thedayoftoday.entity.enumType.Moodmeter;
+import com.example.thedayoftoday.domain.entity.enumType.Moodmeter;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;

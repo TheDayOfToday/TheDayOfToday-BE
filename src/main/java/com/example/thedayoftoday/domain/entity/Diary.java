@@ -1,4 +1,4 @@
-package com.example.thedayoftoday.entity;
+package com.example.thedayoftoday.domain.entity;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;

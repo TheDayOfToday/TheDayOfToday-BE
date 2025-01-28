@@ -1,6 +1,6 @@
-package com.example.thedayoftoday.repository;
+package com.example.thedayoftoday.domain.repository;
 
-import com.example.thedayoftoday.entity.WeeklyData;
+import com.example.thedayoftoday.domain.entity.WeeklyData;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
