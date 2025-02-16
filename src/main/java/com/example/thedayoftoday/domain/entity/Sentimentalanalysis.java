@@ -14,7 +14,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
-public class Sentimentalanalysis {
+public class SentimentalAnalysis {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -31,7 +31,7 @@ public class Sentimentalanalysis {
 
 
     @Builder
-    public Sentimentalanalysis(String moodName,
+    public SentimentalAnalysis(String moodName,
                                Moodmeter moodmeter,
                                String content,
                                Diary diary) {
@@ -40,6 +40,4 @@ public class Sentimentalanalysis {
         this.diary = diary;
         this.content = content;
         }
-
-
 }

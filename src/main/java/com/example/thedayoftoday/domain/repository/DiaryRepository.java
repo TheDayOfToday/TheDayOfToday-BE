@@ -1,7 +1,7 @@
 package com.example.thedayoftoday.domain.repository;
 
 import com.example.thedayoftoday.domain.entity.Diary;
-import com.example.thedayoftoday.domain.entity.Sentimentalanalysis;
+import com.example.thedayoftoday.domain.entity.SentimentalAnalysis;
 import org.springframework.data.jpa.repository.JpaRepository;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -13,7 +13,7 @@ public interface DiaryRepository extends JpaRepository<Diary, Long> {
 
     //특정 diary id의 감정분석 조회
     @Query("SELECT d.sentimentAnalysis FROM Diary d WHERE d.diaryId = :diaryId")
-    Optional<Sentimentalanalysis> findSentimentAnalysisByDiaryId(@Param("diaryId") Long diaryId);
+    Optional<SentimentalAnalysis> findSentimentAnalysisByDiaryId(@Param("diaryId") Long diaryId);
     // 특정 유저 ID로 모든 Diary 조회
     List<Diary> findByUser_UserId(Long userId);
 
