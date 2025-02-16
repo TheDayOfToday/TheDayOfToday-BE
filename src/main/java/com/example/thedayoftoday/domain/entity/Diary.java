@@ -36,14 +36,14 @@ public class Diary {
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "analysisId_id")
-    private Sentimentalanalysis sentimentAnalysis;
+    private SentimentalAnalysis sentimentAnalysis;
 
 
     @Builder
     public Diary(String title, String content,
                  LocalDateTime createTime,
                  User user,
-                 Sentimentalanalysis sentimentAnalysis) {
+                 SentimentalAnalysis sentimentAnalysis) {
         this.title = title;
         this.content = content;
         this.createTime = createTime;

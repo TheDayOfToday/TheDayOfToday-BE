@@ -1,6 +1,7 @@
 package com.example.thedayoftoday;
 
 import com.example.thedayoftoday.domain.entity.Diary;
+import com.example.thedayoftoday.domain.entity.SentimentalAnalysis;
 import com.example.thedayoftoday.domain.entity.Sentimentalanalysis;
 import com.example.thedayoftoday.domain.entity.User;
 import com.example.thedayoftoday.domain.entity.enumType.Moodmeter;
@@ -44,7 +45,7 @@ class DiaryRepositoryTest {
 
         entityManager.persist(user);
 
-        Sentimentalanalysis analysis = Sentimentalanalysis.builder()
+        SentimentalAnalysis analysis = SentimentalAnalysis.builder()
                 .moodName("Happy")
                 .moodmeter(Moodmeter.HAPPY)
                 .content("Feeling good!")
@@ -61,7 +62,7 @@ class DiaryRepositoryTest {
         entityManager.persist(diary);
 
         // when
-        Optional<Sentimentalanalysis> result = diaryRepository.findSentimentAnalysisByDiaryId(diary.getDiaryId());
+        Optional<SentimentalAnalysis> result = diaryRepository.findSentimentAnalysisByDiaryId(diary.getDiaryId());
 
         // then
         assertThat(result).isPresent();
