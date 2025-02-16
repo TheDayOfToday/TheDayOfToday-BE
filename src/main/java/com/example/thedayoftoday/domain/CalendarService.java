@@ -64,19 +64,37 @@ public class CalendarService {
         return response;
     }
 
-    public Map<String, Object> getSentimentalAnalysis(Long diaryId) {
-        Optional<SentimentalAnalysis> analysisOptional = diaryRepository.findSentimentAnalysisByDiaryId(diaryId);
+    public Map<String, Object> getSentimentalAnalysis(Long userId, LocalDateTime date) {
+        List<Diary> diaries = diaryRepository.findByUser_UserIdAndCreateTimeBetween(
+                userId,
+                date.withHour(0).withMinute(0).withSecond(0),
+                date.withHour(23).withMinute(59).withSecond(59)
+        );
 
         Map<String, Object> response = new HashMap<>();
-        response.put("diaryId", diaryId);
+        response.put("userId", userId);
+        response.put("date", date.toLocalDate().toString());
 
-        if (analysisOptional.isPresent()) {
-            SentimentalAnalysis analysis = analysisOptional.get();
-            response.put("mood", analysis.getMoodName());
-            response.put("moodmeter", analysis.getMoodmeter());
-            response.put("content", analysis.getContent());
+        if (diaries.isEmpty()) {
+            response.put("analysisResult", "해당 날짜에 분석된 데이터가 없습니다.");
+            return response;
+        }
+
+        List<Map<String, Object>> analysisResults = new ArrayList<>();
+        for (Diary diary : diaries) {
+            if (diary.getSentimentAnalysis() != null) {
+                Map<String, Object> analysisData = new HashMap<>();
+                analysisData.put("mood", diary.getSentimentAnalysis().getMoodName());
+                analysisData.put("moodmeter", diary.getSentimentAnalysis().getMoodmeter());
+                analysisData.put("content", diary.getSentimentAnalysis().getContent());
+                analysisResults.add(analysisData);
+            }
+        }
+
+        if (analysisResults.isEmpty()) {
+            response.put("analysisResult", "해당 날짜의 감정 분석 데이터가 없습니다.");
         } else {
-            response.put("analysisResult", "분석 데이터가 없습니다.");
+            response.put("analysisResults", analysisResults);
         }
 
         return response;

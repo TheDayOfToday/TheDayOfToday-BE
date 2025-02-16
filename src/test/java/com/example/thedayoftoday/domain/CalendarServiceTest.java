@@ -80,14 +80,31 @@ class CalendarServiceTest {
 
     @Test
     void testGetSentimentalAnalysis() {
-        Long diaryId = 1L;
+        Long userId = 1L;
+        LocalDateTime date = LocalDateTime.of(2025, 2, 15, 0, 0);
 
-        when(diaryRepository.findSentimentAnalysisByDiaryId(diaryId))
-                .thenReturn(Optional.of(testAnalysis));
+        Diary testDiaryWithAnalysis = Diary.builder()
+                .title("행복한 하루")
+                .content("오늘은 정말 즐거운 날이었다.")
+                .createTime(date)
+                .user(null)
+                .sentimentAnalysis(testAnalysis)
+                .build();
 
-        Map<String, Object> result = calendarService.getSentimentalAnalysis(diaryId);
+        List<Diary> mockDiaries = Collections.singletonList(testDiaryWithAnalysis);
 
-        assertEquals("기쁨", result.get("mood"));
-        assertEquals("매우 기쁨기쁨기쁨", result.get("content"));
+        when(diaryRepository.findByUser_UserIdAndCreateTimeBetween(eq(userId), any(), any()))
+                .thenReturn(mockDiaries);
+
+        Map<String, Object> result = calendarService.getSentimentalAnalysis(userId, date);
+
+        assertEquals(userId, result.get("userId"));
+        assertEquals("2025-02-15", result.get("date"));
+
+        List<Map<String, Object>> analysisResults = (List<Map<String, Object>>) result.get("analysisResults");
+        assertNotNull(analysisResults);
+        assertFalse(analysisResults.isEmpty());
+        assertEquals("기쁨", analysisResults.get(0).get("mood"));
+        assertEquals("매우 기쁨기쁨기쁨", analysisResults.get(0).get("content"));
     }
 }

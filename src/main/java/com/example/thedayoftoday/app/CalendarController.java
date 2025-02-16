@@ -15,21 +15,30 @@ public class CalendarController {
         this.calendarService = calendarService;
     }
 
-    @GetMapping("/colors/{userId}/{year}/{month}")
-    public Map<String, Object> getMonthColors(@PathVariable Long userId, @PathVariable int year, @PathVariable int month) {
+    @GetMapping("/{userId}/{year}/{month}")
+    public Map<String, Object> getMonthColors(@PathVariable Long userId,
+                                              @PathVariable int year,
+                                              @PathVariable int month) {
         LocalDateTime startDate = LocalDateTime.of(year, month, 1, 0, 0);
         LocalDateTime endDate = startDate.plusMonths(1).minusSeconds(1);
         return calendarService.getMonthColors(userId, startDate, endDate);
     }
 
     @GetMapping("/diary/{userId}/{year}/{month}/{day}")
-    public Map<String, Object> getDiaryEntry(@PathVariable Long userId, @PathVariable int year, @PathVariable int month, @PathVariable int day) {
+    public Map<String, Object> getDiaryEntry(@PathVariable Long userId,
+                                             @PathVariable int year,
+                                             @PathVariable int month,
+                                             @PathVariable int day) {
         LocalDateTime date = LocalDateTime.of(year, month, day, 0, 0);
         return calendarService.getDiaryEntry(userId, date);
     }
 
-    @GetMapping("/analysis/{diaryId}")
-    public Map<String, Object> getSentimentalAnalysis(@PathVariable Long diaryId) {
-        return calendarService.getSentimentalAnalysis(diaryId);
+    @GetMapping("/analysis/{userId}/{year}/{month}/{day}")
+    public Map<String, Object> getSentimentalAnalysis(@PathVariable Long userId,
+                                                      @PathVariable int year,
+                                                      @PathVariable int month,
+                                                      @PathVariable int day) {
+        LocalDateTime date = LocalDateTime.of(year, month, day, 0, 0);
+        return calendarService.getSentimentalAnalysis(userId, date);
     }
 }

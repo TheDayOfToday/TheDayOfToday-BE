@@ -2,7 +2,6 @@ package com.example.thedayoftoday;
 
 import com.example.thedayoftoday.domain.entity.Diary;
 import com.example.thedayoftoday.domain.entity.SentimentalAnalysis;
-import com.example.thedayoftoday.domain.entity.Sentimentalanalysis;
 import com.example.thedayoftoday.domain.entity.User;
 import com.example.thedayoftoday.domain.entity.enumType.Moodmeter;
 import com.example.thedayoftoday.domain.repository.DiaryRepository;
