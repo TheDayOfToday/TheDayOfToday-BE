@@ -5,6 +5,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface SentimentalAnalysisRepository extends JpaRepository<SentimentalAnalysis, Long> {
+public interface SentimentAnalysisRepository extends JpaRepository<SentimentalAnalysis, Long> {
 
 }
