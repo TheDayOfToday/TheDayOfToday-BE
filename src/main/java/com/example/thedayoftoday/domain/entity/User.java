@@ -1,8 +1,11 @@
 package com.example.thedayoftoday.domain.entity;
 
 
+import com.example.thedayoftoday.domain.entity.enumType.RoleType;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -31,6 +34,9 @@ public class User {
     private  String password;
     private String phoneNumber;
 
+    @Enumerated(EnumType.STRING)
+    private RoleType role;
+
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<Diary> diaries = new ArrayList<>();
 
@@ -46,6 +52,7 @@ public class User {
                 String email,
                 String password,
                 String phoneNumber,
+                RoleType role,
                 List<Diary> diaries,
                 List<Notice> notices,
                 List<WeeklyData> weeklyDataList) {
@@ -54,6 +61,7 @@ public class User {
         this.email = email;
         this.password = password;
         this.phoneNumber = phoneNumber;
+        this.role = role;
         this.diaries = diaries;
         this.notices = notices;
         this.weeklyDataList = weeklyDataList;

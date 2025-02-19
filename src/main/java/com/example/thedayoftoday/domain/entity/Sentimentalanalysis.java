@@ -1,5 +1,6 @@
 package com.example.thedayoftoday.domain.entity;
 
+
 import com.example.thedayoftoday.domain.entity.enumType.Moodmeter;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -39,5 +40,5 @@ public class SentimentalAnalysis {
         this.moodmeter = moodmeter;
         this.diary = diary;
         this.content = content;
-        }
+    }
 }
