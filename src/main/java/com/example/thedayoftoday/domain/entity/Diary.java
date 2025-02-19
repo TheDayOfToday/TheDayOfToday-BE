@@ -50,5 +50,4 @@ public class Diary {
         this.user = user;
         this.sentimentAnalysis = sentimentAnalysis;
     }
-
 }

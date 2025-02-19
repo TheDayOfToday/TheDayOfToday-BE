@@ -3,7 +3,7 @@ package com.example.thedayoftoday.domain;
 import com.example.thedayoftoday.domain.entity.Diary;
 import com.example.thedayoftoday.domain.entity.SentimentalAnalysis;
 import com.example.thedayoftoday.domain.repository.DiaryRepository;
-import com.example.thedayoftoday.domain.repository.SentimentalAnalysisRepository;
+import com.example.thedayoftoday.domain.repository.SentimentAnalysisRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -24,7 +24,7 @@ class CalendarServiceTest {
     private DiaryRepository diaryRepository;
 
     @Mock
-    private SentimentalAnalysisRepository sentimentalAnalysisRepository;
+    private SentimentAnalysisRepository sentimentalAnalysisRepository;
 
     @InjectMocks
     private CalendarService calendarService;
