@@ -1,10 +1,9 @@
 package com.example.thedayoftoday.domain;
 
 import com.example.thedayoftoday.domain.entity.Diary;
-import com.example.thedayoftoday.domain.entity.SentimentalAnalysis;
 import com.example.thedayoftoday.domain.repository.DiaryRepository;
 
-import com.example.thedayoftoday.domain.repository.SentimentalanalysisRepository;
+import com.example.thedayoftoday.domain.repository.SentimentalAnalysisRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -14,9 +13,9 @@ import java.util.*;
 @Service
 public class CalendarService {
     private final DiaryRepository diaryRepository;
-    private final SentimentalanalysisRepository sentimentalanalysisRepository;
+    private final SentimentalAnalysisRepository sentimentalanalysisRepository;
 
-    public CalendarService(DiaryRepository diaryRepository, SentimentalanalysisRepository sentimentalanalysisRepository) {
+    public CalendarService(DiaryRepository diaryRepository, SentimentalAnalysisRepository sentimentalanalysisRepository) {
         this.diaryRepository = diaryRepository;
         this.sentimentalanalysisRepository = sentimentalanalysisRepository;
     }
