@@ -38,5 +38,5 @@ public class SentimentalAnalysis {
         this.moodmeter = moodmeter;
         this.diary = diary;
         this.content = content;
-
+    }
 }

@@ -7,5 +7,4 @@ public enum Moodmeter {
     SAD,
     ANGRY,
     EXCITED
-
 }

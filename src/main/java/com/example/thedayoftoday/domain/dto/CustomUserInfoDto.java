@@ -5,6 +5,7 @@ import lombok.Getter;
 
 @Getter
 public class CustomUserInfoDto {
+
     private Long userId;
     private String nickname;
     private String name;
