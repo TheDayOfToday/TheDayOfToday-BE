@@ -43,5 +43,4 @@ public class Notice {
         this.noticeTime = noticeTime;
         this.user = user;
     }
-
 }

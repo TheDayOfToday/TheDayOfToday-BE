@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class CustomUserDetailService implements UserDetailsService {
+
     private final UserRepository userRepository;
     private final ModelMapper mapper;
 

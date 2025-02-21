@@ -55,9 +55,9 @@ public class JwtUtil {
                 .compact();
     }
 
-
     /**
      * Token에서 User ID 추출
+     *
      * @param token
      * @return User ID
      */
@@ -65,9 +65,9 @@ public class JwtUtil {
         return parseClaims(token).get("memberId", Long.class);
     }
 
-
     /**
      * JWT 검증
+     *
      * @param token
      * @return IsValidate
      */
@@ -87,9 +87,9 @@ public class JwtUtil {
         return false;
     }
 
-
     /**
      * JWT Claims 추출
+     *
      * @param accessToken
      * @return JWT Claims
      */
@@ -100,6 +100,4 @@ public class JwtUtil {
             return e.getClaims();
         }
     }
-
-
 }
