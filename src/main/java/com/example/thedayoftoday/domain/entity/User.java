@@ -23,7 +23,6 @@ import lombok.NoArgsConstructor;
 @Getter
 public class User {
 
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long userId;
@@ -31,7 +30,7 @@ public class User {
     private String nickname;
     private String name;
     private String email;
-    private  String password;
+    private String password;
     private String phoneNumber;
 
     @Enumerated(EnumType.STRING)
@@ -86,5 +85,4 @@ public class User {
     public void changeNickname(String nickname) {
         this.nickname = nickname;
     }
-
 }

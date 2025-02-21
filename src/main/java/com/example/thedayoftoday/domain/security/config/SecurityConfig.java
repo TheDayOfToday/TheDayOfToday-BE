@@ -20,7 +20,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableWebSecurity
 @EnableMethodSecurity
 @AllArgsConstructor
-public class SecurityConfig  {
+public class SecurityConfig {
     private final CustomUserDetailService customUserDetailService;
     private final JwtUtil jwtUtil;
     private final CustomAccessDeniedHandler accessDeniedHandler;
@@ -38,7 +38,8 @@ public class SecurityConfig  {
         http.cors(Customizer.withDefaults());
 
         //세션 관리 상태 없음으로 구성, Spring Security가 세션 생성 or 사용 X
-        http.sessionManagement(sessionManagement -> sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+        http.sessionManagement(
+                sessionManagement -> sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
         //FormLogin, BasicHttp 비활성화
         http.formLogin(form -> form.disable());
@@ -57,9 +58,8 @@ public class SecurityConfig  {
                         .requestMatchers(AUTH_WHITELIST).permitAll()
                         //@PreAuthrization을 사용할 것이기 때문에 모든 경로에 대한 인증처리는 Pass
                         .anyRequest().permitAll()
-//                        .anyRequest().authenticated()
+        //              .anyRequest().authenticated()
         );
-
         return http.build();
     }
 }

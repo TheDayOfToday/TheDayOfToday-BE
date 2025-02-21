@@ -16,19 +16,15 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class CustomUserDetailService implements UserDetailsService {
-
     private final UserRepository userRepository;
     private final ModelMapper mapper;
 
-
     @Override
     public UserDetails loadUserByUsername(String id) throws UsernameNotFoundException {
-        User user= userRepository.findById(Long.parseLong(id))
+        User user = userRepository.findById(Long.parseLong(id))
                 .orElseThrow(() -> new UsernameNotFoundException("해당하는 유저가 없습니다"));
 
         CustomUserInfoDto dto = mapper.map(user, CustomUserInfoDto.class);
-
         return new CustomUserDetails(dto);
-
     }
 }

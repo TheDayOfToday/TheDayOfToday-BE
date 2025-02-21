@@ -6,7 +6,6 @@ import com.example.thedayoftoday.domain.entity.enumType.RoleType;
 import com.example.thedayoftoday.domain.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.modelmapper.ModelMapper;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -19,7 +18,6 @@ public class SignupController {
 
     private final UserService userService;
 
-
     @PostMapping("/signup")
     public ResponseEntity<Long> addUser(@Valid @RequestBody SignupRequestDto signupRequestDto) {
 
@@ -27,7 +25,7 @@ public class SignupController {
                 .nickname(signupRequestDto.getNickname())
                 .name(signupRequestDto.getName())
                 .email(signupRequestDto.getEmail())
-                .password(signupRequestDto.getPassword())  // 🚨 비밀번호를 명확히 설정
+                .password(signupRequestDto.getPassword())
                 .phoneNumber(signupRequestDto.getPhoneNumber())
                 .role(RoleType.USER)
                 .build();
@@ -35,5 +33,4 @@ public class SignupController {
         Long id = userService.join(user);
         return ResponseEntity.ok(id);
     }
-
 }

@@ -25,5 +25,4 @@ public class AuthController {
         String token = this.authService.login(request);
         return ResponseEntity.status(HttpStatus.OK).body(token);
     }
-
 }

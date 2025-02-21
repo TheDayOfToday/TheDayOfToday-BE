@@ -12,17 +12,14 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 @RequiredArgsConstructor
 public class UserService {
-
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder encoder;
 
     public Long join(User user) {
-
-
-    User vaildUser = userRepository.findByEmail(user.getEmail());
-        if(vaildUser!=null) {
-        throw new IllegalArgumentException("해당 email은 이미 존재합니다");
-    }
+        User vaildUser = userRepository.findByEmail(user.getEmail());
+        if (vaildUser != null) {
+            throw new IllegalArgumentException("해당 email은 이미 존재합니다");
+        }
 
         if (user.getPassword() == null || user.getPassword().isEmpty()) {
             throw new IllegalArgumentException("비밀번호는 필수 입력 값입니다.");
@@ -40,8 +37,6 @@ public class UserService {
                 .build();
 
         userRepository.save(newUser);
-
         return newUser.getUserId();
     }
-
 }

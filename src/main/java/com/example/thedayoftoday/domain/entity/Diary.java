@@ -38,7 +38,6 @@ public class Diary {
     @JoinColumn(name = "analysisId_id")
     private SentimentalAnalysis sentimentAnalysis;
 
-
     @Builder
     public Diary(String title, String content,
                  LocalDateTime createTime,

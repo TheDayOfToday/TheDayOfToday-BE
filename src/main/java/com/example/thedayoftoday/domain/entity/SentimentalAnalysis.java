@@ -29,7 +29,6 @@ public class SentimentalAnalysis {
     @OneToOne(mappedBy = "sentimentAnalysis")
     private Diary diary;
 
-
     @Builder
     public SentimentalAnalysis(String moodName,
                                Moodmeter moodmeter,

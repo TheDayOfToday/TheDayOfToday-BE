@@ -14,7 +14,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 @Getter
 @RequiredArgsConstructor
 public class CustomUserDetails implements UserDetails {
-
     private final CustomUserInfoDto user;
 
     @Override
