@@ -1,6 +1,6 @@
 package com.example.thedayoftoday.app;
 
-import com.example.thedayoftoday.domain.CalendarService;
+import com.example.thedayoftoday.domain.service.CalendarService;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;

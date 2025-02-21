@@ -1,6 +1,6 @@
 package com.example.thedayoftoday;
 
-import com.example.thedayoftoday.domain.AudioProcessingService;
+import com.example.thedayoftoday.domain.service.AudioProcessingService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 
