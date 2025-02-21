@@ -41,16 +41,15 @@ public class WeeklyData {
     private User user;
 
     @Builder
-    public WeeklyData (String title,
-                                 String feedback,
-                                 LocalDate startDate,
-                                 LocalDate endDate,
-                                 User user) {
+    public WeeklyData(String title,
+                      String feedback,
+                      LocalDate startDate,
+                      LocalDate endDate,
+                      User user) {
         this.title = title;
         this.feedback = feedback;
         this.startDate = startDate;
         this.endDate = endDate;
         this.user = user;
     }
-
 }

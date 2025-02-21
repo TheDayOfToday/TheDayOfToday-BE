@@ -1,8 +1,8 @@
 package com.example.thedayoftoday.domain;
 
 import com.example.thedayoftoday.domain.entity.Diary;
-import com.example.thedayoftoday.domain.entity.SentimentalAnalysis;
 import com.example.thedayoftoday.domain.repository.DiaryRepository;
+
 import com.example.thedayoftoday.domain.repository.SentimentalAnalysisRepository;
 import org.springframework.stereotype.Service;
 
@@ -13,11 +13,11 @@ import java.util.*;
 @Service
 public class CalendarService {
     private final DiaryRepository diaryRepository;
-    private final SentimentalAnalysisRepository sentimentalAnalysisRepository;
+    private final SentimentalAnalysisRepository sentimentalanalysisRepository;
 
-    public CalendarService(DiaryRepository diaryRepository, SentimentalAnalysisRepository sentimentalAnalysisRepository) {
+    public CalendarService(DiaryRepository diaryRepository, SentimentalAnalysisRepository sentimentalanalysisRepository) {
         this.diaryRepository = diaryRepository;
-        this.sentimentalAnalysisRepository = sentimentalAnalysisRepository;
+        this.sentimentalanalysisRepository = sentimentalanalysisRepository;
     }
 
     public Map<String, Object> getMonthColors(Long userId, LocalDateTime startDate, LocalDateTime endDate) {

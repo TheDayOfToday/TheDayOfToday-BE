@@ -14,6 +14,7 @@ public interface DiaryRepository extends JpaRepository<Diary, Long> {
     //특정 diary id의 감정분석 조회
     @Query("SELECT d.sentimentAnalysis FROM Diary d WHERE d.diaryId = :diaryId")
     Optional<SentimentalAnalysis> findSentimentAnalysisByDiaryId(@Param("diaryId") Long diaryId);
+
     // 특정 유저 ID로 모든 Diary 조회
     List<Diary> findByUser_UserId(Long userId);
 
