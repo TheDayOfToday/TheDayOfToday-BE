@@ -21,16 +21,7 @@ public class SignupController {
     @PostMapping("/signup")
     public ResponseEntity<Long> addUser(@Valid @RequestBody SignupRequestDto signupRequestDto) {
 
-        User user = User.builder()
-                .nickname(signupRequestDto.getNickname())
-                .name(signupRequestDto.getName())
-                .email(signupRequestDto.getEmail())
-                .password(signupRequestDto.getPassword())
-                .phoneNumber(signupRequestDto.getPhoneNumber())
-                .role(RoleType.USER)
-                .build();
-
-        Long id = userService.join(user);
+        Long id = userService.join(signupRequestDto);
         return ResponseEntity.ok(id);
     }
 }
