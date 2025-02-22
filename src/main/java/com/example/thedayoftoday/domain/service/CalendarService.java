@@ -1,4 +1,4 @@
-package com.example.thedayoftoday.domain;
+package com.example.thedayoftoday.domain.service;
 
 import com.example.thedayoftoday.domain.entity.Diary;
 import com.example.thedayoftoday.domain.repository.DiaryRepository;

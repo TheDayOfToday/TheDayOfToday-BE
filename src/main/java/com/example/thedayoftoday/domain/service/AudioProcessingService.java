@@ -1,4 +1,4 @@
-package com.example.thedayoftoday.domain;
+package com.example.thedayoftoday.domain.service;
 
 import org.springframework.stereotype.Service;
 
