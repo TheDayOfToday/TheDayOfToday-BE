@@ -37,7 +37,4 @@ public class UserServiceTest {
         assertThat(savedUser.getEmail()).isEqualTo("hun@aaaa.com");
     }
 
-    @Test
-    @DisplayName("로그인 성공")
-
 }

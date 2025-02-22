@@ -19,8 +19,8 @@ public class UserService {
     private final BCryptPasswordEncoder encoder;
 
     public Long join(@Valid  SignupRequestDto user) {
-        User vaildUser = userRepository.findByEmail(user.getEmail());
-        if (vaildUser != null) {
+        Optional<User> vaildUser = userRepository.findByEmail(user.getEmail());
+        if (vaildUser.isPresent()) {
             throw new IllegalArgumentException("해당 email은 이미 존재합니다");
         }
 
