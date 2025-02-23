@@ -5,8 +5,6 @@ build/
 !**/src/main/**/build/
 !**/src/test/**/build/
 
-application.properties
-
 ### STS ###
 .apt_generated
 .classpath
@@ -40,3 +38,6 @@ out/
 
 ### Jwt Secret Key ###
 src/main/resources/application-jwt.properties
+
+###DB info###
+src/main/resources/application.properties
