@@ -5,6 +5,7 @@ import com.example.thedayoftoday.domain.dto.LoginRequestDto;
 import com.example.thedayoftoday.domain.entity.User;
 import com.example.thedayoftoday.domain.repository.UserRepository;
 import com.example.thedayoftoday.domain.security.util.JwtUtil;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -27,11 +28,9 @@ public class AuthService {
     public String login(LoginRequestDto loginRequestDto) {
         String email = loginRequestDto.getEmail();
         String password = loginRequestDto.getPassword();
-        User user = userRepository.findByEmail(email);
 
-        if (user == null) {
-            throw new UsernameNotFoundException("해당 이메일이 존재하지 않습니다");
-        }
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("해당 이메일이 존재하지 않습니다"));
 
         if (!encoder.matches(password, user.getPassword())) {
             throw new BadCredentialsException("비밀번호가 일치하지 않습니다.");
