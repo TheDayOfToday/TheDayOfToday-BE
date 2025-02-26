@@ -13,7 +13,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.io.PrintWriter;
 
 public class JWTFilter extends OncePerRequestFilter {
 
@@ -48,7 +47,6 @@ public class JWTFilter extends OncePerRequestFilter {
             response.getWriter().print("invalid access token");
             return;
         }
-
 
         String email = jwtUtil.getUsername(accessToken);
         String role = jwtUtil.getRole(accessToken);

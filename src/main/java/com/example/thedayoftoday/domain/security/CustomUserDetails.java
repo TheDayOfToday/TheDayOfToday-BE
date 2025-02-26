@@ -7,6 +7,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 import java.util.List;
+
 public class CustomUserDetails implements UserDetails {
 
     private final String email;
@@ -20,7 +21,7 @@ public class CustomUserDetails implements UserDetails {
         this.role = user.getRole().toString();
     }
 
-    // ✅ 새로 추가: JWT 인증 시 email, role만 사용할 수 있도록!
+    //  새로 추가: JWT 인증 시 email, role만 사용할 수 있도록!
     public CustomUserDetails(String email, String role) {
         this.email = email;
         this.password = null; // JWT 인증에는 비밀번호가 필요 없음

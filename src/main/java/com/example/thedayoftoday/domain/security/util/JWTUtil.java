@@ -15,7 +15,7 @@ public class JWTUtil {
     private final SecretKey secretKey;
 
     public JWTUtil(@Value("${spring.jwt.secret}") String secret) {
-        this.secretKey = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));  // ✅ SecretKey 생성
+        this.secretKey = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));  // SecretKey 생성
     }
 
     public String getUsername(String token) {
@@ -40,14 +40,14 @@ public class JWTUtil {
                 .claim("email", email)
                 .claim("role", role)
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + expiredMs))  // ✅ 만료 시간
+                .setExpiration(new Date(System.currentTimeMillis() + expiredMs))  // 만료 시간
                 .signWith(secretKey, SignatureAlgorithm.HS256)
                 .compact();
     }
 
     private Claims parseClaims(String token) {
         return Jwts.parserBuilder()
-                .setSigningKey(secretKey)  // ✅ 검증할 때 사용
+                .setSigningKey(secretKey)  // 검증할 때 사용
                 .build()
                 .parseClaimsJws(token)
                 .getBody();

@@ -27,7 +27,7 @@ public class AuthService {
 
     public void authProcess(SignupRequestDto signupDTO) {
 
-        if(userRepository.existsByEmail(signupDTO.getEmail())) {
+        if (userRepository.existsByEmail(signupDTO.getEmail())) {
             throw new UsernameNotFoundException("이미 존재하는 이메일입니다");
         }
         User newUser = User.builder()
@@ -41,6 +41,5 @@ public class AuthService {
 
         // DB에 저장
         userRepository.save(newUser);
-
     }
 }
