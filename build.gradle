@@ -42,7 +42,6 @@ dependencies {
 
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
 	implementation group: 'org.modelmapper', name: 'modelmapper', version: '2.4.2'
-	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 
 	testCompileOnly 'org.projectlombok:lombok'
 	testAnnotationProcessor 'org.projectlombok:lombok'

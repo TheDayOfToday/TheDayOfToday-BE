@@ -28,10 +28,17 @@ public class JWTFilter extends OncePerRequestFilter {
 
         String accessToken = request.getHeader("access");
 
-        if (accessToken == null) {
+        System.out.println("Received access token: " + accessToken);
+
+        // 토큰이 없거나 빈 값이면 필터 진행
+        if (accessToken == null || accessToken.trim().isEmpty()) {
+            System.out.println("No access token provided, proceeding without authentication.");
             filterChain.doFilter(request, response);
             return;
         }
+
+        // 공백이 포함된 경우 제거
+        accessToken = accessToken.trim();
 
         try {
             jwtUtil.isExpired(accessToken);
