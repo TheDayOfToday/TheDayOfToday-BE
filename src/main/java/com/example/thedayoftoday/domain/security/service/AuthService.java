@@ -2,43 +2,44 @@ package com.example.thedayoftoday.domain.security.service;
 
 import com.example.thedayoftoday.domain.dto.CustomUserInfoDto;
 import com.example.thedayoftoday.domain.dto.LoginRequestDto;
+import com.example.thedayoftoday.domain.dto.SignupRequestDto;
 import com.example.thedayoftoday.domain.entity.User;
+import com.example.thedayoftoday.domain.entity.enumType.RoleType;
 import com.example.thedayoftoday.domain.repository.UserRepository;
-import com.example.thedayoftoday.domain.security.util.JwtUtil;
-import java.util.Optional;
+
+import com.example.thedayoftoday.domain.security.util.JWTUtil;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@Transactional
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
 public class AuthService {
 
-    private final JwtUtil jwtUtil;
     private final UserRepository userRepository;
-    private final PasswordEncoder encoder;
-    private final ModelMapper modelMapper;
+    private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
-    @Transactional
-    public String login(LoginRequestDto loginRequestDto) {
-        String email = loginRequestDto.getEmail();
-        String password = loginRequestDto.getPassword();
+    public void authProcess(SignupRequestDto signupDTO) {
 
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("해당 이메일이 존재하지 않습니다"));
-
-        if (!encoder.matches(password, user.getPassword())) {
-            throw new BadCredentialsException("비밀번호가 일치하지 않습니다.");
+        if (userRepository.existsByEmail(signupDTO.getEmail())) {
+            throw new UsernameNotFoundException("이미 존재하는 이메일입니다");
         }
+        User newUser = User.builder()
+                .nickname(signupDTO.getNickname())
+                .name(signupDTO.getName())
+                .email(signupDTO.getEmail())
+                .password(bCryptPasswordEncoder.encode(signupDTO.getPassword()))  // ✅ 비밀번호 암호화
+                .phoneNumber(signupDTO.getPhoneNumber())
+                .role(RoleType.USER)
+                .build();
 
-        CustomUserInfoDto info = modelMapper.map(user, CustomUserInfoDto.class);
-
-        String accssToken = jwtUtil.createAccessToken(info);
-        return accssToken;
+        // DB에 저장
+        userRepository.save(newUser);
     }
 }

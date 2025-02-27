@@ -1,66 +1,110 @@
 package com.example.thedayoftoday.domain.security.config;
 
-import com.example.thedayoftoday.domain.security.CustomAccessDeniedHandler;
-import com.example.thedayoftoday.domain.security.CustomAuthenticationEntryPoint;
-import com.example.thedayoftoday.domain.security.filter.JwtAuthFilter;
-import com.example.thedayoftoday.domain.security.service.CustomUserDetailService;
-import com.example.thedayoftoday.domain.security.util.JwtUtil;
-import lombok.AllArgsConstructor;
+import com.example.thedayoftoday.domain.security.filter.CustomLogoutFilter;
+import com.example.thedayoftoday.domain.security.filter.JWTFilter;
+import com.example.thedayoftoday.domain.security.filter.LoginFilter;
+import com.example.thedayoftoday.domain.security.repository.RefreshRepository;
+import com.example.thedayoftoday.domain.security.util.JWTUtil;
+import jakarta.servlet.http.HttpServletRequest;
+import java.util.Arrays;
+import java.util.Collections;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.Customizer;
-import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.authentication.logout.LogoutFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
 
 @Configuration
 @EnableWebSecurity
-@EnableMethodSecurity
-@AllArgsConstructor
 public class SecurityConfig {
+    private final AuthenticationConfiguration authenticationConfiguration;
+    private final JWTUtil jwtUtil;
+    private final RefreshRepository refreshRepository;
 
-    private final CustomUserDetailService customUserDetailService;
-    private final JwtUtil jwtUtil;
-    private final CustomAccessDeniedHandler accessDeniedHandler;
-    private final CustomAuthenticationEntryPoint authenticationEntryPoint;
+    public SecurityConfig(AuthenticationConfiguration authenticationConfiguration, JWTUtil jwtUtil,
+                          RefreshRepository refreshRepository) {
 
-    private static final String[] AUTH_WHITELIST = {
-            "/auth/**"
-    };
-    //접근없이 허용할 수 있는 URL 목록임. 추가할거면 여기서 추가
+        this.authenticationConfiguration = authenticationConfiguration;
+        this.jwtUtil = jwtUtil;
+        this.refreshRepository = refreshRepository;
+    }
+
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
+
+        return configuration.getAuthenticationManager();
+    }
+
+    @Bean
+    public BCryptPasswordEncoder bCryptPasswordEncoder() {
+
+        return new BCryptPasswordEncoder();
+    }
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        //CSRF, CORS
-        http.csrf(csrf -> csrf.disable());
-        http.cors(Customizer.withDefaults());
 
-        //세션 관리 상태 없음으로 구성, Spring Security가 세션 생성 or 사용 X
-        http.sessionManagement(
-                sessionManagement -> sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+        http
+                .cors(corsCustomizer -> corsCustomizer.configurationSource(new CorsConfigurationSource() {
 
-        //FormLogin, BasicHttp 비활성화
-        http.formLogin(form -> form.disable());
-        http.httpBasic(httpBasic -> httpBasic.disable());
+                    @Override
+                    public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
 
-        //JwtAuthFilter를 UsernamePasswordAuthenticationFilter 앞에 추가
-        http.addFilterBefore(new JwtAuthFilter(customUserDetailService), UsernamePasswordAuthenticationFilter.class);
+                        CorsConfiguration configuration = new CorsConfiguration();
 
-        http.exceptionHandling(exceptionHandling -> exceptionHandling
-                .authenticationEntryPoint(authenticationEntryPoint)
-                .accessDeniedHandler(accessDeniedHandler)
-        );
+                        configuration.setAllowedOrigins(Collections.singletonList("http://localhost:3000"));
+                        configuration.setAllowedMethods(Collections.singletonList("*"));
+                        configuration.setAllowCredentials(true);
+                        configuration.setAllowedHeaders(Collections.singletonList("*"));
+                        configuration.setMaxAge(3600L);
 
-        // 권한 규칙 작성
-        http.authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers(AUTH_WHITELIST).permitAll()
-                        //@PreAuthrization을 사용할 것이기 때문에 모든 경로에 대한 인증처리는 Pass
-                        .anyRequest().permitAll()
-                //              .anyRequest().authenticated()
-        );
+                        configuration.setExposedHeaders(Arrays.asList("Set-Cookie", "access"));
+                        return configuration;
+                    }
+                }));
+
+        //csrf disable
+        http
+                .csrf((auth) -> auth.disable());
+
+        //From 로그인 방식 disable
+        http
+                .formLogin((auth) -> auth.disable());
+
+        //http basic 인증 방식 disable
+        http
+                .httpBasic((auth) -> auth.disable());
+
+        http
+                .authorizeHttpRequests((auth) -> auth
+                        .requestMatchers("/login", "/", "/join", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
+
+                        //        .requestMatchers("/admin").hasRole("ADMIN")
+                        .requestMatchers("/reissue").permitAll()
+                        .anyRequest().authenticated());
+
+        http
+                .addFilterBefore(new JWTFilter(jwtUtil), LoginFilter.class);
+        http
+                .addFilterAt(
+                        new LoginFilter(authenticationManager(authenticationConfiguration), jwtUtil, refreshRepository),
+                        UsernamePasswordAuthenticationFilter.class);
+        http
+                .addFilterBefore(new CustomLogoutFilter(jwtUtil, refreshRepository), LogoutFilter.class);
+
+        //세션 설정
+        http
+                .sessionManagement((session) -> session
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+
         return http.build();
     }
 }

@@ -33,8 +33,8 @@ public class UserService {
                 .role(RoleType.USER)
                 .build();
 
-        userRepository.save(newUser);
-        return newUser.getUserId();
+        User savedUser = userRepository.save(newUser);
+        return savedUser.getUserId();
     }
 
 
