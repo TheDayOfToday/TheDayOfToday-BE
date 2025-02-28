@@ -2,6 +2,7 @@ package com.example.thedayoftoday.domain.security.util;
 
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -9,13 +10,20 @@ import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
+@Slf4j
 @Component
 public class JWTUtil {
 
     private final SecretKey secretKey;
+    private final long accessExpirationTime;
+    private final long refreshExpirationTime;
 
-    public JWTUtil(@Value("${spring.jwt.secret}") String secret) {
+    public JWTUtil(@Value("${spring.jwt.secret}") String secret,
+                   @Value("${spring.jwt.expiration_time}") long accessExpirationTime,
+                   @Value("${spring.jwt.refresh-expiration-time}")long refreshExpirationTime) {
         this.secretKey = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));  // SecretKey 생성
+        this.accessExpirationTime = accessExpirationTime;
+        this.refreshExpirationTime = refreshExpirationTime;
     }
 
     public String getUsername(String token) {
@@ -34,7 +42,17 @@ public class JWTUtil {
         return parseClaims(token).getExpiration().before(new Date());
     }
 
-    public String createJwt(String category, String email, String role, Long expiredMs) {
+    public String createAccessToken(String category, String email, String role) {
+        log.info("사용자의 만들어진 Access Token {}, role: {}, expires in {} ms", email, role, accessExpirationTime);
+        return createJwt("access", email, role, accessExpirationTime);
+    }
+
+    public String createRefreshToken(String category, String email, String role) {
+        log.info("사용자의 만들어진 Refresh Token {}, role: {}, expires in {} ms", email, role, refreshExpirationTime);
+        return createJwt("refresh", email, role, refreshExpirationTime);
+    }
+
+    public String createJwt(String category, String email, String role, long expiredMs) {
         return Jwts.builder()
                 .claim("category", category)
                 .claim("email", email)
