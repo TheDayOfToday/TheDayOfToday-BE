@@ -85,16 +85,22 @@ public class SecurityConfig {
 
         http
                 .authorizeHttpRequests((auth) -> auth
-                        .requestMatchers("/","/error","/login", "/join", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
-                        .requestMatchers("/favicon.ico", "/error").permitAll()  // 추가
+                        .requestMatchers(
+                                "/",
+                                "/error",
+                                "/login",
+                                "/join",
+                                "/swagger-ui/**",
+                                "/v3/api-docs/**",
+                                "/reissue").permitAll()
                         //        .requestMatchers("/admin").hasRole("ADMIN")
-                        .requestMatchers("/reissue").permitAll()
                         .anyRequest().authenticated());
-
         http
                 .addFilterBefore(new JWTFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(new CustomLogoutFilter(jwtUtil, refreshRepository), LogoutFilter.class)
-                .addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration), jwtUtil, refreshRepository), UsernamePasswordAuthenticationFilter.class);
+                .addFilterAt(
+                        new LoginFilter(authenticationManager(authenticationConfiguration), jwtUtil, refreshRepository),
+                        UsernamePasswordAuthenticationFilter.class);
 
         //세션 설정
         http

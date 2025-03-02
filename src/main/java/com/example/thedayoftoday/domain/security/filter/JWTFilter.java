@@ -25,12 +25,8 @@ public class JWTFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
-        String requestURI = request.getRequestURI();
 
-        if (requestURI.equals("/") || requestURI.equals("/login") || requestURI.equals("/reissue")) {
-            filterChain.doFilter(request, response);
-            return;
-        }
+        String requestURI = request.getRequestURI();
 
         String accessToken = request.getHeader("access");
 
@@ -42,9 +38,6 @@ public class JWTFilter extends OncePerRequestFilter {
             filterChain.doFilter(request, response);
             return;
         }
-
-        // 공백이 포함된 경우 제거
-        accessToken = accessToken.trim();
 
         try {
             jwtUtil.isExpired(accessToken);
