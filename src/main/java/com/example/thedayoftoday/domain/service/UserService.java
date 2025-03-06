@@ -18,9 +18,10 @@ public class UserService {
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder encoder;
 
-    public Long join(@Valid  SignupRequestDto user) {
-        Optional<User> vaildUser = userRepository.findByEmail(user.getEmail());
-        if (vaildUser.isPresent()) {
+    public Long join(@Valid SignupRequestDto user) {
+        boolean validUser = userRepository.existsByEmail(user.getEmail());
+
+        if (!validUser) {
             throw new IllegalArgumentException("해당 email은 이미 존재합니다");
         }
 
@@ -37,5 +38,7 @@ public class UserService {
         return savedUser.getUserId();
     }
 
-
+    public Optional<User> findById(Long userId) {
+        return userRepository.findById(userId);
+    }
 }

@@ -1,6 +1,6 @@
 package com.example.thedayoftoday.domain.entity;
 
-import com.example.thedayoftoday.domain.entity.enumType.Moodmeter;
+import com.example.thedayoftoday.domain.entity.enumType.MoodMeter;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -31,7 +31,7 @@ public class WeeklyData {
     private String title;
 
     @Enumerated(EnumType.STRING)
-    private Moodmeter analysisMoodmeter;
+    private MoodMeter analysisMoodmeter;
 
     @Lob
     private String feedback;

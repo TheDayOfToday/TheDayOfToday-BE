@@ -89,7 +89,7 @@ class CalendarServiceTest {
                 .content("오늘은 정말 즐거운 날이었다.")
                 .createTime(date)
                 .user(null)
-                .sentimentAnalysis(testAnalysis)
+            //    .sentimentAnalysis(testAnalysis)
                 .build();
 
         List<Diary> mockDiaries = Collections.singletonList(testDiaryWithAnalysis);

@@ -3,6 +3,7 @@ package com.example.thedayoftoday.domain.entity;
 
 import com.example.thedayoftoday.domain.entity.enumType.RoleType;
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -29,6 +30,7 @@ public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name="user_id")
     private Long userId;
 
     private String nickname;

@@ -2,6 +2,8 @@ package com.example.thedayoftoday.domain.repository;
 
 import com.example.thedayoftoday.domain.entity.Diary;
 import com.example.thedayoftoday.domain.entity.SentimentalAnalysis;
+import javax.swing.text.html.Option;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.time.LocalDateTime;
@@ -36,4 +38,11 @@ public interface DiaryRepository extends JpaRepository<Diary, Long> {
             LocalDateTime startDate,
             LocalDateTime endDate
     );
-}
+
+    @EntityGraph(attributePaths = {"sentimentAnalysis"})
+    Optional<Diary> findByDiaryId(Long diaryId);
+
+    @Query("SELECT d FROM Diary d JOIN FETCH d.user WHERE d.user.userId = :userId AND d.title LIKE %:title%")
+    List<Diary> findByUserIdAndTitleWithUser(@Param("userId") Long userId, @Param("title") String title);
+
+    }

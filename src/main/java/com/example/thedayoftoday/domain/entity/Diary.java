@@ -1,5 +1,6 @@
 package com.example.thedayoftoday.domain.entity;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -11,6 +12,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 import java.time.LocalDateTime;
 import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -32,22 +34,24 @@ public class Diary {
     private LocalDateTime createTime;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "userId", nullable = false)
+    @JoinColumn(name = "user_Id", nullable = false)
     private User user;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "analysisId_id")
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "analysis_id_id")
     private SentimentalAnalysis sentimentAnalysis;
 
     @Builder
     public Diary(String title, String content,
                  LocalDateTime createTime,
-                 User user,
-                 SentimentalAnalysis sentimentAnalysis) {
+                 User user) {
         this.title = title;
         this.content = content;
         this.createTime = createTime;
         this.user = user;
+    }
+
+    public void addSentimentAnalysis(SentimentalAnalysis sentimentAnalysis) {
         this.sentimentAnalysis = sentimentAnalysis;
     }
 }
