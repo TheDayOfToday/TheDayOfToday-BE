@@ -26,8 +26,15 @@ public class JWTFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
 
-        String accessToken = request.getHeader("access");
+        String authorizationHeader = request.getHeader("Authorization");
 
+        if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
+            System.out.println("유효한 authorizationHeader이 오지 않았습니다.");
+            filterChain.doFilter(request, response);
+            return;
+        }
+
+        String accessToken = authorizationHeader.substring(7);  // "Bearer " 이후의 토큰 추출
         System.out.println("Received access token: " + accessToken);
 
         // 토큰이 없거나 빈 값이면 필터 진행

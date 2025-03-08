@@ -1,6 +1,6 @@
 package com.example.thedayoftoday.domain.entity;
 
-import com.example.thedayoftoday.domain.entity.enumType.Moodmeter;
+import com.example.thedayoftoday.domain.entity.enumType.MoodMeter;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -22,16 +22,16 @@ public class SentimentalAnalysis {
 
     private String moodName;
 
-    private Moodmeter moodmeter;
+    private MoodMeter moodmeter;
 
     private String content;
 
-    @OneToOne(mappedBy = "sentimentAnalysis")
+    @OneToOne(mappedBy = "sentimentAnalysis", orphanRemoval = true)
     private Diary diary;
 
     @Builder
     public SentimentalAnalysis(String moodName,
-                               Moodmeter moodmeter,
+                               MoodMeter moodmeter,
                                String content,
                                Diary diary) {
         this.moodName = moodName;
