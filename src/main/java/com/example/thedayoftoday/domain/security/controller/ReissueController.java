@@ -12,7 +12,9 @@ import java.util.Date;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RestController;
 
+@RestController
 public class ReissueController {
 
     private final JWTUtil jwtUtil;
@@ -99,8 +101,8 @@ public class ReissueController {
 
         Cookie cookie = new Cookie(key, value);
         cookie.setMaxAge(24 * 60 * 60);
-        //cookie.setSecure(true);
-        //cookie.setPath("/");
+        cookie.setSecure(false);
+        cookie.setPath("/");
         cookie.setHttpOnly(true);
 
         return cookie;
