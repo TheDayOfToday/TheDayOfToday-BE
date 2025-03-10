@@ -1,6 +1,6 @@
 package com.example.thedayoftoday.domain.dto;
 
-public record DiaryRequestDto(
+public record DiaryContentDto(
         String title,
         String content
 ) {

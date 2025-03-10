@@ -40,5 +40,6 @@ out/
 src/main/resources/application-jwt.properties
 
 ###DB info###
+src/main/resources/application.properties
 src/main/resources/application.properties.DS_Store
 .DS_Store

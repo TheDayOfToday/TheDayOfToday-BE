@@ -1,8 +1,9 @@
 package com.example.thedayoftoday.app;
 
+
+import com.example.thedayoftoday.domain.dto.WeeklyAnalysisResponseDto;
 import com.example.thedayoftoday.domain.service.WeeklyAnalysisService;
 import org.springframework.web.bind.annotation.*;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/weeklyAnalysis")
@@ -14,7 +15,8 @@ public class WeeklyAnalysisController {
     }
 
     @GetMapping("/{year}/{month}/{week}")
-    public Map<String, Object> getWeeklyAnalysis(@PathVariable int year, @PathVariable int month, @PathVariable int week) {
+    public WeeklyAnalysisResponseDto getWeeklyAnalysis(
+            @PathVariable int year, @PathVariable int month, @PathVariable int week) {
         return weeklyAnalysisService.getWeeklyAnalysis(year, month, week);
     }
 }
