@@ -1,6 +1,6 @@
 package com.example.thedayoftoday;
 
-import com.example.thedayoftoday.domain.service.AudioProcessingService;
+import com.example.thedayoftoday.domain.service.AudioService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 
@@ -13,7 +13,7 @@ class AudioProcessingServiceTest {
 
     @Test
     void testProcessAudio_withValidFile() throws Exception {
-        AudioProcessingService service = new AudioProcessingService();
+        AudioService service = new AudioService();
 
         String testFilePath = "C:\\Users\\doosa\\Desktop\\대학\\졸설\\WhisperSTT\\STORYWAY.m4a";
         File testFile = new File(testFilePath);
@@ -33,7 +33,7 @@ class AudioProcessingServiceTest {
 
     @Test
     void testProcessAudio_withInvalidFile() {
-        AudioProcessingService service = new AudioProcessingService();
+        AudioService service = new AudioService();
 
         // 존재하지 않는 파일 경로
         String invalidFilePath = "C:\\invalid\\nonexistent_audio.wav";
@@ -45,7 +45,7 @@ class AudioProcessingServiceTest {
 
     @Test
     void testProcessAudio_withNoFile() {
-        AudioProcessingService service = new AudioProcessingService();
+        AudioService service = new AudioService();
 
         // 빈 파일 경로 테스트
         String result = service.processAudio("");

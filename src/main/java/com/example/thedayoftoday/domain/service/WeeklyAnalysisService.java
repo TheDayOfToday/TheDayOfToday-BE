@@ -1,9 +1,12 @@
 package com.example.thedayoftoday.domain.service;
 
+import com.example.thedayoftoday.domain.dto.WeeklyAnalysisResponseDto;
 import com.example.thedayoftoday.domain.entity.WeeklyData;
 import com.example.thedayoftoday.domain.repository.WeeklyDataRepository;
 import org.springframework.stereotype.Service;
-import java.util.*;
+
+import java.util.Calendar;
+import java.util.List;
 
 @Service
 public class WeeklyAnalysisService {
@@ -13,7 +16,7 @@ public class WeeklyAnalysisService {
         this.weeklyDataRepository = weeklyDataRepository;
     }
 
-    public Map<String, Object> getWeeklyAnalysis(int year, int month, int week) {
+    public WeeklyAnalysisResponseDto getWeeklyAnalysis(int year, int month, int week) {
         List<WeeklyData> weeklyDataList = weeklyDataRepository.findAll();
 
         WeeklyData targetWeekData = weeklyDataList.stream()
@@ -21,22 +24,16 @@ public class WeeklyAnalysisService {
                 .findFirst()
                 .orElse(null);
 
-        Map<String, Object> response = new HashMap<>();
-        response.put("year", year);
-        response.put("month", month);
-        response.put("week", week);
-
-        if (targetWeekData != null) {
-            response.put("title", targetWeekData.getTitle());
-            response.put("analysisMoodmeter", targetWeekData.getAnalysisMoodmeter());
-            response.put("feedback", targetWeekData.getFeedback());
-            response.put("startDate", targetWeekData.getStartDate());
-            response.put("endDate", targetWeekData.getEndDate());
-        } else {
-            response.put("message", "해당 주차에 대한 분석 데이터가 없습니다.");
-        }
-
-        return response;
+        return (targetWeekData != null)
+                ? new WeeklyAnalysisResponseDto(
+                year, month, week,
+                targetWeekData.getTitle(),
+                targetWeekData.getAnalysisMoodmeter(),  // MoodMeter enum 그대로 전달
+                targetWeekData.getFeedback(),
+                targetWeekData.getStartDate(),  // LocalDate 그대로 전달
+                targetWeekData.getEndDate(),
+                null)
+                : WeeklyAnalysisResponseDto.noData(year, month, week);
     }
 
     private boolean isMatchingWeek(WeeklyData data, int year, int month, int week) {
