@@ -7,11 +7,12 @@ import com.example.thedayoftoday.domain.entity.Diary;
 import com.example.thedayoftoday.domain.entity.User;
 import com.example.thedayoftoday.domain.repository.DiaryRepository;
 import com.example.thedayoftoday.domain.repository.UserRepository;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -21,69 +22,65 @@ public class DiaryService {
     private final UserService userService;
     private final SentimentalAnalysisService sentimentalAnalysisService;
 
-    public DiaryService(DiaryRepository diaryRepository, UserRepository userRepository, UserService userService,
+    public DiaryService(DiaryRepository diaryRepository, UserService userService,
                         SentimentalAnalysisService sentimentalAnalysisService) {
         this.diaryRepository = diaryRepository;
         this.userService = userService;
         this.sentimentalAnalysisService = sentimentalAnalysisService;
     }
 
-    public Diary createDiary(DiaryRequestDto diaryCreateDto, Long userId) {
+    public DiaryResponseDto createDiary(DiaryRequestDto diaryCreateDto, Long userId) {
         User user = userService.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("유저를 찾을 수 없습니다."));
 
         Diary addDiary = Diary.builder()
-                .title(diaryCreateDto.getTitle())
-                .content(diaryCreateDto.getContent())
+                .title(diaryCreateDto.title())
+                .content(diaryCreateDto.content())
                 .createTime(LocalDateTime.now())
                 .user(user)
                 .build();
+
+
         diaryRepository.save(addDiary);
 
-        SentimentalAnalysisResponseDto sentimentalAnalysisResponseDto = sentimentalAnalysisService.processSentimentalAnalysis();
-        sentimentalAnalysisService.addAnalysis(sentimentalAnalysisResponseDto, addDiary.getDiaryId());
+        SentimentalAnalysisResponseDto analysisDto = sentimentalAnalysisService.processSentimentalAnalysis();
+        sentimentalAnalysisService.addAnalysis(analysisDto, addDiary.getDiaryId());
 
-        return addDiary;
+        return toDiaryResponseDto(user, addDiary);
     }
+
 
     public void deleteDiary(Long diaryId) {
         Diary diary = diaryRepository.findByDiaryId(diaryId)
-                .orElseThrow(() -> new IllegalArgumentException("다이어리가 존재하지 않습니다"));
+                .orElseThrow(() -> new IllegalArgumentException("다이어리가 존재하지 않습니다."));
         diaryRepository.delete(diary);
     }
 
-    public Diary findDiary(Long diaryId) {
-        return diaryRepository.findByDiaryId(diaryId)
+    public DiaryResponseDto findDiary(Long diaryId) {
+        Diary diary = diaryRepository.findByDiaryId(diaryId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 다이어리가 존재하지 않습니다."));
-    }
-
-    public DiaryResponseDto getDiaryResponseDto(Long userId, Diary updatedDiary) {
-
-        User user = userService.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("유저를 찾을 수 없습니다."));
-
-        return DiaryResponseDto.builder()
-                .nickName(user.getNickname())
-                .diaryTitle(updatedDiary.getTitle())
-                .diaryContent(updatedDiary.getContent())
-                .createTime(LocalDateTime.now())
-                .moodName(updatedDiary.getSentimentAnalysis().getMoodName())
-                .moodMeter(updatedDiary.getSentimentAnalysis().getMoodmeter())
-                .analysisContent(updatedDiary.getSentimentAnalysis().getContent())
-                .build();
+        return toDiaryResponseDto(diary.getUser(), diary);
     }
 
     public List<DiaryResponseDto> findByTitle(Long userId, String title) {
-
         List<Diary> diaries = diaryRepository.findByUserIdAndTitleWithUser(userId, title);
         if (diaries.isEmpty()) {
             throw new IllegalArgumentException("일기가 없습니다.");
         }
+        return diaries.stream()
+                .map(diary -> toDiaryResponseDto(diary.getUser(), diary))
+                .collect(Collectors.toList());
+    }
 
-        List<DiaryResponseDto> sameTitleDiaries = new ArrayList<>();
-        for (Diary diary : diaries) {
-            sameTitleDiaries.add(getDiaryResponseDto(diary.getUser().getUserId(), diary));
-        }
-        return sameTitleDiaries;
+    private DiaryResponseDto toDiaryResponseDto(User user, Diary diary) {
+        return new DiaryResponseDto(
+                user.getNickname(),
+                diary.getTitle(),
+                diary.getContent(),
+                diary.getCreateTime(),
+                diary.getSentimentAnalysis().getMoodName(),
+                diary.getSentimentAnalysis().getMoodmeter(),
+                diary.getSentimentAnalysis().getContent()
+        );
     }
 }

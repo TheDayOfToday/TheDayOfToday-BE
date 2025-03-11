@@ -19,24 +19,25 @@ public class UserService {
     private final BCryptPasswordEncoder encoder;
 
     public Long join(@Valid SignupRequestDto user) {
-        boolean validUser = userRepository.existsByEmail(user.getEmail());
+        boolean validUser = userRepository.existsByEmail(user.email());
 
-        if (!validUser) {
+        if (validUser) {
             throw new IllegalArgumentException("해당 email은 이미 존재합니다");
         }
 
         User newUser = User.builder()
-                .nickname(user.getNickname())
-                .name(user.getName())
-                .email(user.getEmail())
-                .password(encoder.encode(user.getPassword()))
-                .phoneNumber(user.getPhoneNumber())
+                .nickname(user.nickname())
+                .name(user.name())
+                .email(user.email())
+                .password(encoder.encode(user.password()))
+                .phoneNumber(user.phoneNumber())
                 .role(RoleType.USER)
                 .build();
 
         User savedUser = userRepository.save(newUser);
         return savedUser.getUserId();
     }
+
 
     public Optional<User> findById(Long userId) {
         return userRepository.findById(userId);
