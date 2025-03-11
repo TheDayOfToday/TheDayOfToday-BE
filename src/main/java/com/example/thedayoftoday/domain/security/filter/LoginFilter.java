@@ -43,7 +43,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response)
             throws AuthenticationException {
 
-        LoginRequestDto loginDTO = new LoginRequestDto();
+        LoginRequestDto loginDTO;
 
         try {
             ObjectMapper objectMapper = new ObjectMapper();
@@ -55,8 +55,8 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
             throw new RuntimeException(e);
         }
 
-        String email = loginDTO.getEmail();
-        String password = loginDTO.getPassword();
+        String email = loginDTO.email();
+        String password = loginDTO.password();
 
         System.out.println(email);
 
