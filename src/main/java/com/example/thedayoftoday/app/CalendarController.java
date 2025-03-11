@@ -34,10 +34,10 @@ public class CalendarController {
     }
 
     @GetMapping("/analysis/{userId}/{year}/{month}/{day}")
-    public SentimentalAnalysisResponseDto getSentimentalAnalysis(@PathVariable Long userId,
-                                                                 @PathVariable int year,
-                                                                 @PathVariable int month,
-                                                                 @PathVariable int day) {
+    public SentimentalAnalysisListResponseDto getSentimentalAnalysis(@PathVariable Long userId,
+                                                                     @PathVariable int year,
+                                                                     @PathVariable int month,
+                                                                     @PathVariable int day) {
         LocalDateTime date = LocalDateTime.of(year, month, day, 0, 0);
         return calendarService.getSentimentalAnalysis(userId, date);
     }
