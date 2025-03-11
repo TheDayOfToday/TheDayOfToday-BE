@@ -33,12 +33,13 @@ public class DiaryService {
         User user = userService.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("유저를 찾을 수 없습니다."));
 
-        Diary addDiary = new Diary(
-                diaryCreateDto.title(),
-                diaryCreateDto.content(),
-                LocalDateTime.now(),
-                user
-        );
+        Diary addDiary = Diary.builder()
+                .title(diaryCreateDto.title())
+                .content(diaryCreateDto.content())
+                .createTime(LocalDateTime.now())
+                .user(user)
+                .build();
+
 
         diaryRepository.save(addDiary);
 

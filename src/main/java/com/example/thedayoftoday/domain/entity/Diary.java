@@ -1,25 +1,14 @@
 package com.example.thedayoftoday.domain.entity;
 
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.Lob;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToOne;
+import jakarta.persistence.*;
 import java.time.LocalDateTime;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Builder(toBuilder = true) // ✅ 기존 객체를 기반으로 새로운 객체 생성 가능
+@AllArgsConstructor // ✅ Builder 사용 시 모든 필드 포함된 생성자 필요
 public class Diary {
 
     @Id
@@ -44,11 +33,13 @@ public class Diary {
     @Builder
     public Diary(String title, String content,
                  LocalDateTime createTime,
-                 User user) {
+                 User user,
+                 SentimentalAnalysis sentimentAnalysis) { // ✅ 필드 추가
         this.title = title;
         this.content = content;
         this.createTime = createTime;
         this.user = user;
+        this.sentimentAnalysis = sentimentAnalysis;
     }
 
     public void addSentimentAnalysis(SentimentalAnalysis sentimentAnalysis) {

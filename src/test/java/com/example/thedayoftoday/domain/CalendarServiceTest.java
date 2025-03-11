@@ -1,7 +1,9 @@
 package com.example.thedayoftoday.domain;
 
+import com.example.thedayoftoday.domain.dto.*;
 import com.example.thedayoftoday.domain.entity.Diary;
 import com.example.thedayoftoday.domain.entity.SentimentalAnalysis;
+import com.example.thedayoftoday.domain.entity.enumType.MoodMeter;
 import com.example.thedayoftoday.domain.repository.DiaryRepository;
 import com.example.thedayoftoday.domain.repository.SentimentalAnalysisRepository;
 import com.example.thedayoftoday.domain.service.CalendarService;
@@ -13,7 +15,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -36,16 +39,17 @@ class CalendarServiceTest {
     @BeforeEach
     void setUp() {
         testDiary = Diary.builder()
-                .title("테스트")
+                .title("테스트 일기")
                 .content("테스트 내용")
                 .createTime(LocalDateTime.of(2025, 2, 15, 10, 0))
-                .user(null) // Mocking, so no need for actual user
+                .user(null)
                 .sentimentAnalysis(null)
                 .build();
 
         testAnalysis = SentimentalAnalysis.builder()
                 .moodName("기쁨")
-                .content("매우 기쁨기쁨기쁨")
+                .moodmeter(MoodMeter.HAPPY)
+                .content("매우 기쁨")
                 .diary(testDiary)
                 .build();
     }
@@ -59,10 +63,10 @@ class CalendarServiceTest {
         when(diaryRepository.findByUser_UserIdAndCreateTimeBetween(userId, startDate, endDate))
                 .thenReturn(Collections.singletonList(testDiary));
 
-        Map<String, Object> result = calendarService.getMonthColors(userId, startDate, endDate);
+        MonthColorsResponseDto result = calendarService.getMonthColors(userId, startDate, endDate);
 
-        assertEquals(userId, result.get("userId"));
-        assertNotNull(result.get("colors"));
+        assertEquals(userId, result.userId());
+        assertNotNull(result.colors());
     }
 
     @Test
@@ -73,10 +77,14 @@ class CalendarServiceTest {
         when(diaryRepository.findByUser_UserIdAndCreateTimeBetween(anyLong(), any(), any()))
                 .thenReturn(Collections.singletonList(testDiary));
 
-        Map<String, Object> result = calendarService.getDiaryEntry(userId, date);
+        DiaryEntryResponseDto result = calendarService.getDiaryEntry(userId, date);
 
-        assertEquals(userId, result.get("userId"));
-        assertNotNull(result.get("entries"));
+        assertEquals(userId, result.userId());
+        assertEquals("2025-02-15", result.date());
+        assertNotNull(result.entries());
+        assertFalse(result.entries().isEmpty());
+        assertEquals("테스트 일기", result.entries().get(0).title());
+        assertEquals("테스트 내용", result.entries().get(0).content());
     }
 
     @Test
@@ -89,7 +97,7 @@ class CalendarServiceTest {
                 .content("오늘은 정말 즐거운 날이었다.")
                 .createTime(date)
                 .user(null)
-            //    .sentimentAnalysis(testAnalysis)
+                .sentimentAnalysis(testAnalysis)
                 .build();
 
         List<Diary> mockDiaries = Collections.singletonList(testDiaryWithAnalysis);
@@ -97,15 +105,15 @@ class CalendarServiceTest {
         when(diaryRepository.findByUser_UserIdAndCreateTimeBetween(eq(userId), any(), any()))
                 .thenReturn(mockDiaries);
 
-        Map<String, Object> result = calendarService.getSentimentalAnalysis(userId, date);
+        SentimentalAnalysisListResponseDto result = calendarService.getSentimentalAnalysis(userId, date);
 
-        assertEquals(userId, result.get("userId"));
-        assertEquals("2025-02-15", result.get("date"));
+        assertEquals(userId, result.userId());
+        assertEquals("2025-02-15", result.date());
 
-        List<Map<String, Object>> analysisResults = (List<Map<String, Object>>) result.get("analysisResults");
+        List<SentimentalAnalysisResultDto> analysisResults = result.analysisResults();
         assertNotNull(analysisResults);
         assertFalse(analysisResults.isEmpty());
-        assertEquals("기쁨", analysisResults.get(0).get("mood"));
-        assertEquals("매우 기쁨기쁨기쁨", analysisResults.get(0).get("content"));
+        assertEquals("기쁨", analysisResults.get(0).mood());
+        assertEquals("매우 기쁨", analysisResults.get(0).content());
     }
 }
