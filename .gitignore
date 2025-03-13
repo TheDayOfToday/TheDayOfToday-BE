@@ -43,3 +43,5 @@ src/main/resources/application-jwt.properties
 src/main/resources/application.properties
 src/main/resources/application.properties.DS_Store
 .DS_Store
+application.properties
+application-jwt.properties
