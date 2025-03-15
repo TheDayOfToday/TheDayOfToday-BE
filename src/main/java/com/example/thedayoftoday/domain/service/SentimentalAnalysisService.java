@@ -1,10 +1,18 @@
 package com.example.thedayoftoday.domain.service;
 
+import com.example.thedayoftoday.domain.dto.MoodDetailsDto;
+import com.example.thedayoftoday.domain.dto.MoodMeterCategoryDto;
 import com.example.thedayoftoday.domain.dto.SentimentalAnalysisResponseDto;
 import com.example.thedayoftoday.domain.entity.Diary;
 import com.example.thedayoftoday.domain.entity.SentimentalAnalysis;
+import com.example.thedayoftoday.domain.entity.enumType.Degree;
+import com.example.thedayoftoday.domain.entity.enumType.MoodMeter;
 import com.example.thedayoftoday.domain.repository.DiaryRepository;
 import com.example.thedayoftoday.domain.repository.SentimentalAnalysisRepository;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -38,5 +46,23 @@ public class SentimentalAnalysisService {
 
         sentimentalAnalysisRepository.save(sentimentalAnalysis);
         diary.addSentimentAnalysis(sentimentalAnalysis);
+    }
+
+    public List<MoodMeterCategoryDto> getAllMoodListResponseDto() {
+        Map<Degree, List<MoodDetailsDto>> moodGroup = new LinkedHashMap<>();
+
+        for (Degree value : Degree.values()) {
+            moodGroup.put(value, new ArrayList<>());
+        }
+
+        for (MoodMeter mood : MoodMeter.values()) {
+            moodGroup.get(mood.getDegree()).add(new MoodDetailsDto(mood.getMoodName(), mood.getColor()));
+        }
+
+        List<MoodMeterCategoryDto> moodCategories = new ArrayList<>();
+        for (Map.Entry<Degree, List<MoodDetailsDto>> entry : moodGroup.entrySet()) {
+            moodCategories.add(new MoodMeterCategoryDto(entry.getKey().getDegreeName(), entry.getValue()));
+        }
+        return moodCategories;
     }
 }
