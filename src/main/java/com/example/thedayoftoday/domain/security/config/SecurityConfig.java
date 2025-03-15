@@ -89,7 +89,7 @@ public class SecurityConfig {
                                 "/",
                                 "/error",
                                 "/login",
-                                "/join",
+                                "/signup",
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**",
                                 "/reissue").permitAll()

@@ -2,6 +2,7 @@ package com.example.thedayoftoday.app;
 
 import com.example.thedayoftoday.domain.dto.DiaryRequestDto;
 import com.example.thedayoftoday.domain.dto.DiaryResponseDto;
+import com.example.thedayoftoday.domain.service.AiService;
 import com.example.thedayoftoday.domain.service.DiaryService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;

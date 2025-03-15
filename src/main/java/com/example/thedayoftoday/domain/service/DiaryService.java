@@ -6,7 +6,6 @@ import com.example.thedayoftoday.domain.dto.SentimentalAnalysisResponseDto;
 import com.example.thedayoftoday.domain.entity.Diary;
 import com.example.thedayoftoday.domain.entity.User;
 import com.example.thedayoftoday.domain.repository.DiaryRepository;
-import com.example.thedayoftoday.domain.repository.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -39,7 +38,6 @@ public class DiaryService {
                 .createTime(LocalDateTime.now())
                 .user(user)
                 .build();
-
 
         diaryRepository.save(addDiary);
 
