@@ -1,3 +1,4 @@
+/*
 package com.example.thedayoftoday.domain.service;
 
 import com.example.thedayoftoday.domain.dto.*;
@@ -17,7 +18,8 @@ public class CalendarService {
     private final DiaryRepository diaryRepository;
     private final SentimentalAnalysisRepository sentimentalAnalysisRepository;
 
-    public CalendarService(DiaryRepository diaryRepository, SentimentalAnalysisRepository sentimentalAnalysisRepository) {
+    public CalendarService(DiaryRepository diaryRepository,
+                           SentimentalAnalysisRepository sentimentalAnalysisRepository) {
         this.diaryRepository = diaryRepository;
         this.sentimentalAnalysisRepository = sentimentalAnalysisRepository;
     }
@@ -29,7 +31,8 @@ public class CalendarService {
         Map<String, String> colors = diaries.stream()
                 .collect(Collectors.toMap(
                         diary -> diary.getCreateTime().format(formatter),
-                        diary -> diary.getSentimentAnalysis() != null ? diary.getSentimentAnalysis().getMoodName() : "미분석"
+                        diary -> diary.getSentimentAnalysis() != null ? diary.getSentimentAnalysis().getMoodName()
+                                : "미분석"
                 ));
 
         return new MonthColorsResponseDto(userId, colors);
@@ -78,3 +81,4 @@ public class CalendarService {
         );
     }
 }
+*/
