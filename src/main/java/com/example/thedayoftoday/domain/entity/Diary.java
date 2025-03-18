@@ -14,24 +14,22 @@ public class Diary {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long diaryId;
-
     private String title;
 
     @Lob
     private String content;
-
     private LocalDateTime createTime;
 
     @Embedded
     DiaryMood diaryMood;
 
+    @Lob
+    private String analysisContent;
+
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_Id", nullable = false)
     private User user;
-
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "analysis_id_id")
-    private SentimentalAnalysis sentimentAnalysis;
 
     @Builder
     public Diary(String title,
@@ -39,16 +37,20 @@ public class Diary {
                  LocalDateTime createTime,
                  DiaryMood diaryMood,
                  User user,
-                 SentimentalAnalysis sentimentAnalysis) {
+                 String analysisContent) {
         this.title = title;
         this.content = content;
         this.createTime = createTime;
         this.diaryMood = diaryMood;
         this.user = user;
-        this.sentimentAnalysis = sentimentAnalysis;
+        this.analysisContent = analysisContent;
     }
 
-    public void addSentimentAnalysis(SentimentalAnalysis sentimentAnalysis) {
-        this.sentimentAnalysis = sentimentAnalysis;
+    public void addAnalysisContent(String analysisContent){
+        this.analysisContent = analysisContent;
     }
+
+//    public void addSentimentAnalysis(SentimentalAnalysis sentimentAnalysis) {
+//        this.sentimentAnalysis = sentimentAnalysis;
+//    }
 }

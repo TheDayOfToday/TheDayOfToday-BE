@@ -1,14 +1,15 @@
-/*
 package com.example.thedayoftoday.domain.service;
 
 import com.example.thedayoftoday.domain.dto.*;
 import com.example.thedayoftoday.domain.entity.Diary;
+import com.example.thedayoftoday.domain.entity.enumType.MoodMeter;
 import com.example.thedayoftoday.domain.repository.DiaryRepository;
-import com.example.thedayoftoday.domain.repository.SentimentalAnalysisRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -16,27 +17,31 @@ import java.util.stream.Collectors;
 @Service
 public class CalendarService {
     private final DiaryRepository diaryRepository;
-    private final SentimentalAnalysisRepository sentimentalAnalysisRepository;
 
-    public CalendarService(DiaryRepository diaryRepository,
-                           SentimentalAnalysisRepository sentimentalAnalysisRepository) {
+    public CalendarService(DiaryRepository diaryRepository) {
         this.diaryRepository = diaryRepository;
-        this.sentimentalAnalysisRepository = sentimentalAnalysisRepository;
     }
 
     public MonthColorsResponseDto getMonthColors(Long userId, LocalDateTime startDate, LocalDateTime endDate) {
         List<Diary> diaries = diaryRepository.findByUser_UserIdAndCreateTimeBetween(userId, startDate, endDate);
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        Map<String, String> colors = diaries.stream()
-                .collect(Collectors.toMap(
-                        diary -> diary.getCreateTime().format(formatter),
-                        diary -> diary.getSentimentAnalysis() != null ? diary.getSentimentAnalysis().getMoodName()
-                                : "미분석"
-                ));
+        Map<String, String> colors = new HashMap<>();
+
+        for (Diary diary : diaries) {
+            String dateKey = diary.getCreateTime().format(formatter);
+            String moodColor = "미분석";
+
+            if (diary.getDiaryMood() != null) {
+                moodColor = diary.getDiaryMood().getMoodColor(); // MoodMeter 타입이라면 String 변환 필요
+            }
+
+            colors.put(dateKey, moodColor);
+        }
 
         return new MonthColorsResponseDto(userId, colors);
     }
+
 
     public DiaryEntryResponseDto getDiaryEntry(Long userId, LocalDateTime date) {
         List<Diary> diaries = diaryRepository.findByUser_UserIdAndCreateTimeBetween(
@@ -49,10 +54,14 @@ public class CalendarService {
                 .map(diary -> new DiaryContentDto(diary.getTitle(), diary.getContent()))
                 .collect(Collectors.toList());
 
+        if (diaryEntries.isEmpty()) {
+            diaryEntries.add(new DiaryContentDto("일기 없음", "해당 날짜에 작성된 일기가 없습니다."));
+        }
+
         return new DiaryEntryResponseDto(
                 userId,
                 date.toLocalDate().toString(),
-                diaryEntries.isEmpty() ? List.of(new DiaryContentDto("일기 없음", "해당 날짜에 작성된 일기가 없습니다.")) : diaryEntries
+                diaryEntries
         );
     }
 
@@ -63,22 +72,28 @@ public class CalendarService {
                 date.withHour(23).withMinute(59).withSecond(59)
         );
 
-        List<SentimentalAnalysisResultDto> analysisResults = diaries.stream()
-                .filter(diary -> diary.getSentimentAnalysis() != null)
-                .map(diary -> new SentimentalAnalysisResultDto(
-                        diary.getSentimentAnalysis().getMoodName(),
-                        diary.getSentimentAnalysis().getMoodmeter(),
-                        diary.getSentimentAnalysis().getContent()
-                ))
-                .collect(Collectors.toList());
+        List<SentimentalAnalysisResultDto> analysisResults = new ArrayList<>();
 
-        return new SentimentalAnalysisListResponseDto(
-                userId,
-                date.toLocalDate().toString(),
-                analysisResults.isEmpty()
-                        ? List.of(new SentimentalAnalysisResultDto("분석 없음", null, "해당 날짜의 감정 분석 데이터가 없습니다."))
-                        : analysisResults
-        );
+        for (Diary diary : diaries) {
+            String moodName = "분석 없음";
+            MoodMeter moodMeter = null;
+            String analysisContent = "해당 날짜의 감정 분석 데이터가 없습니다.";
+
+            if (diary.getDiaryMood() != null) {
+                moodName = diary.getDiaryMood().getMoodName();
+                moodMeter = MoodMeter.valueOf(diary.getDiaryMood().getMoodColor()); //무드 칼라 스트링 맞쥬?
+            }
+            if (diary.getAnalysisContent() != null) {
+                analysisContent = diary.getAnalysisContent();
+            }
+
+            analysisResults.add(new SentimentalAnalysisResultDto(moodName, moodMeter, analysisContent));
+        }
+
+        if (analysisResults.isEmpty()) {
+            analysisResults.add(new SentimentalAnalysisResultDto("분석 없음", null, "해당 날짜의 감정 분석 데이터가 없습니다."));
+        }
+
+        return new SentimentalAnalysisListResponseDto(userId, date.toLocalDate().toString(), analysisResults);
     }
 }
-*/
