@@ -3,6 +3,7 @@ package com.example.thedayoftoday.domain.service;
 import com.example.thedayoftoday.domain.dto.DiaryAllRequestDto;
 import com.example.thedayoftoday.domain.dto.DiaryAllResponseDto;
 import com.example.thedayoftoday.domain.entity.Diary;
+import com.example.thedayoftoday.domain.entity.DiaryMood;
 import com.example.thedayoftoday.domain.entity.SentimentalAnalysis;
 import com.example.thedayoftoday.domain.entity.User;
 import com.example.thedayoftoday.domain.repository.DiaryRepository;
@@ -32,15 +33,13 @@ public class DiaryService {
                 .title(diaryCreateDto.title())
                 .content(diaryCreateDto.content())
                 .createTime(LocalDateTime.now())
-                .moodName(diaryCreateDto.moodName())
-                .moodColor(diaryCreateDto.moodColor())
+                .diaryMood(diaryCreateDto.diaryMood())
                 .user(user)
                 .build();
 
         diaryRepository.save(newDiary);
 
-        return new DiaryAllRequestDto(newDiary.getTitle(), newDiary.getContent(), newDiary.getMoodName(),
-                newDiary.getMoodColor());
+        return new DiaryAllRequestDto(newDiary.getTitle(), newDiary.getContent(), newDiary.getDiaryMood());
     }
 
     public void deleteDiary(Long diaryId) {
@@ -55,8 +54,7 @@ public class DiaryService {
 
         SentimentalAnalysis sentimentalAnalysis = diary.getSentimentAnalysis();
 
-        String moodName = (sentimentalAnalysis != null) ? sentimentalAnalysis.getAnalysisMoodName() : "분석 없음";
-        String moodColor = (sentimentalAnalysis != null) ? sentimentalAnalysis.getAnalysisMoodColor() : "#FFFFFF";
+        DiaryMood diaryMood = (diary.getDiaryMood()!= null) ? diary.getDiaryMood():new DiaryMood("저장된 감정 없음", "#FFFFFF");
         String analysisContent =
                 (sentimentalAnalysis != null) ? sentimentalAnalysis.getAnalysisContent() : "감정 분석 결과가 없습니다.";
 
@@ -65,8 +63,7 @@ public class DiaryService {
                 diary.getTitle(),
                 diary.getContent(),
                 diary.getCreateTime(),
-                moodName,
-                moodColor,
+                diary.getDiaryMood(),
                 analysisContent
         );
     }

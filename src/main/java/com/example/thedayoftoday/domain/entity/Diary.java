@@ -22,9 +22,8 @@ public class Diary {
 
     private LocalDateTime createTime;
 
-    private String moodName;
-
-    private String moodColor;
+    @Embedded
+    DiaryMood diaryMood;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_Id", nullable = false)
@@ -35,13 +34,16 @@ public class Diary {
     private SentimentalAnalysis sentimentAnalysis;
 
     @Builder
-    public Diary(String title, String content,
+    public Diary(String title,
+                 String content,
                  LocalDateTime createTime,
+                 DiaryMood diaryMood,
                  User user,
                  SentimentalAnalysis sentimentAnalysis) {
         this.title = title;
         this.content = content;
         this.createTime = createTime;
+        this.diaryMood = diaryMood;
         this.user = user;
         this.sentimentAnalysis = sentimentAnalysis;
     }
