@@ -26,7 +26,6 @@ public class UserService {
         }
 
         User newUser = User.builder()
-                .nickname(user.nickname())
                 .name(user.name())
                 .email(user.email())
                 .password(encoder.encode(user.password()))
@@ -37,7 +36,6 @@ public class UserService {
         User savedUser = userRepository.save(newUser);
         return savedUser.getUserId();
     }
-
 
     public Optional<User> findById(Long userId) {
         return userRepository.findById(userId);

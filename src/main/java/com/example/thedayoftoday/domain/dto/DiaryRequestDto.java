@@ -1,7 +1,0 @@
-package com.example.thedayoftoday.domain.dto;
-
-public record DiaryRequestDto(
-        String title,
-        String content
-) {
-}

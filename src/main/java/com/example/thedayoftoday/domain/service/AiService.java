@@ -1,6 +1,6 @@
 package com.example.thedayoftoday.domain.service;
 
-import com.example.thedayoftoday.domain.dto.DiaryRequestDto;
+import com.example.thedayoftoday.domain.dto.DiaryOnlyDto;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.BufferedReader;
@@ -159,9 +159,9 @@ public class AiService {
         return splitFiles;
     }
 
-    // 텍스트를 "일기 형식"으로 변환
 
-    public DiaryRequestDto convertToDiary(String text) {
+    // 텍스트를 "일기 형식"으로 변환
+    public DiaryOnlyDto convertToDiary(String text) {
         Map<String, Object> requestBody = new HashMap<>();
         requestBody.put("model", "gpt-3.5-turbo");
         requestBody.put("messages", List.of(
@@ -174,7 +174,8 @@ public class AiService {
         return parseDiaryResponse(response);
     }
 
-    private DiaryRequestDto parseDiaryResponse(String response) {
+    //제목,내용 분할
+    private DiaryOnlyDto parseDiaryResponse(String response) {
         try {
             ObjectMapper objectMapper = new ObjectMapper();
             JsonNode rootNode = objectMapper.readTree(response); //response를 직렬화시켜주기위해 사용
@@ -182,23 +183,11 @@ public class AiService {
             String title = rootNode.has("title") ? rootNode.get("title").asText() : "제목 없음";
             String content = rootNode.has("content") ? rootNode.get("content").asText() : "내용 없음";
 
-            return new DiaryRequestDto(title, content);
+            return new DiaryOnlyDto(title, content);
         } catch (Exception e) {
             log.error("일기 변환 중 오류 발생: {}", e.getMessage());
-            return new DiaryRequestDto("변환 오류", "일기 내용을 생성하는데 실패했습니다.");
+            return new DiaryOnlyDto("변환 오류", "일기 내용을 생성하는데 실패했습니다.");
         }
-    }
-
-    // 텍스트 감정 분석
-    public String analyzeTextEmotion(String text) {
-        Map<String, Object> requestBody = new HashMap<>();
-        requestBody.put("model", "gpt-3.5-turbo");
-        requestBody.put("messages", List.of(
-                Map.of("role", "system", "content", "Analyze the emotions of the given text."),
-                Map.of("role", "user", "content", "다음 텍스트의 감정을 분석해줘: " + text)
-        ));
-
-        return callOpenAiApi(requestBody);
     }
 
     // OpenAI API 공통 호출 메서드

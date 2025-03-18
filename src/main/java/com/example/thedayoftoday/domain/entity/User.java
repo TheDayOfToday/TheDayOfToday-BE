@@ -30,10 +30,9 @@ public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name="user_id")
+    @Column(name = "user_id")
     private Long userId;
 
-    private String nickname;
     private String name;
     private String email;
     private String password;
@@ -52,16 +51,15 @@ public class User {
     private List<WeeklyData> weeklyDataList = new ArrayList<>();
 
     @Builder
-    public User(String nickname,
-                String name,
-                String email,
-                String password,
-                String phoneNumber,
-                RoleType role,
-                List<Diary> diaries,
-                List<Notice> notices,
-                List<WeeklyData> weeklyDataList) {
-        this.nickname = nickname;
+    public User(
+            String name,
+            String email,
+            String password,
+            String phoneNumber,
+            RoleType role,
+            List<Diary> diaries,
+            List<Notice> notices,
+            List<WeeklyData> weeklyDataList) {
         this.name = name;
         this.email = email;
         this.password = password;
@@ -88,7 +86,4 @@ public class User {
         this.password = password;
     }
 
-    public void changeNickname(String nickname) {
-        this.nickname = nickname;
-    }
 }
