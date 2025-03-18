@@ -1,7 +1,7 @@
 package com.example.thedayoftoday.domain.service;
 
-import com.example.thedayoftoday.domain.dto.DiaryAllRequestDto;
-import com.example.thedayoftoday.domain.dto.DiaryAllResponseDto;
+import com.example.thedayoftoday.domain.dto.DiaryCreateRequestDto;
+import com.example.thedayoftoday.domain.dto.DiaryInfoResponseDto;
 import com.example.thedayoftoday.domain.entity.Diary;
 import com.example.thedayoftoday.domain.entity.DiaryMood;
 import com.example.thedayoftoday.domain.entity.SentimentalAnalysis;
@@ -25,7 +25,7 @@ public class DiaryService {
         this.userRepository = userRepository;
     }
 
-    public DiaryAllRequestDto createDiary(DiaryAllRequestDto diaryCreateDto, Long userId) {
+    public DiaryCreateRequestDto createDiary(DiaryCreateRequestDto diaryCreateDto, Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("유저를 찾을 수 없습니다."));
 
@@ -39,7 +39,7 @@ public class DiaryService {
 
         diaryRepository.save(newDiary);
 
-        return new DiaryAllRequestDto(newDiary.getTitle(), newDiary.getContent(), newDiary.getDiaryMood());
+        return new DiaryCreateRequestDto(newDiary.getTitle(), newDiary.getContent(), newDiary.getDiaryMood());
     }
 
     public void deleteDiary(Long diaryId) {
@@ -48,7 +48,7 @@ public class DiaryService {
         diaryRepository.delete(diary);
     }
 
-    public DiaryAllResponseDto findDiary(Long diaryId) {
+    public DiaryInfoResponseDto findDiary(Long diaryId) {
         Diary diary = diaryRepository.findByDiaryId(diaryId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 다이어리가 존재하지 않습니다."));
 
@@ -58,7 +58,7 @@ public class DiaryService {
         String analysisContent =
                 (sentimentalAnalysis != null) ? sentimentalAnalysis.getAnalysisContent() : "감정 분석 결과가 없습니다.";
 
-        return new DiaryAllResponseDto(
+        return new DiaryInfoResponseDto(
                 diary.getUser().getName(),
                 diary.getTitle(),
                 diary.getContent(),

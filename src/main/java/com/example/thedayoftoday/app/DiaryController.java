@@ -1,6 +1,6 @@
 package com.example.thedayoftoday.app;
 
-import com.example.thedayoftoday.domain.dto.DiaryAllRequestDto;
+import com.example.thedayoftoday.domain.dto.DiaryCreateRequestDto;
 import com.example.thedayoftoday.domain.service.DiaryService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -18,11 +18,11 @@ public class DiaryController {
     }
 
     @PostMapping("/create/{userId}")
-    public ResponseEntity<DiaryAllRequestDto> createDiary(
-            @Valid @RequestBody DiaryAllRequestDto diaryRequestDto,
+    public ResponseEntity<DiaryCreateRequestDto> createDiary(
+            @Valid @RequestBody DiaryCreateRequestDto diaryRequestDto,
             @PathVariable Long userId) {
 
-        DiaryAllRequestDto diaryResponseDto = diaryService.createDiary(diaryRequestDto, userId);
+        DiaryCreateRequestDto diaryResponseDto = diaryService.createDiary(diaryRequestDto, userId);
         return ResponseEntity.status(HttpStatus.CREATED).body(diaryResponseDto);
     }
 

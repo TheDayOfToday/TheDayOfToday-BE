@@ -1,6 +1,6 @@
 package com.example.thedayoftoday.app;
 
-import com.example.thedayoftoday.domain.dto.DiaryOnlyDto;
+import com.example.thedayoftoday.domain.dto.DiaryBasicResponseDto;
 import com.example.thedayoftoday.domain.service.AiService;
 
 import java.io.IOException;
@@ -22,7 +22,7 @@ public class ChatController {
 
     // 음성 파일을 받아서 텍스트로 변환
     @PostMapping("/transcribe")
-    public DiaryOnlyDto transcribeAudio(@RequestParam("file") MultipartFile file) throws IOException {
+    public DiaryBasicResponseDto transcribeAudio(@RequestParam("file") MultipartFile file) throws IOException {
         String transAudio = openAiService.transcribeAudio(file);
         return openAiService.convertToDiary(transAudio);
     }

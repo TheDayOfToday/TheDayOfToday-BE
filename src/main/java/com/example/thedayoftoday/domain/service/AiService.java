@@ -1,6 +1,6 @@
 package com.example.thedayoftoday.domain.service;
 
-import com.example.thedayoftoday.domain.dto.DiaryOnlyDto;
+import com.example.thedayoftoday.domain.dto.DiaryBasicResponseDto;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.BufferedReader;
@@ -161,7 +161,7 @@ public class AiService {
 
 
     // 텍스트를 "일기 형식"으로 변환
-    public DiaryOnlyDto convertToDiary(String text) {
+    public DiaryBasicResponseDto convertToDiary(String text) {
         Map<String, Object> requestBody = new HashMap<>();
         requestBody.put("model", "gpt-3.5-turbo");
         requestBody.put("messages", List.of(
@@ -175,7 +175,7 @@ public class AiService {
     }
 
     //제목,내용 분할
-    private DiaryOnlyDto parseDiaryResponse(String response) {
+    private DiaryBasicResponseDto parseDiaryResponse(String response) {
         try {
             ObjectMapper objectMapper = new ObjectMapper();
             JsonNode rootNode = objectMapper.readTree(response); //response를 직렬화시켜주기위해 사용
@@ -183,10 +183,10 @@ public class AiService {
             String title = rootNode.has("title") ? rootNode.get("title").asText() : "제목 없음";
             String content = rootNode.has("content") ? rootNode.get("content").asText() : "내용 없음";
 
-            return new DiaryOnlyDto(title, content);
+            return new DiaryBasicResponseDto(title, content);
         } catch (Exception e) {
             log.error("일기 변환 중 오류 발생: {}", e.getMessage());
-            return new DiaryOnlyDto("변환 오류", "일기 내용을 생성하는데 실패했습니다.");
+            return new DiaryBasicResponseDto("변환 오류", "일기 내용을 생성하는데 실패했습니다.");
         }
     }
 
