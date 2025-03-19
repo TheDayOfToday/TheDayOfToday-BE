@@ -1,9 +1,7 @@
 package com.example.thedayoftoday;
 
 import com.example.thedayoftoday.domain.entity.Diary;
-import com.example.thedayoftoday.domain.entity.SentimentalAnalysis;
 import com.example.thedayoftoday.domain.entity.User;
-import com.example.thedayoftoday.domain.entity.enumType.MoodMeter;
 import com.example.thedayoftoday.domain.repository.DiaryRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -74,7 +72,6 @@ class DiaryRepositoryTest {
     void findByUser_UserId() {
         // given
         User user = User.builder()
-                .nickname("nickname")
                 .name("name")
                 .email("email@test.com")
                 .password("password")
@@ -112,7 +109,6 @@ class DiaryRepositoryTest {
     void findByUser_UserIdAndCreateTimeBetween() {
         // given
         User user = User.builder()
-                .nickname("nickname")
                 .name("name")
                 .email("email@test.com")
                 .password("password")
@@ -162,7 +158,6 @@ class DiaryRepositoryTest {
     void deleteByUser_UserId() {
         // given
         User user = User.builder()
-                .nickname("nickname")
                 .name("name")
                 .email("email@test.com")
                 .password("password")
@@ -200,7 +195,6 @@ class DiaryRepositoryTest {
     void deleteByUser_UserIdAndCreateTimeBetween() {
         // given
         User user = User.builder()
-                .nickname("nickname")
                 .name("name")
                 .email("email@test.com")
                 .password("password")

@@ -2,10 +2,8 @@ package com.example.thedayoftoday.domain;
 
 import com.example.thedayoftoday.domain.dto.*;
 import com.example.thedayoftoday.domain.entity.Diary;
-import com.example.thedayoftoday.domain.entity.SentimentalAnalysis;
-import com.example.thedayoftoday.domain.entity.enumType.MoodMeter;
+import com.example.thedayoftoday.domain.entity.DiaryMood;
 import com.example.thedayoftoday.domain.repository.DiaryRepository;
-import com.example.thedayoftoday.domain.repository.SentimentalAnalysisRepository;
 import com.example.thedayoftoday.domain.service.CalendarService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -27,30 +25,22 @@ class CalendarServiceTest {
     @Mock
     private DiaryRepository diaryRepository;
 
-    @Mock
-    private SentimentalAnalysisRepository sentimentalAnalysisRepository;
-
     @InjectMocks
     private CalendarService calendarService;
 
     private Diary testDiary;
-    private SentimentalAnalysis testAnalysis;
 
     @BeforeEach
     void setUp() {
+        DiaryMood diaryMood = new DiaryMood("기쁨", "#FFD700"); // 기존 SentimentalAnalysis 대신 DiaryMood 사용
+
         testDiary = Diary.builder()
                 .title("테스트 일기")
                 .content("테스트 내용")
                 .createTime(LocalDateTime.of(2025, 2, 15, 10, 0))
                 .user(null)
-                .sentimentAnalysis(null)
-                .build();
-
-        testAnalysis = SentimentalAnalysis.builder()
-                .moodName("기쁨")
-                .moodmeter(MoodMeter.HAPPY)
-                .content("매우 기쁨")
-                .diary(testDiary)
+                .diaryMood(diaryMood) // 변경된 DiaryMood 추가
+                .analysisContent("매우 기쁨") // 감정 분석 내용 추가
                 .build();
     }
 
@@ -92,15 +82,7 @@ class CalendarServiceTest {
         Long userId = 1L;
         LocalDateTime date = LocalDateTime.of(2025, 2, 15, 0, 0);
 
-        Diary testDiaryWithAnalysis = Diary.builder()
-                .title("행복한 하루")
-                .content("오늘은 정말 즐거운 날이었다.")
-                .createTime(date)
-                .user(null)
-                .sentimentAnalysis(testAnalysis)
-                .build();
-
-        List<Diary> mockDiaries = Collections.singletonList(testDiaryWithAnalysis);
+        List<Diary> mockDiaries = Collections.singletonList(testDiary);
 
         when(diaryRepository.findByUser_UserIdAndCreateTimeBetween(eq(userId), any(), any()))
                 .thenReturn(mockDiaries);

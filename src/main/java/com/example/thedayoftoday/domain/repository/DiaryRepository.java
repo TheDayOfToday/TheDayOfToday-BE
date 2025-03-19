@@ -1,8 +1,6 @@
 package com.example.thedayoftoday.domain.repository;
 
 import com.example.thedayoftoday.domain.entity.Diary;
-import com.example.thedayoftoday.domain.entity.SentimentalAnalysis;
-import javax.swing.text.html.Option;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -15,11 +13,7 @@ import org.springframework.data.repository.query.Param;
 
 public interface DiaryRepository extends JpaRepository<Diary, Long> {
 
-    //특정 diary id의 감정분석 조회
-    @Query("SELECT d.sentimentAnalysis FROM Diary d WHERE d.diaryId = :diaryId")
-    Optional<SentimentalAnalysis> findSentimentAnalysisByDiaryId(@Param("diaryId") Long diaryId);
-
-    // 특정 유저 ID로 모든 Diary 조회
+        // 특정 유저 ID로 모든 Diary 조회
     List<Diary> findByUser_UserId(Long userId);
 
     // 특정 유저 ID와 기간으로 Diary 조회

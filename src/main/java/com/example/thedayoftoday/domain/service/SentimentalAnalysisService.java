@@ -7,14 +7,14 @@ import com.example.thedayoftoday.domain.dto.MoodMeterCategoryDto;
 import com.example.thedayoftoday.domain.dto.SentimentalAnalysisRequestDto;
 import com.example.thedayoftoday.domain.dto.SentimentalAnalysisResponseDto;
 import com.example.thedayoftoday.domain.entity.Diary;
-import com.example.thedayoftoday.domain.entity.SentimentalAnalysis;
+import com.example.thedayoftoday.domain.entity.DiaryMood;
 import com.example.thedayoftoday.domain.entity.enumType.Degree;
 import com.example.thedayoftoday.domain.entity.enumType.MoodMeter;
 import com.example.thedayoftoday.domain.repository.DiaryRepository;
-import com.example.thedayoftoday.domain.repository.SentimentalAnalysisRepository;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -22,6 +22,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -36,7 +37,6 @@ import org.springframework.web.client.RestTemplate;
 @Transactional
 public class SentimentalAnalysisService {
 
-    private final SentimentalAnalysisRepository sentimentalAnalysisRepository;
     private final DiaryRepository diaryRepository;
     private final RestTemplate restTemplate;
 
@@ -44,12 +44,9 @@ public class SentimentalAnalysisService {
     private String apiKey;
     private static final String GPT_URL = "https://api.openai.com/v1/chat/completions";
 
-    public SentimentalAnalysisService(SentimentalAnalysisRepository sentimentalAnalysisRepository,
-                                      DiaryRepository diaryRepository, RestTemplate restTemplate) {
-        this.sentimentalAnalysisRepository = sentimentalAnalysisRepository;
+    public SentimentalAnalysisService(DiaryRepository diaryRepository, RestTemplate restTemplate) {
         this.diaryRepository = diaryRepository;
         this.restTemplate = restTemplate;
-
     }
 
     //텍스트에 맞춰 AI가 분석한 무드미터한글, 감정분석한글 만들어주는것
@@ -62,24 +59,42 @@ public class SentimentalAnalysisService {
     }
 
     //해당 다이어리 id에 감정분석 결과 저장해주는거임!! ->moodName(한글), content 던져주면 이에 맞게 감정분석 db, 연결되어있는 일기에도 저장
-    public SentimentalAnalysisResponseDto addAnalysis(SentimentalAnalysisRequestDto sentimentalAnalysisRequestDto,
-                                                      Long diaryId) {
+//    public SentimentalAnalysisResponseDto addAnalysis(SentimentalAnalysisRequestDto sentimentalAnalysisRequestDto,
+//                                                      Long diaryId) {
+//        Diary diary = diaryRepository.findById(diaryId)
+//                .orElseThrow(() -> new IllegalArgumentException("해당 일기가 없습니다"));
+//
+//        SentimentalAnalysis sentimentalAnalysis = SentimentalAnalysis.builder()
+//                .analysisMoodName(sentimentalAnalysisRequestDto.analysisMoodName())
+//                .analysisMoodColor(sentimentalAnalysisRequestDto.analysisMoodColor())
+//                .analysisContent(sentimentalAnalysisRequestDto.analysisContent())
+//                .diary(diary).build();
+//
+//        sentimentalAnalysisRepository.save(sentimentalAnalysis);
+//        diary.addSentimentAnalysis(sentimentalAnalysis);
+//
+//        return new SentimentalAnalysisResponseDto(
+//                sentimentalAnalysis.getAnalysisMoodName(),
+//                sentimentalAnalysis.getAnalysisMoodColor(),
+//                sentimentalAnalysis.getAnalysisContent()
+//        );
+//    }
+    public SentimentalAnalysisResponseDto addAnalysis(SentimentalAnalysisRequestDto sentimentalAnalysisRequestDto, Long diaryId) {
         Diary diary = diaryRepository.findById(diaryId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 일기가 없습니다"));
 
-        SentimentalAnalysis sentimentalAnalysis = SentimentalAnalysis.builder()
-                .analysisMoodName(sentimentalAnalysisRequestDto.analysisMoodName())
-                .analysisMoodColor(sentimentalAnalysisRequestDto.analysisMoodColor())
+        DiaryMood diaryMood = new DiaryMood(sentimentalAnalysisRequestDto.analysisMoodName(), sentimentalAnalysisRequestDto.analysisMoodColor());
+        diary = diary.toBuilder()
+                .diaryMood(diaryMood)
                 .analysisContent(sentimentalAnalysisRequestDto.analysisContent())
-                .diary(diary).build();
+                .build();
 
-        sentimentalAnalysisRepository.save(sentimentalAnalysis);
-        diary.addSentimentAnalysis(sentimentalAnalysis);
+        diaryRepository.save(diary);
 
         return new SentimentalAnalysisResponseDto(
-                sentimentalAnalysis.getAnalysisMoodName(),
-                sentimentalAnalysis.getAnalysisMoodColor(),
-                sentimentalAnalysis.getAnalysisContent()
+                diaryMood.getMoodName(),
+                diaryMood.getMoodColor(),
+                diary.getAnalysisContent()
         );
     }
 
