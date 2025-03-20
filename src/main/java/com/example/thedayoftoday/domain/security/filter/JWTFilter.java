@@ -29,7 +29,6 @@ public class JWTFilter extends OncePerRequestFilter {
         String authorizationHeader = request.getHeader("Authorization");
 
         if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
-            System.out.println("유효한 authorizationHeader이 오지 않았습니다.");
             filterChain.doFilter(request, response);
             return;
         }
@@ -38,7 +37,7 @@ public class JWTFilter extends OncePerRequestFilter {
         System.out.println("Received access token: " + accessToken);
 
         // 토큰이 없거나 빈 값이면 필터 진행
-        if (accessToken == null || accessToken.trim().isEmpty()) {
+        if (accessToken.trim().isEmpty()) {
             System.out.println("No access token provided, proceeding without authentication.");
             filterChain.doFilter(request, response);
             return;
