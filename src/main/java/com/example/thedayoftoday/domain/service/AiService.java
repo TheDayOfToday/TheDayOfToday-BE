@@ -159,7 +159,6 @@ public class AiService {
         return splitFiles;
     }
 
-
     // 텍스트를 "일기 형식"으로 변환
     public DiaryBasicResponseDto convertToDiary(String text) {
         Map<String, Object> requestBody = new HashMap<>();
