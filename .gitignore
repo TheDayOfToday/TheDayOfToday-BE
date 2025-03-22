@@ -43,3 +43,6 @@ src/main/resources/application-jwt.properties
 src/main/resources/application.properties
 src/main/resources/application.properties.DS_Store
 .DS_Store
+
+### Cors info ###
+src/main/resources/application-cors.properties.properties
