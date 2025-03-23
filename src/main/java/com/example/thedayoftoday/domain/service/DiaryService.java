@@ -47,6 +47,24 @@ public class DiaryService {
         diaryRepository.delete(diary);
     }
 
+    public DiaryCreateRequestDto createEmptyDiary(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("유저를 찾을 수 없습니다."));
+
+        Diary newDiary = Diary.builder()
+                .title("작성중인 일기")
+                .content("")
+                .createTime(LocalDateTime.now())
+                .diaryMood(null)
+                .user(user)
+                .build();
+
+        diaryRepository.save(newDiary);
+
+        return new DiaryCreateRequestDto(newDiary.getTitle(), newDiary.getContent(), newDiary.getDiaryMood());
+    }
+
+
     public DiaryInfoResponseDto findDiary(Long diaryId) {
         Diary diary = diaryRepository.findByDiaryId(diaryId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 다이어리가 존재하지 않습니다."));

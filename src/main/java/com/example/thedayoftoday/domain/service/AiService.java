@@ -236,6 +236,18 @@ public class AiService {
         return convFile;
     }
 
+    public String generateNextQuestion(String answerText) {
+        Map<String, Object> requestBody = new HashMap<>();
+        requestBody.put("model", "gpt-3.5-turbo");
+        requestBody.put("messages", List.of(
+                Map.of("role", "system", "content", "너는 일상 회고 질문을 이어가는 대화 어시스턴트야. 간결하고 공감되는 다음 질문 하나만 생성해줘."),
+                Map.of("role", "user", "content", "대답: " + answerText)
+        ));
+
+        return callOpenAiApi(requestBody);
+    }
+
+
     //파일 읽어들이기
     private byte[] readFileBytes(File file) throws IOException {
         return java.nio.file.Files.readAllBytes(file.toPath());

@@ -31,4 +31,11 @@ public class DiaryController {
         diaryService.deleteDiary(diaryId);
         return ResponseEntity.ok("삭제가 완료되었습니다.");
     }
+
+    @GetMapping("/start-conversation/{userId}")
+    public ResponseEntity<DiaryCreateRequestDto> startConversation(@PathVariable("userId") Long userId) {
+        DiaryCreateRequestDto diaryResponseDto = diaryService.createEmptyDiary(userId);
+        return ResponseEntity.status(HttpStatus.CREATED).body(diaryResponseDto);
+    }
+
 }

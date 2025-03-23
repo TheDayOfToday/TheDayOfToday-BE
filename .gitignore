@@ -45,4 +45,4 @@ src/main/resources/application.properties.DS_Store
 .DS_Store
 
 ### Cors info ###
-src/main/resources/application-cors.properties.properties
+src/main/resources/application-cors.properties

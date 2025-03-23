@@ -55,7 +55,8 @@ public class SecurityConfig {
                 .formLogin(formLogin -> formLogin.disable())
                 .httpBasic(httpBasic -> httpBasic.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/", "/error", "/login", "/signup", "/swagger-ui/**", "/v3/api-docs/**", "/reissue")
+                        .requestMatchers("/", "/error", "/login", "/signup", "/swagger-ui/**",
+                                "/v3/api-docs/**", "/reissue", "/api/chat/**", "/diary/**")
                         .permitAll()
                         .anyRequest().authenticated())
                 .sessionManagement(session -> session
