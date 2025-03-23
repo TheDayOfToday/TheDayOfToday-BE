@@ -9,6 +9,7 @@ import com.example.thedayoftoday.domain.service.AiService;
 import java.io.IOException;
 
 import com.example.thedayoftoday.domain.service.ConversationService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -51,5 +52,9 @@ public class ChatController {
         return new ConversationResponseDto(nextQuestion);
     }
 
-    // 일기작성 마무리 버튼 누르면 저장한 텍스트를 싹다 가져와서 요약
+    //대화모드 끝
+    @PostMapping("/complete")
+    public DiaryBasicResponseDto completeDiary(@RequestParam("diaryId") Long diaryId) {
+        return conversationService.completeDiary(diaryId);
+    }
 }

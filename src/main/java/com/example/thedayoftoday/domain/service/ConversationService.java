@@ -1,5 +1,6 @@
 package com.example.thedayoftoday.domain.service;
 
+import com.example.thedayoftoday.domain.dto.DiaryBasicResponseDto;
 import com.example.thedayoftoday.domain.entity.Conversation;
 import com.example.thedayoftoday.domain.entity.Diary;
 import com.example.thedayoftoday.domain.repository.ConversationRepository;
@@ -8,12 +9,15 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class ConversationService {
 
     private final ConversationRepository conversationRepository;
     private final DiaryRepository diaryRepository;
+    private final AiService aiService;
 
     @Transactional
     public void save(String question, String answer, Long diaryId) {
@@ -27,5 +31,24 @@ public class ConversationService {
                 .build();
 
         conversationRepository.save(conversation);
+    }
+
+    @Transactional
+    public DiaryBasicResponseDto completeDiary(Long diaryId) {
+        Diary diary = diaryRepository.findById(diaryId)
+                .orElseThrow(() -> new IllegalArgumentException("다이어리가 존재하지 않습니다."));
+
+        List<Conversation> conversations = conversationRepository.findAllByDiaryOrderByConversationIdAsc(diary);
+
+        StringBuilder combinedText = new StringBuilder();
+        for (Conversation conv : conversations) {
+            combinedText.append("Q: ").append(conv.getQuestion()).append("\n");
+            combinedText.append("A: ").append(conv.getAnswer()).append("\n\n");
+        }
+
+        DiaryBasicResponseDto diaryDto = aiService.convertToDiary(combinedText.toString());
+        diary.updateDiary(diaryDto.title(), diaryDto.content());
+
+        return diaryDto;
     }
 }

@@ -58,4 +58,9 @@ public class Diary {
 //    public void addSentimentAnalysis(SentimentalAnalysis sentimentAnalysis) {
 //        this.sentimentAnalysis = sentimentAnalysis;
 //    }
+
+    public void updateDiary(String title, String content) {
+        this.title = title;
+        this.content = content;
+    }
 }
