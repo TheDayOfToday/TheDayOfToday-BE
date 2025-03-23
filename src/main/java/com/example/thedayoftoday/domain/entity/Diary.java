@@ -2,6 +2,9 @@ package com.example.thedayoftoday.domain.entity;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
 import lombok.*;
 
 @Entity
@@ -26,10 +29,12 @@ public class Diary {
     @Lob
     private String analysisContent;
 
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_Id", nullable = false)
     private User user;
+
+    @OneToMany(mappedBy = "diary", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private List<Conversation> conversations = new ArrayList<>();
 
     @Builder
     public Diary(String title,
