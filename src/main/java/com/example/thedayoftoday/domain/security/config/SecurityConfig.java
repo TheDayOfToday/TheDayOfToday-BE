@@ -56,7 +56,8 @@ public class SecurityConfig {
                 .httpBasic(httpBasic -> httpBasic.disable())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/", "/error", "/login", "/signup", "/swagger-ui/**",
-                                "/v3/api-docs/**", "/reissue", "/api/chat/**", "/diary/**")
+                                "/v3/api-docs/**", "/reissue", "/api/chat/**", "/diary/**", "/sentimental/**",
+                                "/weeklyAnalysis/**", "/calendar/**")
                         .permitAll()
                         .anyRequest().authenticated())
                 .sessionManagement(session -> session
