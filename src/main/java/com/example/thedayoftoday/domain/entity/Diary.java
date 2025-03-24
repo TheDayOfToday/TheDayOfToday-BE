@@ -1,6 +1,7 @@
 package com.example.thedayoftoday.domain.entity;
 
 import jakarta.persistence.*;
+
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -51,7 +52,7 @@ public class Diary {
         this.analysisContent = analysisContent;
     }
 
-    public void addAnalysisContent(String analysisContent){
+    public void addAnalysisContent(String analysisContent) {
         this.analysisContent = analysisContent;
     }
 

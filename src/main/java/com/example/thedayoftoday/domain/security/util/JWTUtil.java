@@ -20,7 +20,7 @@ public class JWTUtil {
 
     public JWTUtil(@Value("${spring.jwt.secret}") String secret,
                    @Value("${spring.jwt.expiration_time}") long accessExpirationTime,
-                   @Value("${spring.jwt.refresh-expiration-time}")long refreshExpirationTime) {
+                   @Value("${spring.jwt.refresh-expiration-time}") long refreshExpirationTime) {
         this.secretKey = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));  // SecretKey 생성
         this.accessExpirationTime = accessExpirationTime;
         this.refreshExpirationTime = refreshExpirationTime;

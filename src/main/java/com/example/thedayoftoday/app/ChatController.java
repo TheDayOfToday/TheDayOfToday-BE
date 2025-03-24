@@ -19,7 +19,6 @@ public class ChatController {
 
     private final AiService openAiService;
 
-
     private final ConversationService conversationService;
 
     public ChatController(AiService openAiService, ConversationService conversationService) {

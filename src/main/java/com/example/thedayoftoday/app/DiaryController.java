@@ -37,5 +37,4 @@ public class DiaryController {
         DiaryCreateRequestDto diaryResponseDto = diaryService.createEmptyDiary(userId);
         return ResponseEntity.status(HttpStatus.CREATED).body(diaryResponseDto);
     }
-
 }

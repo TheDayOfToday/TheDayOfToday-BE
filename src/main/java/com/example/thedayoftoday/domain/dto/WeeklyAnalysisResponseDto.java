@@ -1,9 +1,10 @@
 package com.example.thedayoftoday.domain.dto;
 
 import com.example.thedayoftoday.domain.entity.enumType.MoodMeter;
+
 import java.time.LocalDate;
 
-public record WeeklyAnalysisResponseDto(
+public record   WeeklyAnalysisResponseDto(
         int year,
         int month,
         int week,

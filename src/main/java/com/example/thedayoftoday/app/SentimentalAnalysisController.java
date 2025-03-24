@@ -4,7 +4,9 @@ import com.example.thedayoftoday.domain.dto.MoodMeterCategoryDto;
 import com.example.thedayoftoday.domain.dto.SentimentalAnalysisRequestDto;
 import com.example.thedayoftoday.domain.dto.SentimentalAnalysisResponseDto;
 import com.example.thedayoftoday.domain.service.SentimentalAnalysisService;
+
 import java.util.List;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
