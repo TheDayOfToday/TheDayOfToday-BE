@@ -24,6 +24,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
+
     private final AuthenticationConfiguration authenticationConfiguration;
     private final JWTUtil jwtUtil;
     private final RefreshRepository refreshRepository;
@@ -55,7 +56,9 @@ public class SecurityConfig {
                 .formLogin(formLogin -> formLogin.disable())
                 .httpBasic(httpBasic -> httpBasic.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/", "/error", "/login", "/signup", "/swagger-ui/**", "/v3/api-docs/**", "/reissue")
+                        .requestMatchers("/", "/error", "/login", "/signup", "/swagger-ui/**",
+                                "/v3/api-docs/**", "/reissue", "/api/chat/**", "/diary/**", "/sentimental/**",
+                                "/weeklyAnalysis/**", "/calendar/**")
                         .permitAll()
                         .anyRequest().authenticated())
                 .sessionManagement(session -> session

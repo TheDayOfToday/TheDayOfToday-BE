@@ -3,6 +3,7 @@ package com.example.thedayoftoday.domain.service;
 import com.example.thedayoftoday.domain.dto.DiaryBasicResponseDto;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -13,6 +14,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
@@ -235,6 +237,18 @@ public class AiService {
         }
         return convFile;
     }
+
+    public String generateNextQuestion(String answerText) {
+        Map<String, Object> requestBody = new HashMap<>();
+        requestBody.put("model", "gpt-3.5-turbo");
+        requestBody.put("messages", List.of(
+                Map.of("role", "system", "content", "너는 일상 회고 질문을 이어가는 대화 어시스턴트야. 간결하고 공감되는 다음 질문 하나만 생성해줘."),
+                Map.of("role", "user", "content", "대답: " + answerText)
+        ));
+
+        return callOpenAiApi(requestBody);
+    }
+
 
     //파일 읽어들이기
     private byte[] readFileBytes(File file) throws IOException {

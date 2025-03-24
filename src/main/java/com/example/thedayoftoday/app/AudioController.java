@@ -27,7 +27,7 @@ public class AudioController {
     public ResponseEntity<AudioResponseDto> uploadAudio(@RequestParam("file") MultipartFile file) {
         File tempFile = null;
         try {
-            // 업로드된 파일을 OS 독립적인 임시 디렉토리에 저장
+            // 업로드된 파일을 임시 디렉토리에 저장
             tempFile = File.createTempFile("uploaded_", ".wav");
             Files.copy(file.getInputStream(), tempFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
 

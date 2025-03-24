@@ -8,7 +8,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/")
 public class HomeController {
 
-
     @GetMapping
     public String home() {
         return "메인 페이지";

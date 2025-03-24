@@ -28,9 +28,9 @@ public class WeeklyAnalysisService {
                 ? new WeeklyAnalysisResponseDto(
                 year, month, week,
                 targetWeekData.getTitle(),
-                targetWeekData.getAnalysisMoodmeter(),  // MoodMeter enum 그대로 전달
+                targetWeekData.getAnalysisMoodmeter(),
                 targetWeekData.getFeedback(),
-                targetWeekData.getStartDate(),  // LocalDate 그대로 전달
+                targetWeekData.getStartDate(),
                 targetWeekData.getEndDate(),
                 null)
                 : WeeklyAnalysisResponseDto.noData(year, month, week);

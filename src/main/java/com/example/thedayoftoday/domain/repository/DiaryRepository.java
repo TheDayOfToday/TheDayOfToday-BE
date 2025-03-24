@@ -13,7 +13,7 @@ import org.springframework.data.repository.query.Param;
 
 public interface DiaryRepository extends JpaRepository<Diary, Long> {
 
-        // 특정 유저 ID로 모든 Diary 조회
+    // 특정 유저 ID로 모든 Diary 조회
     List<Diary> findByUser_UserId(Long userId);
 
     // 특정 유저 ID와 기간으로 Diary 조회
@@ -39,4 +39,4 @@ public interface DiaryRepository extends JpaRepository<Diary, Long> {
     @Query("SELECT d FROM Diary d JOIN FETCH d.user WHERE d.user.userId = :userId AND d.title LIKE %:title%")
     List<Diary> findByUserIdAndTitleWithUser(@Param("userId") Long userId, @Param("title") String title);
 
-    }
+}

@@ -1,7 +1,11 @@
 package com.example.thedayoftoday.domain.entity;
 
 import jakarta.persistence.*;
+
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
 import lombok.*;
 
 @Entity
@@ -26,10 +30,12 @@ public class Diary {
     @Lob
     private String analysisContent;
 
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_Id", nullable = false)
     private User user;
+
+    @OneToMany(mappedBy = "diary", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private List<Conversation> conversations = new ArrayList<>();
 
     @Builder
     public Diary(String title,
@@ -46,11 +52,16 @@ public class Diary {
         this.analysisContent = analysisContent;
     }
 
-    public void addAnalysisContent(String analysisContent){
+    public void addAnalysisContent(String analysisContent) {
         this.analysisContent = analysisContent;
     }
 
 //    public void addSentimentAnalysis(SentimentalAnalysis sentimentAnalysis) {
 //        this.sentimentAnalysis = sentimentAnalysis;
 //    }
+
+    public void updateDiary(String title, String content) {
+        this.title = title;
+        this.content = content;
+    }
 }

@@ -1,6 +1,7 @@
 package com.example.thedayoftoday.domain.entity.enumType;
 
 import java.util.Arrays;
+
 import lombok.Getter;
 
 @Getter
@@ -57,6 +58,7 @@ public enum MoodMeter {
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("해당 감정을 찾을 수 없습니다: " + moodName));
     }
+
     public static MoodMeter fromColor(String color) {
         return Arrays.stream(values())
                 .filter(mood -> mood.color.equals(color))

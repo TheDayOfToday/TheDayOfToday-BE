@@ -3,7 +3,9 @@ package com.example.thedayoftoday.domain.security.service;
 import com.example.thedayoftoday.domain.entity.User;
 import com.example.thedayoftoday.domain.repository.UserRepository;
 import com.example.thedayoftoday.domain.security.CustomUserDetails;
+
 import java.util.Optional;
+
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
