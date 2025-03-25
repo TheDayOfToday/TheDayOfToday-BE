@@ -34,7 +34,7 @@ public class JWTFilter extends OncePerRequestFilter {
         }
 
         String accessToken = authorizationHeader.substring(7);  // "Bearer " 이후의 토큰 추출
-        System.out.println("Received access token: " + accessToken);
+        System.out.println("Received Authorization token: " + accessToken);
 
         // 토큰이 없거나 빈 값이면 필터 진행
         if (accessToken.trim().isEmpty()) {
