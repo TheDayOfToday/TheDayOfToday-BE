@@ -16,7 +16,6 @@ public class ConversationService {
 
     private final ConversationRepository conversationRepository;
     private final DiaryRepository diaryRepository;
-    private final AiService aiService;
 
     @Transactional
     public void save(String question, String answer, Long diaryId) {
