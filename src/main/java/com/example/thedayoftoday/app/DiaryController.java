@@ -1,8 +1,7 @@
 package com.example.thedayoftoday.app;
 
 import com.example.thedayoftoday.domain.dto.DiaryBasicResponseDto;
-import com.example.thedayoftoday.domain.dto.DiaryCreateRequestDto;
-import com.example.thedayoftoday.domain.dto.DiaryWithMoodResponseDto;
+import com.example.thedayoftoday.domain.dto.DiaryRequestDto;
 import com.example.thedayoftoday.domain.dto.conversation.ConversationResponseDto;
 import com.example.thedayoftoday.domain.entity.DiaryMood;
 import com.example.thedayoftoday.domain.service.AiService;
@@ -30,21 +29,15 @@ public class DiaryController {
         this.diaryService = diaryService;
     }
 
-    //독백모드 음성 파일을 받아서 텍스트로 변환
-    @PostMapping("/transcribe")
-    public DiaryBasicResponseDto transcribeAudio(@RequestParam("file") MultipartFile file) throws IOException {
-        String transAudio = openAiService.transcribeAudio(file);
-        return openAiService.convertToDiary(transAudio);
-    }
-
     //독백모드 버튼
-    @PostMapping("/single-mode")
-    public ResponseEntity<DiaryWithMoodResponseDto> createDiaryWithMood(@RequestParam("file") MultipartFile file) throws IOException {
+    @PostMapping("/single-mode/start")
+    public ResponseEntity<DiaryRequestDto> createDiaryWithMood(@RequestParam("file") MultipartFile file, @RequestParam("userId") Long userId) throws IOException {
+        DiaryRequestDto emptyDiary = diaryService.createEmptyDiary(userId);
         String transcribedText = openAiService.transcribeAudio(file);
         DiaryBasicResponseDto diary = openAiService.convertToDiary(transcribedText);
-        String mood = openAiService.recommendMood(transcribedText);
+        DiaryMood mood = openAiService.recommendMood(transcribedText);
         return ResponseEntity.ok(
-                new DiaryWithMoodResponseDto(diary.title(), diary.content(), mood)
+                new DiaryRequestDto(emptyDiary.diaryId(), diary.title(), diary.content(), mood)
         );
     }
 
@@ -57,11 +50,11 @@ public class DiaryController {
 
     //사용자가 일기 수정
     @PutMapping("/update-diary")
-    public ResponseEntity<Void> updateDiaryContent(@RequestParam Long diaryId,
-                                                   @RequestBody DiaryCreateRequestDto requestDto) {
-        diaryService.updateDiaryContent(diaryId, requestDto.title(), requestDto.content());
+    public ResponseEntity<Void> updateDiaryContent(@RequestBody DiaryRequestDto requestDto) {
+        diaryService.updateDiaryContent(requestDto.diaryId(), requestDto.title(), requestDto.content());
         return ResponseEntity.ok().build();
     }
+
 
     //사용자 무드미터, 일기 토대로 감정 분석
     @GetMapping("/analyze")
@@ -73,9 +66,9 @@ public class DiaryController {
     }
 
     //대화모드 시작 버튼
-    @GetMapping("/conversation-mode/{userId}")
-    public ResponseEntity<DiaryCreateRequestDto> startConversation(@PathVariable("userId") Long userId) {
-        DiaryCreateRequestDto diaryResponseDto = diaryService.createEmptyDiary(userId);
+    @PostMapping("/conversation-mode/start")
+    public ResponseEntity<DiaryRequestDto> startConversation(@RequestParam("userId") Long userId) {
+        DiaryRequestDto diaryResponseDto = diaryService.createEmptyDiary(userId);
         return ResponseEntity.status(HttpStatus.CREATED).body(diaryResponseDto);
     }
 
@@ -97,14 +90,13 @@ public class DiaryController {
 
     //대화모드 끝
     @PostMapping("/conversation-mode/complete")
-    public ResponseEntity<DiaryWithMoodResponseDto> completeDiary(@RequestParam("diaryId") Long diaryId) {
+    public ResponseEntity<DiaryRequestDto> completeDiary(@RequestParam("diaryId") Long diaryId) {
         String mergedText = conversationService.mergeConversationText(diaryId);
         DiaryBasicResponseDto diary = openAiService.convertToDiary(mergedText);
-        String mood = openAiService.recommendMood(diary.content());
+        DiaryMood mood = openAiService.recommendMood(diary.content());
         diaryService.updateDiaryContent(diaryId, diary.title(), diary.content());
-        return ResponseEntity.ok(new DiaryWithMoodResponseDto(diary.title(), diary.content(), mood));
+        return ResponseEntity.ok(new DiaryRequestDto(diaryId, diary.title(), diary.content(), mood));
     }
-
 
     //일기 삭제
     @DeleteMapping("/delete/{diaryId}")
