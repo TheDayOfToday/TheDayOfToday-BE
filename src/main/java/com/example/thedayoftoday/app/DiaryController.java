@@ -5,7 +5,9 @@ import com.example.thedayoftoday.domain.dto.DiaryRequestDto;
 import com.example.thedayoftoday.domain.dto.conversation.ConversationResponseDto;
 import com.example.thedayoftoday.domain.entity.DiaryMood;
 import com.example.thedayoftoday.domain.service.AiService;
+
 import java.io.IOException;
+
 import com.example.thedayoftoday.domain.service.ConversationService;
 import com.example.thedayoftoday.domain.service.DiaryService;
 import org.springframework.http.HttpStatus;
@@ -41,7 +43,7 @@ public class DiaryController {
 
     //사용자가 감정 선택
     @PostMapping("/update-mood")
-    public ResponseEntity<Void> updateDiaryMood(@RequestParam Long diaryId, @RequestBody DiaryMood mood) {
+    public ResponseEntity<Void> updateDiaryMood(@RequestParam(value = "diaryId") Long diaryId, @RequestBody DiaryMood mood) {
         diaryService.updateDiaryMood(diaryId, mood);
         return ResponseEntity.ok().build();
     }
@@ -55,10 +57,9 @@ public class DiaryController {
 
     //사용자 무드미터, 일기 토대로 감정 분석
     @GetMapping("/analyze")
-    public ResponseEntity<String> analyzeDiary(@RequestParam Long diaryId,
-                                               @RequestParam String moodName,
-                                               @RequestParam String moodColor) {
-        String analysis = openAiService.analyzeDiary(diaryId, new DiaryMood(moodName, moodColor));
+    public ResponseEntity<String> analyzeDiary(@RequestParam(value = "diaryId") Long diaryId) {
+        DiaryMood mood = diaryService.getMoodByDiaryId(diaryId);
+        String analysis = openAiService.analyzeDiary(diaryId, mood);
         return ResponseEntity.ok(analysis);
     }
 

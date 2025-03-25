@@ -32,8 +32,6 @@ public interface DiaryRepository extends JpaRepository<Diary, Long> {
             LocalDateTime startDate,
             LocalDateTime endDate
     );
-
-    @EntityGraph(attributePaths = {"sentimentAnalysis"})
     Optional<Diary> findByDiaryId(Long diaryId);
 
     @Query("SELECT d FROM Diary d JOIN FETCH d.user WHERE d.user.userId = :userId AND d.title LIKE %:title%")

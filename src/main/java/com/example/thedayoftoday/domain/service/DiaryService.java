@@ -62,6 +62,11 @@ public class DiaryService {
         return new DiaryRequestDto(newDiary.getDiaryId(), newDiary.getTitle(), newDiary.getContent(), newDiary.getDiaryMood());
     }
 
+    public DiaryMood getMoodByDiaryId(Long diaryId) {
+        Diary diary = diaryRepository.findById(diaryId).orElseThrow(() -> new RuntimeException("Diary not found"));
+        return new DiaryMood(diary.getDiaryMood().getMoodName(), diary.getDiaryMood().getMoodColor());
+    }
+
     public DiaryInfoResponseDto findDiary(Long diaryId) {
         Diary diary = diaryRepository.findByDiaryId(diaryId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 다이어리가 존재하지 않습니다."));

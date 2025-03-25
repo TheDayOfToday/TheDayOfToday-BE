@@ -176,7 +176,7 @@ public class AiService {
         requestBody.put("messages", List.of(
                 Map.of("role", "system", "content", "You are a diary-writing assistant. " +
                         "Generate a diary entry in JSON format with the keys: 'title' and 'content'."),
-                Map.of("role", "user", "content", "다음 내용을 바탕으로 일기를 작성해줘:\n" + text)
+                Map.of("role", "user", "content", "다음 내용을 바탕으로 한국어로 일기를 작성해줘:\n" + text)
         ));
 
         String response = callOpenAiApi(requestBody);
@@ -250,7 +250,7 @@ public class AiService {
         Map<String, Object> requestBody = new HashMap<>();
         requestBody.put("model", "gpt-3.5-turbo");
         requestBody.put("messages", List.of(
-                Map.of("role", "system", "content", "이 질문에 대해서 대답해주면서 간결하고 공감되는 다음 질문 하나만 생성해줘."),
+                Map.of("role", "system", "content", "이 질문에 대해서 한국어로 대답해주면서 간결하고 공감되는 다음 질문 하나만 생성해줘."),
                 Map.of("role", "user", "content", "대답: " + answerText)
         ));
 
@@ -294,7 +294,7 @@ public class AiService {
         String prompt = """
                 아래는 사용자의 일기입니다.
                 사용자가 선택한 감정은 [%s]입니다. 이 감정을 반영하여 아래 일기를 분석해줘.
-                감정의 원인, 사용자 성향, 긍정적 마무리 코멘트 등을 6문장으로 작성해줘.
+                감정의 원인, 사용자 성향, 긍정적 마무리 코멘트 등을 한국어로 6문장으로 작성해줘.
                         
                 일기 내용:
                 %s
@@ -310,7 +310,7 @@ public class AiService {
         Map<String, Object> requestBody = new HashMap<>();
         requestBody.put("model", "gpt-3.5-turbo");
         requestBody.put("messages", List.of(
-                Map.of("role", "system", "content", "다음 내용을 분석해서 감정의 원인, 성향, 긍정적 코멘트를 6문장으로 정리해줘."),
+                Map.of("role", "system", "content", "다음 내용을 분석해서 감정의 원인, 성향, 긍정적 코멘트를 한국어로 6문장으로 정리해줘."),
                 Map.of("role", "user", "content", prompt)
         ));
         return callOpenAiApi(requestBody);
