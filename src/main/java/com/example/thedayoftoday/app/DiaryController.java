@@ -5,9 +5,7 @@ import com.example.thedayoftoday.domain.dto.DiaryRequestDto;
 import com.example.thedayoftoday.domain.dto.conversation.ConversationResponseDto;
 import com.example.thedayoftoday.domain.entity.DiaryMood;
 import com.example.thedayoftoday.domain.service.AiService;
-
 import java.io.IOException;
-
 import com.example.thedayoftoday.domain.service.ConversationService;
 import com.example.thedayoftoday.domain.service.DiaryService;
 import org.springframework.http.HttpStatus;
@@ -54,7 +52,6 @@ public class DiaryController {
         diaryService.updateDiaryContent(requestDto.diaryId(), requestDto.title(), requestDto.content());
         return ResponseEntity.ok().build();
     }
-
 
     //사용자 무드미터, 일기 토대로 감정 분석
     @GetMapping("/analyze")
