@@ -24,6 +24,14 @@ public class DiaryService {
         this.userRepository = userRepository;
     }
 
+    @Transactional
+    public void updateDiaryMood(Long diaryId, DiaryMood mood) {
+        Diary diary = diaryRepository.findByDiaryId(diaryId)
+                .orElseThrow(() -> new IllegalArgumentException("다이어리를 찾을 수 없습니다."));
+
+        diary.updateDiaryMood(mood);
+    }
+
     public DiaryCreateRequestDto createDiary(DiaryCreateRequestDto diaryCreateDto, Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("유저를 찾을 수 없습니다."));

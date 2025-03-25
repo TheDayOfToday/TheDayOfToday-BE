@@ -9,7 +9,6 @@ import java.util.List;
 import lombok.*;
 
 @Entity
-@Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Builder(toBuilder = true)
 @AllArgsConstructor
@@ -63,5 +62,9 @@ public class Diary {
     public void updateDiary(String title, String content) {
         this.title = title;
         this.content = content;
+    }
+
+    public void updateDiaryMood(DiaryMood diaryMood) {
+        this.diaryMood = diaryMood;
     }
 }

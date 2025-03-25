@@ -5,11 +5,13 @@ import com.example.thedayoftoday.domain.dto.DiaryCreateRequestDto;
 import com.example.thedayoftoday.domain.dto.DiaryWithMoodResponseDto;
 import com.example.thedayoftoday.domain.dto.conversation.ConversationResponseDto;
 import com.example.thedayoftoday.domain.entity.Diary;
+import com.example.thedayoftoday.domain.entity.DiaryMood;
 import com.example.thedayoftoday.domain.service.AiService;
 
 import java.io.IOException;
 
 import com.example.thedayoftoday.domain.service.ConversationService;
+import com.example.thedayoftoday.domain.service.DiaryService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -19,12 +21,13 @@ import org.springframework.web.multipart.MultipartFile;
 public class ChatController {
 
     private final AiService openAiService;
-
     private final ConversationService conversationService;
+    private final DiaryService diaryService; // ✅ 추가
 
-    public ChatController(AiService openAiService, ConversationService conversationService) {
+    public ChatController(AiService openAiService, ConversationService conversationService, DiaryService diaryService) {
         this.openAiService = openAiService;
         this.conversationService = conversationService;
+        this.diaryService = diaryService; // ✅ 할당
     }
 
     //독백모드 음성 파일을 받아서 텍스트로 변환
@@ -43,6 +46,13 @@ public class ChatController {
                 new DiaryWithMoodResponseDto(diary.title(), diary.content(), mood)
         );
     }
+
+    @PostMapping("/update-mood")
+    public ResponseEntity<Void> updateDiaryMood(@RequestParam Long diaryId, @RequestBody DiaryMood mood) {
+        diaryService.updateDiaryMood(diaryId, mood);
+        return ResponseEntity.ok().build();
+    }
+
 
     // 다음 버튼 누르면 음성 파일을 받아서 텍스트로 바꾸고 Conversation에 저장하고 텍스트 분석한 걸 바탕으로 질문 생성해서 던져줌
     @PostMapping("/next")
