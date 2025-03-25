@@ -22,12 +22,12 @@ public class ChatController {
 
     private final AiService openAiService;
     private final ConversationService conversationService;
-    private final DiaryService diaryService; // ✅ 추가
+    private final DiaryService diaryService;
 
     public ChatController(AiService openAiService, ConversationService conversationService, DiaryService diaryService) {
         this.openAiService = openAiService;
         this.conversationService = conversationService;
-        this.diaryService = diaryService; // ✅ 할당
+        this.diaryService = diaryService;
     }
 
     //독백모드 음성 파일을 받아서 텍스트로 변환
@@ -37,6 +37,7 @@ public class ChatController {
         return openAiService.convertToDiary(transAudio);
     }
 
+    //독백모드 버튼
     @PostMapping("/single-mode")
     public ResponseEntity<DiaryWithMoodResponseDto> createDiaryWithMood(@RequestParam("file") MultipartFile file) throws IOException {
         String transcribedText = openAiService.transcribeAudio(file);
@@ -47,17 +48,28 @@ public class ChatController {
         );
     }
 
+    //사용자가 감정 선택
     @PostMapping("/update-mood")
     public ResponseEntity<Void> updateDiaryMood(@RequestParam Long diaryId, @RequestBody DiaryMood mood) {
         diaryService.updateDiaryMood(diaryId, mood);
         return ResponseEntity.ok().build();
     }
 
+    //사용자가 일기 수정
     @PutMapping("/update-diary")
     public ResponseEntity<Void> updateDiaryContent(@RequestParam Long diaryId,
                                                    @RequestBody DiaryCreateRequestDto requestDto) {
         diaryService.updateDiaryContent(diaryId, requestDto);
         return ResponseEntity.ok().build();
+    }
+
+    //사용자 무드미터, 일기 토대로 감정 분석
+    @GetMapping("/analyze")
+    public ResponseEntity<String> analyzeDiary(@RequestParam Long diaryId,
+                                               @RequestParam String moodName,
+                                               @RequestParam String moodColor) {
+        String analysis = openAiService.analyzeDiary(diaryId, new DiaryMood(moodName, moodColor));
+        return ResponseEntity.ok(analysis);
     }
 
     // 다음 버튼 누르면 음성 파일을 받아서 텍스트로 바꾸고 Conversation에 저장하고 텍스트 분석한 걸 바탕으로 질문 생성해서 던져줌

@@ -1,6 +1,9 @@
 package com.example.thedayoftoday.domain.service;
 
 import com.example.thedayoftoday.domain.dto.DiaryBasicResponseDto;
+import com.example.thedayoftoday.domain.entity.Diary;
+import com.example.thedayoftoday.domain.entity.DiaryMood;
+import com.example.thedayoftoday.domain.repository.DiaryRepository;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -15,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
@@ -33,6 +37,12 @@ import org.springframework.web.multipart.MultipartFile;
 @Slf4j
 @Service
 public class AiService {
+
+    private final DiaryRepository diaryRepository;
+
+    public AiService(DiaryRepository diaryRepository) {
+        this.diaryRepository = diaryRepository;
+    }
 
     @Value("${openai.api.key}")
     private String apiKey;
@@ -260,6 +270,35 @@ public class AiService {
         return callOpenAiApi(requestBody);
     }
 
+    @Transactional
+    public String analyzeDiary(Long diaryId, DiaryMood mood) {
+        Diary diary = diaryRepository.findByDiaryId(diaryId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 다이어리가 존재하지 않습니다."));
+
+        String prompt = """
+                아래는 사용자의 일기입니다.
+                사용자가 선택한 감정은 [%s]입니다. 이 감정을 반영하여 아래 일기를 분석해줘.
+                감정의 원인, 사용자 성향, 긍정적 마무리 코멘트 등을 3~5문장으로 작성해줘.
+                        
+                일기 내용:
+                %s
+                """.formatted(mood.getMoodName(), diary.getContent());
+
+        String result = callGptForAnalysis(prompt);
+        diary.addAnalysisContent(result);
+
+        return result;
+    }
+
+    private String callGptForAnalysis(String prompt) {
+        Map<String, Object> requestBody = new HashMap<>();
+        requestBody.put("model", "gpt-3.5-turbo");
+        requestBody.put("messages", List.of(
+                Map.of("role", "system", "content", "다음 내용을 분석해서 감정의 원인, 성향, 긍정적 코멘트를 3~5문장으로 정리해줘."),
+                Map.of("role", "user", "content", prompt)
+        ));
+        return callOpenAiApi(requestBody);
+    }
 
 
     //파일 읽어들이기
