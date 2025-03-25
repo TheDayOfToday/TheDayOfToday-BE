@@ -53,6 +53,12 @@ public class ChatController {
         return ResponseEntity.ok().build();
     }
 
+    @PutMapping("/update-diary")
+    public ResponseEntity<Void> updateDiaryContent(@RequestParam Long diaryId,
+                                                   @RequestBody DiaryCreateRequestDto requestDto) {
+        diaryService.updateDiaryContent(diaryId, requestDto);
+        return ResponseEntity.ok().build();
+    }
 
     // 다음 버튼 누르면 음성 파일을 받아서 텍스트로 바꾸고 Conversation에 저장하고 텍스트 분석한 걸 바탕으로 질문 생성해서 던져줌
     @PostMapping("/next")

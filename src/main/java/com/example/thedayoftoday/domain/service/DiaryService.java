@@ -32,6 +32,14 @@ public class DiaryService {
         diary.updateDiaryMood(mood);
     }
 
+    public void updateDiaryContent(Long diaryId, DiaryCreateRequestDto requestDto) {
+        Diary diary = diaryRepository.findByDiaryId(diaryId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 다이어리가 존재하지 않습니다."));
+
+        diary.updateDiary(requestDto.title(), requestDto.content()); // 기존에 있는 updateDiary 메서드 사용
+    }
+
+
     public DiaryCreateRequestDto createDiary(DiaryCreateRequestDto diaryCreateDto, Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("유저를 찾을 수 없습니다."));

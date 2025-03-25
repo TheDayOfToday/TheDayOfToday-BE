@@ -9,6 +9,7 @@ import java.util.List;
 import lombok.*;
 
 @Entity
+@Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Builder(toBuilder = true)
 @AllArgsConstructor
