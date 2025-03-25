@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 @RestController
-@RequestMapping("/Diary")
+@RequestMapping("/diary")
 public class DiaryController {
 
     private final AiService openAiService;
