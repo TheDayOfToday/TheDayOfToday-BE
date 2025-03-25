@@ -43,7 +43,7 @@ public class JWTUtil {
     }
 
     public String createAccessToken(String category, String email, String role) {
-        log.info("사용자의 만들어진 Access Token {}, role: {}, expires in {} ms", email, role, accessExpirationTime);
+        log.info("사용자의 만들어진 access Token {}, role: {}, expires in {} ms", email, role, accessExpirationTime);
         return createJwt("access", email, role, accessExpirationTime);
     }
 
