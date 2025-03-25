@@ -1,6 +1,7 @@
 package com.example.thedayoftoday.domain.service;
 
 import com.example.thedayoftoday.domain.dto.DiaryBasicResponseDto;
+import com.example.thedayoftoday.domain.dto.DiaryWithMoodResponseDto;
 import com.example.thedayoftoday.domain.entity.Conversation;
 import com.example.thedayoftoday.domain.entity.Diary;
 import com.example.thedayoftoday.domain.repository.ConversationRepository;
@@ -34,7 +35,7 @@ public class ConversationService {
     }
 
     @Transactional
-    public DiaryBasicResponseDto completeDiary(Long diaryId) {
+    public String mergeConversationText(Long diaryId) {
         Diary diary = diaryRepository.findById(diaryId)
                 .orElseThrow(() -> new IllegalArgumentException("다이어리가 존재하지 않습니다."));
 
@@ -46,9 +47,6 @@ public class ConversationService {
             combinedText.append("A: ").append(conv.getAnswer()).append("\n\n");
         }
 
-        DiaryBasicResponseDto diaryDto = aiService.convertToDiary(combinedText.toString());
-        diary.updateDiary(diaryDto.title(), diaryDto.content());
-
-        return diaryDto;
+        return combinedText.toString().trim();
     }
 }
