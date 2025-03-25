@@ -249,6 +249,18 @@ public class AiService {
         return callOpenAiApi(requestBody);
     }
 
+    public String recommendMood(String diaryText) {
+        Map<String, Object> requestBody = new HashMap<>();
+        requestBody.put("model", "gpt-3.5-turbo");
+        requestBody.put("messages", List.of(
+                Map.of("role", "system", "content", "다음 일기 내용을 분석해서 추천하는 감정을 하나만 말해줘. 예: 기쁨, 슬픔, 평온, 화남 등"),
+                Map.of("role", "user", "content", diaryText)
+        ));
+
+        return callOpenAiApi(requestBody);
+    }
+
+
 
     //파일 읽어들이기
     private byte[] readFileBytes(File file) throws IOException {
