@@ -1,6 +1,10 @@
 package com.example.thedayoftoday.domain.service;
 
 import com.example.thedayoftoday.domain.dto.DiaryBasicResponseDto;
+import com.example.thedayoftoday.domain.entity.Diary;
+import com.example.thedayoftoday.domain.entity.DiaryMood;
+import com.example.thedayoftoday.domain.entity.enumType.MoodMeter;
+import com.example.thedayoftoday.domain.repository.DiaryRepository;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -9,12 +13,10 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
+import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
@@ -33,6 +35,12 @@ import org.springframework.web.multipart.MultipartFile;
 @Slf4j
 @Service
 public class AiService {
+
+    private final DiaryRepository diaryRepository;
+
+    public AiService(DiaryRepository diaryRepository) {
+        this.diaryRepository = diaryRepository;
+    }
 
     @Value("${openai.api.key}")
     private String apiKey;
@@ -168,7 +176,7 @@ public class AiService {
         requestBody.put("messages", List.of(
                 Map.of("role", "system", "content", "You are a diary-writing assistant. " +
                         "Generate a diary entry in JSON format with the keys: 'title' and 'content'."),
-                Map.of("role", "user", "content", "다음 내용을 바탕으로 일기를 작성해줘:\n" + text)
+                Map.of("role", "user", "content", "다음 내용을 바탕으로 한국어로 일기를 작성해줘:\n" + text)
         ));
 
         String response = callOpenAiApi(requestBody);
@@ -242,13 +250,71 @@ public class AiService {
         Map<String, Object> requestBody = new HashMap<>();
         requestBody.put("model", "gpt-3.5-turbo");
         requestBody.put("messages", List.of(
-                Map.of("role", "system", "content", "너는 일상 회고 질문을 이어가는 대화 어시스턴트야. 간결하고 공감되는 다음 질문 하나만 생성해줘."),
+                Map.of("role", "system", "content", "이 질문에 대해서 한국어로 대답해주면서 간결하고 공감되는 다음 질문 하나만 생성해줘."),
                 Map.of("role", "user", "content", "대답: " + answerText)
         ));
 
         return callOpenAiApi(requestBody);
     }
 
+    public DiaryMood recommendMood(String diaryText) {
+        String allowedMoods = Arrays.stream(MoodMeter.values())
+                .map(MoodMeter::getMoodName)
+                .map(name -> "\"" + name + "\"")
+                .collect(Collectors.joining(", "));
+
+        Map<String, Object> requestBody = new HashMap<>();
+        requestBody.put("model", "gpt-3.5-turbo");
+        requestBody.put("messages", List.of(
+                Map.of("role", "system", "content", """
+                다음 일기 내용을 분석해서 아래 리스트 중 감정 하나만 골라서 한국어로 반환해줘.
+                반드시 리스트에 있는 감정 중 하나만 말해줘. 다른 말은 하지 마.
+                감정 리스트: [%s]
+            """.formatted(allowedMoods)),
+                Map.of("role", "user", "content", diaryText)
+        ));
+
+        try {
+            String moodName = callOpenAiApi(requestBody).trim();
+            MoodMeter moodMeter = MoodMeter.fromMoodName(moodName);
+            return new DiaryMood(moodMeter.getMoodName(), moodMeter.getColor());
+
+        } catch (Exception e) {
+            log.warn("감정 추천 실패. 평범함 감정으로 대체됨. 오류: {}", e.getMessage());
+            MoodMeter defaultMood = MoodMeter.NORMAL;
+            return new DiaryMood(defaultMood.getMoodName(), defaultMood.getColor());
+        }
+    }
+
+    @Transactional
+    public String analyzeDiary(Long diaryId, DiaryMood mood) {
+        Diary diary = diaryRepository.findByDiaryId(diaryId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 다이어리가 존재하지 않습니다."));
+
+        String prompt = """
+                아래는 사용자의 일기입니다.
+                사용자가 선택한 감정은 [%s]입니다. 이 감정을 반영하여 아래 일기를 분석해줘.
+                감정의 원인, 사용자 성향, 긍정적 마무리 코멘트 등을 한국어로 6문장으로 작성해줘.
+                        
+                일기 내용:
+                %s
+                """.formatted(mood.getMoodName(), diary.getContent());
+
+        String result = callGptForAnalysis(prompt);
+        diary.addAnalysisContent(result);
+
+        return result;
+    }
+
+    private String callGptForAnalysis(String prompt) {
+        Map<String, Object> requestBody = new HashMap<>();
+        requestBody.put("model", "gpt-3.5-turbo");
+        requestBody.put("messages", List.of(
+                Map.of("role", "system", "content", "다음 내용을 분석해서 감정의 원인, 성향, 긍정적 코멘트를 한국어로 6문장으로 정리해줘."),
+                Map.of("role", "user", "content", prompt)
+        ));
+        return callOpenAiApi(requestBody);
+    }
 
     //파일 읽어들이기
     private byte[] readFileBytes(File file) throws IOException {

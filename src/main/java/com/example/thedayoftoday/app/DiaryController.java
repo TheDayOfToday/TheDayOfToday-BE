@@ -1,40 +1,105 @@
 package com.example.thedayoftoday.app;
 
-import com.example.thedayoftoday.domain.dto.DiaryCreateRequestDto;
+import com.example.thedayoftoday.domain.dto.DiaryBasicResponseDto;
+import com.example.thedayoftoday.domain.dto.DiaryRequestDto;
+import com.example.thedayoftoday.domain.dto.conversation.ConversationResponseDto;
+import com.example.thedayoftoday.domain.entity.DiaryMood;
+import com.example.thedayoftoday.domain.service.AiService;
+
+import java.io.IOException;
+
+import com.example.thedayoftoday.domain.service.ConversationService;
 import com.example.thedayoftoday.domain.service.DiaryService;
-import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/diary")
 public class DiaryController {
 
+    private final AiService openAiService;
+    private final ConversationService conversationService;
     private final DiaryService diaryService;
 
-    public DiaryController(DiaryService diaryService) {
+    public DiaryController(AiService openAiService, ConversationService conversationService, DiaryService diaryService) {
+        this.openAiService = openAiService;
+        this.conversationService = conversationService;
         this.diaryService = diaryService;
     }
 
-    @PostMapping("/create/{userId}")
-    public ResponseEntity<DiaryCreateRequestDto> createDiary(
-            @Valid @RequestBody DiaryCreateRequestDto diaryRequestDto,
-            @PathVariable Long userId) {
+    //독백모드 버튼
+    @PostMapping("/single-mode/start")
+    public ResponseEntity<DiaryRequestDto> createDiaryWithMood(@RequestParam("file") MultipartFile file, @RequestParam("userId") Long userId) throws IOException {
+        DiaryRequestDto emptyDiary = diaryService.createEmptyDiary(userId);
+        String transcribedText = openAiService.transcribeAudio(file);
+        DiaryBasicResponseDto diary = openAiService.convertToDiary(transcribedText);
+        DiaryMood mood = openAiService.recommendMood(transcribedText);
+        return ResponseEntity.ok(
+                new DiaryRequestDto(emptyDiary.diaryId(), diary.title(), diary.content(), mood)
+        );
+    }
 
-        DiaryCreateRequestDto diaryResponseDto = diaryService.createDiary(diaryRequestDto, userId);
+    //사용자가 감정 선택
+    @PostMapping("/update-mood")
+    public ResponseEntity<Void> updateDiaryMood(@RequestParam(value = "diaryId") Long diaryId, @RequestBody DiaryMood mood) {
+        diaryService.updateDiaryMood(diaryId, mood);
+        return ResponseEntity.ok().build();
+    }
+
+    //사용자가 일기 수정
+    @PutMapping("/update-diary")
+    public ResponseEntity<Void> updateDiaryContent(@RequestBody DiaryRequestDto requestDto) {
+        diaryService.updateDiaryContent(requestDto.diaryId(), requestDto.title(), requestDto.content());
+        return ResponseEntity.ok().build();
+    }
+
+    //사용자 무드미터, 일기 토대로 감정 분석
+    @GetMapping("/analyze")
+    public ResponseEntity<String> analyzeDiary(@RequestParam(value = "diaryId") Long diaryId) {
+        DiaryMood mood = diaryService.getMoodByDiaryId(diaryId);
+        String analysis = openAiService.analyzeDiary(diaryId, mood);
+        return ResponseEntity.ok(analysis);
+    }
+
+    //대화모드 시작 버튼
+    @PostMapping("/conversation-mode/start")
+    public ResponseEntity<DiaryRequestDto> startConversation(@RequestParam("userId") Long userId) {
+        DiaryRequestDto diaryResponseDto = diaryService.createEmptyDiary(userId);
         return ResponseEntity.status(HttpStatus.CREATED).body(diaryResponseDto);
     }
 
+    //대화모드 다음 버튼 누르면 음성 파일을 받아서 텍스트로 바꾸고 Conversation에 저장하고 텍스트 분석한 걸 바탕으로 질문 생성해서 던져줌
+    @PostMapping("/conversation-mode/next-question")
+    public ConversationResponseDto continueConversation(
+            @RequestParam("question") String question,
+            @RequestParam("file") MultipartFile file,
+            @RequestParam("diaryId") Long diaryId) throws IOException {
+
+        String answer = openAiService.transcribeAudio(file);
+        // Conversation 저장
+        conversationService.save(question, answer, diaryId);
+        // 텍스트 바탕으로 다음 질문 생성
+        String nextQuestion = openAiService.generateNextQuestion(answer);
+
+        return new ConversationResponseDto(nextQuestion);
+    }
+
+    //대화모드 끝
+    @PostMapping("/conversation-mode/complete")
+    public ResponseEntity<DiaryRequestDto> completeDiary(@RequestParam("diaryId") Long diaryId) {
+        String mergedText = conversationService.mergeConversationText(diaryId);
+        DiaryBasicResponseDto diary = openAiService.convertToDiary(mergedText);
+        DiaryMood mood = openAiService.recommendMood(diary.content());
+        diaryService.updateDiaryContent(diaryId, diary.title(), diary.content());
+        return ResponseEntity.ok(new DiaryRequestDto(diaryId, diary.title(), diary.content(), mood));
+    }
+
+    //일기 삭제
     @DeleteMapping("/delete/{diaryId}")
     public ResponseEntity<String> deleteDiary(@PathVariable Long diaryId) {
         diaryService.deleteDiary(diaryId);
         return ResponseEntity.ok("삭제가 완료되었습니다.");
-    }
-
-    @GetMapping("/start-conversation/{userId}")
-    public ResponseEntity<DiaryCreateRequestDto> startConversation(@PathVariable("userId") Long userId) {
-        DiaryCreateRequestDto diaryResponseDto = diaryService.createEmptyDiary(userId);
-        return ResponseEntity.status(HttpStatus.CREATED).body(diaryResponseDto);
     }
 }

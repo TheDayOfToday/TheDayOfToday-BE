@@ -29,7 +29,7 @@ public class UserServiceTest {
     @DisplayName("회원가입 성공")
     void joinSuccess() {
         SignupRequestDto signupRequestDto = new SignupRequestDto(
-                "Hun", "백광훈", "hun@aaaa.com", "1234", "010-1234-5678"
+                "Hun", "백광훈", "hun@aaaa.com", "010-1234-5678"
         );
 
         Long userId = userService.join(signupRequestDto);

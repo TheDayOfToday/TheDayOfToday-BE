@@ -64,4 +64,8 @@ public class Diary {
         this.title = title;
         this.content = content;
     }
+
+    public void updateDiaryMood(DiaryMood diaryMood) {
+        this.diaryMood = diaryMood;
+    }
 }

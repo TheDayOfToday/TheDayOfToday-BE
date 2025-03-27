@@ -1,6 +1,6 @@
 package com.example.thedayoftoday.domain.service;
 
-import com.example.thedayoftoday.domain.dto.DiaryCreateRequestDto;
+import com.example.thedayoftoday.domain.dto.DiaryRequestDto;
 import com.example.thedayoftoday.domain.dto.DiaryInfoResponseDto;
 import com.example.thedayoftoday.domain.entity.Diary;
 import com.example.thedayoftoday.domain.entity.DiaryMood;
@@ -24,21 +24,19 @@ public class DiaryService {
         this.userRepository = userRepository;
     }
 
-    public DiaryCreateRequestDto createDiary(DiaryCreateRequestDto diaryCreateDto, Long userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("유저를 찾을 수 없습니다."));
+    @Transactional
+    public void updateDiaryMood(Long diaryId, DiaryMood mood) {
+        Diary diary = diaryRepository.findByDiaryId(diaryId)
+                .orElseThrow(() -> new IllegalArgumentException("다이어리를 찾을 수 없습니다."));
 
-        Diary newDiary = Diary.builder()
-                .title(diaryCreateDto.title())
-                .content(diaryCreateDto.content())
-                .createTime(LocalDateTime.now())
-                .diaryMood(diaryCreateDto.diaryMood())
-                .user(user)
-                .build();
+        diary.updateDiaryMood(mood);
+    }
 
-        diaryRepository.save(newDiary);
-
-        return new DiaryCreateRequestDto(newDiary.getTitle(), newDiary.getContent(), newDiary.getDiaryMood());
+    @Transactional
+    public void updateDiaryContent(Long diaryId, String title, String content) {
+        Diary diary = diaryRepository.findById(diaryId)
+                .orElseThrow(() -> new IllegalArgumentException("다이어리가 존재하지 않습니다."));
+        diary.updateDiary(title, content);
     }
 
     public void deleteDiary(Long diaryId) {
@@ -47,7 +45,7 @@ public class DiaryService {
         diaryRepository.delete(diary);
     }
 
-    public DiaryCreateRequestDto createEmptyDiary(Long userId) {
+    public DiaryRequestDto createEmptyDiary(Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("유저를 찾을 수 없습니다."));
 
@@ -61,9 +59,13 @@ public class DiaryService {
 
         diaryRepository.save(newDiary);
 
-        return new DiaryCreateRequestDto(newDiary.getTitle(), newDiary.getContent(), newDiary.getDiaryMood());
+        return new DiaryRequestDto(newDiary.getDiaryId(), newDiary.getTitle(), newDiary.getContent(), newDiary.getDiaryMood());
     }
 
+    public DiaryMood getMoodByDiaryId(Long diaryId) {
+        Diary diary = diaryRepository.findById(diaryId).orElseThrow(() -> new RuntimeException("Diary not found"));
+        return new DiaryMood(diary.getDiaryMood().getMoodName(), diary.getDiaryMood().getMoodColor());
+    }
 
     public DiaryInfoResponseDto findDiary(Long diaryId) {
         Diary diary = diaryRepository.findByDiaryId(diaryId)
