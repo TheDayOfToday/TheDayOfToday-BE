@@ -1,19 +1,27 @@
 package com.example.thedayoftoday.domain.service;
 
 import com.example.thedayoftoday.domain.dto.WeeklyAnalysisResponseDto;
+import com.example.thedayoftoday.domain.entity.Diary;
 import com.example.thedayoftoday.domain.entity.WeeklyData;
+import com.example.thedayoftoday.domain.repository.DiaryRepository;
 import com.example.thedayoftoday.domain.repository.WeeklyDataRepository;
-import org.springframework.stereotype.Service;
-
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.temporal.WeekFields;
 import java.util.Calendar;
 import java.util.List;
+import org.springframework.stereotype.Service;
 
 @Service
 public class WeeklyAnalysisService {
-    private final WeeklyDataRepository weeklyDataRepository;
 
-    public WeeklyAnalysisService(WeeklyDataRepository weeklyDataRepository) {
+    private final WeeklyDataRepository weeklyDataRepository;
+    private final DiaryRepository diaryRepository;
+
+    public WeeklyAnalysisService(WeeklyDataRepository weeklyDataRepository, DiaryRepository diaryRepository) {
         this.weeklyDataRepository = weeklyDataRepository;
+        this.diaryRepository = diaryRepository;
     }
 
     public WeeklyAnalysisResponseDto getWeeklyAnalysis(int year, int month, int week) {
@@ -45,4 +53,22 @@ public class WeeklyAnalysisService {
 
         return dataYear == year && dataMonth == month && dataWeek == week;
     }
+
+    public List<Diary> getWeeklyData(long userId, int year, int month, int week) {
+
+        LocalDate firstDayOfMonth = LocalDate.of(year, month, 1);
+        WeekFields weekFields = WeekFields.ISO;
+
+        LocalDate startOfWeek = firstDayOfMonth
+                .with(weekFields.weekOfMonth(), week)
+                .with(weekFields.dayOfWeek(), 1); //월요일인거 알려줌
+
+        LocalDate endOfWeek = startOfWeek.with(weekFields.dayOfWeek(), 7); //일요일
+
+        LocalDateTime startDateTime = startOfWeek.atStartOfDay();
+        LocalDateTime endDateTime = endOfWeek.atTime(LocalTime.MAX);
+
+        return diaryRepository.findByUser_UserIdAndCreateTimeBetween(userId, startDateTime, endDateTime);
+    }
+
 }
