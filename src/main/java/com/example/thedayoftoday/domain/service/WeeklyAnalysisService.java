@@ -72,11 +72,13 @@ public class WeeklyAnalysisService {
         return diaryRepository.findByUser_UserIdAndCreateTimeBetween(userId, startDateTime, endDateTime);
     }
 
-    public String combineWeeklyDiary(List<Diary> diaries)
-    {
+    public String combineWeeklyDiary(List<Diary> diaries) {
         return diaries.stream()
-                .map(Diary::getContent)
-                .collect(Collectors.joining("\n"));
+                .map(diary -> {
+                    String moodName = diary.getDiaryMood() != null ? diary.getDiaryMood().getMoodName() : "저장된 감정 없음";
+                    return "[기분: " + moodName + "]\n" + diary.getContent();
+                })
+                .collect(Collectors.joining("\n\n"));
     }
     
 }
