@@ -1,5 +1,6 @@
 package com.example.thedayoftoday.domain.dto;
 
+import com.example.thedayoftoday.domain.entity.enumType.Degree;
 import com.example.thedayoftoday.domain.entity.enumType.MoodMeter;
 
 import java.time.LocalDate;
@@ -9,7 +10,7 @@ public record   WeeklyAnalysisResponseDto(
         int month,
         int week,
         String title,
-        MoodMeter analysisMoodmeter,  // MoodMeter enum 적용
+        Degree degree,  // MoodMeter enum 적용
         String feedback,
         LocalDate startDate,  // LocalDate 적용
         LocalDate endDate,
