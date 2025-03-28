@@ -37,7 +37,7 @@ public class WeeklyAnalysisService {
                 ? new WeeklyAnalysisResponseDto(
                 year, month, week,
                 targetWeekData.getTitle(),
-                targetWeekData.getAnalysisMoodmeter(),
+                targetWeekData.getDegree(),
                 targetWeekData.getFeedback(),
                 targetWeekData.getStartDate(),
                 targetWeekData.getEndDate(),
@@ -57,20 +57,22 @@ public class WeeklyAnalysisService {
 
     public List<Diary> getWeeklyDiary(long userId, int year, int month, int week) {
 
-        LocalDate firstDayOfMonth = LocalDate.of(year, month, 1);
-        WeekFields weekFields = WeekFields.ISO;
+        WeekFields weekFields = WeekFields.ISO; //월요일 기준으로 잡음
 
-        LocalDate startOfWeek = firstDayOfMonth
+        LocalDate baseDate = LocalDate.of(year, month, 1);
+
+        LocalDate startOfWeek = baseDate
                 .with(weekFields.weekOfMonth(), week)
-                .with(weekFields.dayOfWeek(), 1); //월요일인거 알려줌
+                .with(weekFields.dayOfWeek(), 1); // ISO 기준: 1은 월요일
 
-        LocalDate endOfWeek = startOfWeek.with(weekFields.dayOfWeek(), 7); //일요일
+        LocalDate endOfWeek = startOfWeek.plusDays(6);
 
         LocalDateTime startDateTime = startOfWeek.atStartOfDay();
         LocalDateTime endDateTime = endOfWeek.atTime(LocalTime.MAX);
 
         return diaryRepository.findByUser_UserIdAndCreateTimeBetween(userId, startDateTime, endDateTime);
     }
+    //만약 2.1(수) 이렇게 되어있으면 1월 마지막주, 2월 첫째주 다 들어감
 
     public String combineWeeklyDiary(List<Diary> diaries) {
         return diaries.stream()
@@ -80,5 +82,5 @@ public class WeeklyAnalysisService {
                 })
                 .collect(Collectors.joining("\n\n"));
     }
-    
+
 }
