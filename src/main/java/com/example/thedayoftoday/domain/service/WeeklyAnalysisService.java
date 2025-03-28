@@ -11,6 +11,7 @@ import java.time.LocalTime;
 import java.time.temporal.WeekFields;
 import java.util.Calendar;
 import java.util.List;
+import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -54,7 +55,7 @@ public class WeeklyAnalysisService {
         return dataYear == year && dataMonth == month && dataWeek == week;
     }
 
-    public List<Diary> getWeeklyData(long userId, int year, int month, int week) {
+    public List<Diary> getWeeklyDiary(long userId, int year, int month, int week) {
 
         LocalDate firstDayOfMonth = LocalDate.of(year, month, 1);
         WeekFields weekFields = WeekFields.ISO;
@@ -71,4 +72,11 @@ public class WeeklyAnalysisService {
         return diaryRepository.findByUser_UserIdAndCreateTimeBetween(userId, startDateTime, endDateTime);
     }
 
+    public String combineWeeklyDiary(List<Diary> diaries)
+    {
+        return diaries.stream()
+                .map(Diary::getContent)
+                .collect(Collectors.joining("\n"));
+    }
+    
 }
