@@ -1,5 +1,8 @@
 package com.example.thedayoftoday.domain.entity.enumType;
 
+import lombok.Getter;
+
+@Getter
 public enum Degree {
 
     NEUTRAL("중립"),
@@ -12,7 +15,4 @@ public enum Degree {
         this.degreeName = degreeName;
     }
 
-    public String getDegreeName() {
-        return degreeName;
-    }
 }
