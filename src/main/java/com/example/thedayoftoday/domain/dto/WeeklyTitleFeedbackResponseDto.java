@@ -1,4 +1,4 @@
 package com.example.thedayoftoday.domain.dto;
 
-public class WeeklyTitleFeedbackResponseDto {
+public record WeeklyTitleFeedbackResponseDto(String title, String feedback) {
 }

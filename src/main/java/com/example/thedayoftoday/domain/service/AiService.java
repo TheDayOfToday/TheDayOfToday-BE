@@ -1,8 +1,12 @@
 package com.example.thedayoftoday.domain.service;
 
 import com.example.thedayoftoday.domain.dto.DiaryBasicResponseDto;
+import com.example.thedayoftoday.domain.dto.WeeklyAnalysisResponseDto;
+import com.example.thedayoftoday.domain.dto.WeeklyTitleFeedbackResponseDto;
 import com.example.thedayoftoday.domain.entity.Diary;
 import com.example.thedayoftoday.domain.entity.DiaryMood;
+import com.example.thedayoftoday.domain.entity.WeeklyData;
+import com.example.thedayoftoday.domain.entity.enumType.Degree;
 import com.example.thedayoftoday.domain.entity.enumType.MoodMeter;
 import com.example.thedayoftoday.domain.repository.DiaryRepository;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -315,7 +319,80 @@ public class AiService {
         ));
         return callOpenAiApi(requestBody);
     }
+    public WeeklyTitleFeedbackResponseDto analyzeWeeklyDiaryWithTitle(String combinedWeeklyDiary) {
+        if (combinedWeeklyDiary == null || combinedWeeklyDiary.isBlank()) {
+            return new WeeklyTitleFeedbackResponseDto("무기록", "해당 주간에는 작성된 일기가 없습니다.");
+        }
 
+        String prompt = """
+    아래는 사용자의 일주일간 일기 모음입니다.
+    각 일기에는 사용자가 선택한 감정이 포함되어 있습니다.
+
+    이 일기를 분석하여 감정의 흐름, 성향, 감정 변화의 원인 등을 바탕으로
+    아래 형식처럼 작성해주세요:
+
+    제목: 짧고 상징적인 한 줄 제목
+    피드백: 감정 흐름에 대한 공감 가는 피드백, 최소 6문장 이상
+
+    일기 모음:
+    %s
+    """.formatted(combinedWeeklyDiary);
+
+        Map<String, Object> requestBody = new HashMap<>();
+        requestBody.put("model", "gpt-3.5-turbo");
+        requestBody.put("messages", List.of(
+                Map.of("role", "system", "content", "너는 공감과 감정 분석에 능숙한 피드백 작성 도우미야."),
+                Map.of("role", "user", "content", prompt)
+        ));
+
+        String response = callOpenAiApi(requestBody);
+
+        try {
+            String[] parts = response.split("피드백:", 2);
+            String title = parts[0].replace("제목:", "").trim();
+            String feedback = parts.length > 1 ? parts[1].trim() : "피드백 없음";
+            return new WeeklyTitleFeedbackResponseDto(title, feedback);
+        } catch (Exception e) {
+            log.error("응답 파싱 실패: {}", e.getMessage());
+            return new WeeklyTitleFeedbackResponseDto("분석 실패", "GPT 응답을 이해할 수 없습니다.");
+        }
+    }
+
+    public Degree analyzeDegree(String combinedWeeklyDiary) {
+        if (combinedWeeklyDiary == null || combinedWeeklyDiary.isBlank()) {
+            return Degree.NEUTRAL; // 기본값 처리
+        }
+
+        String prompt = """
+        다음은 사용자의 일주일간 일기 모음입니다.
+
+        전체 감정 흐름을 종합해 다음 중 하나로 판단해주세요:
+        - 긍정
+        - 부정
+        - 중립
+
+        반드시 위 단어 중 하나만 한국어로 대답해주세요.
+
+        일기 모음:
+        %s
+        """.formatted(combinedWeeklyDiary);
+
+        Map<String, Object> requestBody = new HashMap<>();
+        requestBody.put("model", "gpt-3.5-turbo");
+        requestBody.put("messages", List.of(
+                Map.of("role", "system", "content", "You are an emotional analyzer. Return only one word: 긍정, 부정, 중립."),
+                Map.of("role", "user", "content", prompt)
+        ));
+
+        String response = callOpenAiApi(requestBody).trim();
+
+        return switch (response) {
+            case "긍정" -> Degree.POSITIVE;
+            case "부정" -> Degree.NEGATIVE;
+            case "중립" -> Degree.NEUTRAL;
+            default -> Degree.NEUTRAL; // 잘못된 응답 처리
+        };
+    }
     //파일 읽어들이기
     private byte[] readFileBytes(File file) throws IOException {
         return java.nio.file.Files.readAllBytes(file.toPath());
