@@ -40,8 +40,7 @@ public class WeeklyAnalysisService {
                 targetWeekData.getDegree(),
                 targetWeekData.getFeedback(),
                 targetWeekData.getStartDate(),
-                targetWeekData.getEndDate(),
-                null)
+                targetWeekData.getEndDate())
                 : WeeklyAnalysisResponseDto.noData(year, month, week);
     }
 
