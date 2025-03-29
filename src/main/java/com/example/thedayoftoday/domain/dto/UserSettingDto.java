@@ -1,4 +1,4 @@
 package com.example.thedayoftoday.domain.dto;
 
-public record UserSettingDto(String name, String email, String phoneNumber) {
+public record UserSettingDto(String name, String password, String email, String phoneNumber) {
 }
