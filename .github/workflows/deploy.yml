@@ -46,11 +46,11 @@ jobs:
             # Step 1: Build new container with a new tag
             docker build -t thedayoftoday-app:latest .
             
-            # Step 2: Run new container with a different name
-            docker run -d --name app_v1_new -p 8081:8080 thedayoftoday-app
+            # Step 2: Run new container with a different name (keeping same ports)
+            docker run -d --name app_v1_new -p 8080:8080 thedayoftoday-app
             
             # Step 3: Swap Nginx configuration to point to new container
-            sudo ln -s /etc/nginx/sites-available/thedayoftoday-v1 /etc/nginx/sites-enabled/
+            sudo ln -sf /etc/nginx/sites-available/thedayoftoday-v1 /etc/nginx/sites-enabled/
             sudo systemctl reload nginx
             
             # Step 4: Stop and remove old container
