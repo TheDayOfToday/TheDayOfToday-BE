@@ -26,7 +26,8 @@ public class DiaryController {
     private final ConversationService conversationService;
     private final DiaryService diaryService;
 
-    public DiaryController(AiService openAiService, ConversationService conversationService, DiaryService diaryService) {
+    public DiaryController(AiService openAiService, ConversationService conversationService,
+                           DiaryService diaryService) {
         this.openAiService = openAiService;
         this.conversationService = conversationService;
         this.diaryService = diaryService;
@@ -49,7 +50,8 @@ public class DiaryController {
 
     //사용자가 감정 선택
     @PostMapping("/update-mood")
-    public ResponseEntity<Void> updateDiaryMood(@RequestParam(value = "diaryId") Long diaryId, @RequestBody DiaryMood mood) {
+    public ResponseEntity<Void> updateDiaryMood(@RequestParam(value = "diaryId") Long diaryId,
+                                                @RequestBody DiaryMood mood) {
         diaryService.updateDiaryMood(diaryId, mood);
         return ResponseEntity.ok().build();
     }

@@ -23,7 +23,7 @@ public class SettingController {
     @GetMapping("/setting")
     public UserSettingDto getSetting(@AuthenticationPrincipal CustomUserDetails userDetails) {
 
-        Long userId=userDetails.getUserId();
+        Long userId = userDetails.getUserId();
         User user = userRepository.findById(userId).orElse(null);
         if (user == null) {
             throw new IllegalArgumentException("존재하지 않는 사용자입니다.");
@@ -32,9 +32,10 @@ public class SettingController {
     }
 
     @PutMapping("update-password")
-    public ResponseEntity<Void> updatePassword(@AuthenticationPrincipal CustomUserDetails userDetails, @RequestParam String newPassword) {
+    public ResponseEntity<Void> updatePassword(@AuthenticationPrincipal CustomUserDetails userDetails,
+                                               @RequestParam String newPassword) {
 
-        Long userId= userDetails.getUserId();
+        Long userId = userDetails.getUserId();
         User user = userRepository.findById(userId).orElse(null);
         if (user == null) {
             throw new IllegalArgumentException("존재하지 않는 사용자입니다.");

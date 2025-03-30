@@ -1,4 +1,3 @@
-
 package com.example.thedayoftoday.app;
 
 import com.example.thedayoftoday.domain.security.CustomUserDetails;
@@ -20,7 +19,7 @@ public class CalendarController {
     }
 
     @GetMapping("/{year}/{month}")
-    public MonthColorsResponseDto getMonthColors( @AuthenticationPrincipal CustomUserDetails userDetails,
+    public MonthColorsResponseDto getMonthColors(@AuthenticationPrincipal CustomUserDetails userDetails,
                                                  @PathVariable int year,
                                                  @PathVariable int month) {
         Long userId = userDetails.getUserId();
@@ -30,7 +29,7 @@ public class CalendarController {
     }
 
     @GetMapping("/diary/{year}/{month}/{day}")
-    public DiaryEntryResponseDto getDiaryEntry( @AuthenticationPrincipal CustomUserDetails userDetails,
+    public DiaryEntryResponseDto getDiaryEntry(@AuthenticationPrincipal CustomUserDetails userDetails,
                                                @PathVariable int year,
                                                @PathVariable int month,
                                                @PathVariable int day) {
@@ -40,10 +39,11 @@ public class CalendarController {
     }
 
     @GetMapping("/analysis/{year}/{month}/{day}")
-    public SentimentalAnalysisListResponseDto getSentimentalAnalysis( @AuthenticationPrincipal CustomUserDetails userDetails,
-                                                                     @PathVariable int year,
-                                                                     @PathVariable int month,
-                                                                     @PathVariable int day) {
+    public SentimentalAnalysisListResponseDto getSentimentalAnalysis(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @PathVariable int year,
+            @PathVariable int month,
+            @PathVariable int day) {
         Long userId = userDetails.getUserId();
         LocalDateTime date = LocalDateTime.of(year, month, day, 0, 0);
         return calendarService.getSentimentalAnalysis(userId, date);

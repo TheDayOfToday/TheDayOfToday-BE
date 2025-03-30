@@ -29,6 +29,7 @@ public class JWTUtil {
     public Long getUserId(String token) {
         return parseClaims(token).get("userId", Long.class);
     }
+
     public String getUsername(String token) {
         return parseClaims(token).get("email", String.class);
     }

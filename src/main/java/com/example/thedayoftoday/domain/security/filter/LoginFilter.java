@@ -17,7 +17,6 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
