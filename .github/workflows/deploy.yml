@@ -34,7 +34,7 @@ jobs:
           source: "build/libs/thedayoftoday-0.0.1-SNAPSHOT.jar"
           target: "~/TheDayOfToday-BE"
 
-      - name: Run Docker deploy on EC2
+      - name: Run Blue-Green Deployment on EC2
         uses: appleboy/ssh-action@v0.1.10
         with:
           host: ${{ secrets.EC2_HOST }}
@@ -42,8 +42,20 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             cd ~/TheDayOfToday-BE
+            
+            # Step 1: Build new container with a new tag
+            docker build -t thedayoftoday-app:latest .
+            
+            # Step 2: Run new container with a different name
+            docker run -d --name app_v1_new -p 8081:8080 thedayoftoday-app
+            
+            # Step 3: Swap Nginx configuration to point to new container
+            sudo ln -s /etc/nginx/sites-available/thedayoftoday-v1 /etc/nginx/sites-enabled/
+            sudo systemctl reload nginx
+            
+            # Step 4: Stop and remove old container
             docker stop app_v1 || true
             docker rm app_v1 || true
-            docker rmi thedayoftoday-app || true
-            docker build -t thedayoftoday-app .
-            docker run -d --name app_v1 -p 8080:8080 thedayoftoday-app
+
+            # Step 5: Rename new container to the original name
+            docker rename app_v1_new app_v1
