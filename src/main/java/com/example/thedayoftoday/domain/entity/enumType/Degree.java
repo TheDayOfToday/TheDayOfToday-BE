@@ -4,10 +4,11 @@ import lombok.Getter;
 
 @Getter
 public enum Degree {
-
-    NEUTRAL("중립"),
-    POSITIVE("긍정"),
-    NEGATIVE("부정");
+    GOOD("좋은"),
+    BAD("나쁜"),
+    COMFORT("편안한"),
+    HARD("힘든"),
+    UNKNOWN("모르겠는");
 
     private final String degreeName;
 
