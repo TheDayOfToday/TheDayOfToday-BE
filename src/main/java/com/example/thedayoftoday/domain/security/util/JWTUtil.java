@@ -26,6 +26,9 @@ public class JWTUtil {
         this.refreshExpirationTime = refreshExpirationTime;
     }
 
+    public Long getUserId(String token) {
+        return parseClaims(token).get("userId", Long.class);
+    }
     public String getUsername(String token) {
         return parseClaims(token).get("email", String.class);
     }
@@ -42,21 +45,22 @@ public class JWTUtil {
         return parseClaims(token).getExpiration().before(new Date());
     }
 
-    public String createAccessToken(String category, String email, String role) {
+    public String createAccessToken(String category, String email, String role, Long userId) {
         log.info("사용자의 만들어진 access Token {}, role: {}, expires in {} ms", email, role, accessExpirationTime);
-        return createJwt("access", email, role, accessExpirationTime);
+        return createJwt("access", email, role, userId, accessExpirationTime);
     }
 
-    public String createRefreshToken(String category, String email, String role) {
+    public String createRefreshToken(String category, String email, String role, Long userId) {
         log.info("사용자의 만들어진 Refresh Token {}, role: {}, expires in {} ms", email, role, refreshExpirationTime);
-        return createJwt("refresh", email, role, refreshExpirationTime);
+        return createJwt("refresh", email, role, userId, refreshExpirationTime);
     }
 
-    public String createJwt(String category, String email, String role, long expiredMs) {
+    public String createJwt(String category, String email, String role, Long userId, long expiredMs) {
         return Jwts.builder()
                 .claim("category", category)
                 .claim("email", email)
                 .claim("role", role)
+                .claim("userId", userId)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + expiredMs))  // 만료 시간
                 .signWith(secretKey, SignatureAlgorithm.HS256)
