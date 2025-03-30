@@ -2,10 +2,12 @@ package com.example.thedayoftoday.domain.service;
 
 import static com.example.thedayoftoday.domain.entity.enumType.MoodMeter.fromMoodName;
 
+import com.example.thedayoftoday.domain.dto.MoodCategoryResponse;
 import com.example.thedayoftoday.domain.dto.MoodDetailsDto;
 import com.example.thedayoftoday.domain.dto.MoodMeterCategoryDto;
 import com.example.thedayoftoday.domain.dto.SentimentalAnalysisRequestDto;
 import com.example.thedayoftoday.domain.dto.SentimentalAnalysisResponseDto;
+import com.example.thedayoftoday.domain.dto.UnknownMoodCategoryDto;
 import com.example.thedayoftoday.domain.entity.Diary;
 import com.example.thedayoftoday.domain.entity.DiaryMood;
 import com.example.thedayoftoday.domain.entity.enumType.Degree;
@@ -165,21 +167,32 @@ public class SentimentalAnalysisService {
         }
     }
 
-    public List<MoodMeterCategoryDto> getAllMoodListResponseDto() {
+    public List<MoodCategoryResponse> getAllMoodListResponseDto() {
         Map<Degree, List<MoodDetailsDto>> moodGroup = new LinkedHashMap<>();
+        List<MoodDetailsDto> unknownList = new ArrayList<>();
 
         for (Degree value : Degree.values()) {
             moodGroup.put(value, new ArrayList<>());
         }
 
         for (MoodMeter mood : MoodMeter.values()) {
-            moodGroup.get(mood.getDegree()).add(new MoodDetailsDto(mood.getMoodName(), mood.getColor()));
+            if (mood.getDegree() == null) {
+                unknownList.add(new MoodDetailsDto(mood.getMoodName(), mood.getColor()));
+            } else {
+                moodGroup.get(mood.getDegree()).add(new MoodDetailsDto(mood.getMoodName(), mood.getColor()));
+            }
         }
 
-        List<MoodMeterCategoryDto> moodCategories = new ArrayList<>();
+        List<MoodCategoryResponse> moodCategories = new ArrayList<>();
+
         for (Map.Entry<Degree, List<MoodDetailsDto>> entry : moodGroup.entrySet()) {
             moodCategories.add(new MoodMeterCategoryDto(entry.getKey().getDegreeName(), entry.getValue()));
         }
+
+        if (!unknownList.isEmpty()) {
+            moodCategories.add(new UnknownMoodCategoryDto(unknownList));
+        }
+
         return moodCategories;
     }
 }

@@ -57,7 +57,7 @@ public enum MoodMeter {
     BLESSED(Degree.COMFORT, "축복받은", "#51a23c"),
     COZY(Degree.COMFORT, "안락한", "#4fa43b"),
     TOUCHED(Degree.COMFORT, "감동적인", "#468c33"),
-    
+
     UNKNOWN(Degree.UNKNOWN, "모르겠는", "#ffffff");
 
     private final Degree degree;

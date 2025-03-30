@@ -1,6 +1,6 @@
 package com.example.thedayoftoday.app;
 
-import com.example.thedayoftoday.domain.dto.MoodMeterCategoryDto;
+import com.example.thedayoftoday.domain.dto.MoodCategoryResponse;
 import com.example.thedayoftoday.domain.dto.SentimentalAnalysisRequestDto;
 import com.example.thedayoftoday.domain.dto.SentimentalAnalysisResponseDto;
 import com.example.thedayoftoday.domain.service.SentimentalAnalysisService;
@@ -24,7 +24,7 @@ public class SentimentalAnalysisController {
     private final SentimentalAnalysisService sentimentalAnalysisService;
 
     @GetMapping("/moodmeters")
-    public List<MoodMeterCategoryDto> getMoodMeters() {
+    public List<MoodCategoryResponse> getMoodMeters() {
         return sentimentalAnalysisService.getAllMoodListResponseDto();
     }
 
