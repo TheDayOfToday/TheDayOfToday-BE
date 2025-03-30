@@ -4,6 +4,7 @@ import com.example.thedayoftoday.domain.dto.DiaryBasicResponseDto;
 import com.example.thedayoftoday.domain.dto.DiaryRequestDto;
 import com.example.thedayoftoday.domain.dto.conversation.ConversationResponseDto;
 import com.example.thedayoftoday.domain.entity.DiaryMood;
+import com.example.thedayoftoday.domain.security.CustomUserDetails;
 import com.example.thedayoftoday.domain.service.AiService;
 
 import java.io.IOException;
@@ -12,6 +13,8 @@ import com.example.thedayoftoday.domain.service.ConversationService;
 import com.example.thedayoftoday.domain.service.DiaryService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -31,7 +34,10 @@ public class DiaryController {
 
     //독백모드 버튼
     @PostMapping("/single-mode/start")
-    public ResponseEntity<DiaryRequestDto> createDiaryWithMood(@RequestParam("file") MultipartFile file, @RequestParam("userId") Long userId) throws IOException {
+    public ResponseEntity<DiaryRequestDto> createDiaryWithMood(@RequestParam("file") MultipartFile file,
+                                                               @AuthenticationPrincipal CustomUserDetails userDetails)
+            throws IOException {
+        Long userId = userDetails.getUserId();
         DiaryRequestDto emptyDiary = diaryService.createEmptyDiary(userId);
         String transcribedText = openAiService.transcribeAudio(file);
         DiaryBasicResponseDto diary = openAiService.convertToDiary(transcribedText);
