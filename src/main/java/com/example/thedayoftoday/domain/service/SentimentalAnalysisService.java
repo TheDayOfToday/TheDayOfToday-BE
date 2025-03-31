@@ -171,28 +171,44 @@ public class SentimentalAnalysisService {
         Map<Degree, List<MoodDetailsDto>> moodGroup = new LinkedHashMap<>();
         List<MoodDetailsDto> unknownList = new ArrayList<>();
 
-        for (Degree value : Degree.values()) {
-            moodGroup.put(value, new ArrayList<>());
+        for (Degree degree : Degree.values()) {
+            // "미분석"은 건너뜀
+            if (degree == Degree.NONE) continue;
+            moodGroup.put(degree, new ArrayList<>());
         }
 
         for (MoodMeter mood : MoodMeter.values()) {
-            if (mood.getDegree() == null) {
+            Degree degree = mood.getDegree();
+
+            if (degree == null || degree == Degree.NONE) {
+                // "미분석" 또는 Degree 자체가 null이면 무시
+                continue;
+            }
+
+            if (degree == Degree.UNKNOWN) {
                 unknownList.add(new MoodDetailsDto(mood.getMoodName(), mood.getColor()));
             } else {
-                moodGroup.get(mood.getDegree()).add(new MoodDetailsDto(mood.getMoodName(), mood.getColor()));
+                moodGroup.get(degree).add(new MoodDetailsDto(mood.getMoodName(), mood.getColor()));
             }
         }
 
+        return getMoodCategoryResponses(unknownList, moodGroup);
+    }
+
+    private static List<MoodCategoryResponse> getMoodCategoryResponses(List<MoodDetailsDto> unknownList,
+                                                                       Map<Degree, List<MoodDetailsDto>> moodGroup) {
         List<MoodCategoryResponse> moodCategories = new ArrayList<>();
 
-        for (Map.Entry<Degree, List<MoodDetailsDto>> entry : moodGroup.entrySet()) {
-            moodCategories.add(new MoodMeterCategoryDto(entry.getKey().getDegreeName(), entry.getValue()));
-        }
-
+        // "모르겠는"은 따로 UnknownMoodCategoryDto로 출력
         if (!unknownList.isEmpty()) {
             moodCategories.add(new UnknownMoodCategoryDto(unknownList));
         }
 
+        for (Map.Entry<Degree, List<MoodDetailsDto>> entry : moodGroup.entrySet()) {
+            // "모르겠는" 제외 (이미 위에서 처리)
+            if (entry.getKey() == Degree.UNKNOWN) continue;
+            moodCategories.add(new MoodMeterCategoryDto(entry.getKey().getDegreeName(), entry.getValue()));
+        }
         return moodCategories;
     }
 }
