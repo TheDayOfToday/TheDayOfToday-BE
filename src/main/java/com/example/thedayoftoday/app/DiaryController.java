@@ -73,7 +73,8 @@ public class DiaryController {
 
     //대화모드 시작 버튼
     @PostMapping("/conversation-mode/start")
-    public ResponseEntity<DiaryRequestDto> startConversation(@RequestParam("userId") Long userId) {
+    public ResponseEntity<DiaryRequestDto> startConversation(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        Long userId = userDetails.getUserId();
         DiaryRequestDto diaryResponseDto = diaryService.createEmptyDiary(userId);
         return ResponseEntity.status(HttpStatus.CREATED).body(diaryResponseDto);
     }

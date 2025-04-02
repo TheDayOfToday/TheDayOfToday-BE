@@ -30,10 +30,6 @@ public class SentimentalAnalysisController {
     private final SentimentalAnalysisService sentimentalAnalysisService;
 
     @GetMapping("/moodmeters")
-    @ApiResponse(
-            responseCode = "200",
-            content = @Content(array = @ArraySchema(schema = @Schema(oneOf = {MoodMeterCategoryDto.class, UnknownMoodCategoryDto.class})))
-    )
     public List<MoodCategoryResponse> getMoodMeters() {
         return sentimentalAnalysisService.getAllMoodListResponseDto();
     }
