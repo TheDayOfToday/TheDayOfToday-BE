@@ -33,7 +33,6 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           source: "."
           target: "~/TheDayOfToday-BE"
-
       - name: Run Blue-Green Deployment on EC2
         uses: appleboy/ssh-action@v0.1.10
         with:
@@ -42,6 +41,10 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             cd ~/TheDayOfToday-BE
+
+            # Step 0: Stop previous app_v2 if still alive
+            docker stop app_v2 || true
+            docker rm app_v2 || true
 
             # Step 1: Build new Docker image
             docker build --no-cache -t thedayoftoday-app:latest .
@@ -56,6 +59,10 @@ jobs:
             # Step 4: Stop and remove old container
             docker stop app_v1 || true
             docker rm app_v1 || true
+
+            # Step 5: Rename app_v2 → app_v1 (prepare for next deploy)
+            docker rename app_v2 app_v1
+
 
             # Step 5: Rename app_v2 → app_v1 (prepare for next deploy)
             docker rename app_v2 app_v1
