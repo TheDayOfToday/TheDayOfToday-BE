@@ -7,7 +7,6 @@ import com.example.thedayoftoday.domain.dto.MoodDetailsDto;
 import com.example.thedayoftoday.domain.dto.MoodMeterCategoryDto;
 import com.example.thedayoftoday.domain.dto.SentimentalAnalysisRequestDto;
 import com.example.thedayoftoday.domain.dto.SentimentalAnalysisResponseDto;
-import com.example.thedayoftoday.domain.dto.UnknownMoodCategoryDto;
 import com.example.thedayoftoday.domain.entity.Diary;
 import com.example.thedayoftoday.domain.entity.DiaryMood;
 import com.example.thedayoftoday.domain.entity.enumType.Degree;
@@ -60,27 +59,6 @@ public class SentimentalAnalysisService {
         return new SentimentalAnalysisResponseDto(moodName, moodColor, contentAnalysis);
     }
 
-    //해당 다이어리 id에 감정분석 결과 저장해주는거임!! ->moodName(한글), content 던져주면 이에 맞게 감정분석 db, 연결되어있는 일기에도 저장
-//    public SentimentalAnalysisResponseDto addAnalysis(SentimentalAnalysisRequestDto sentimentalAnalysisRequestDto,
-//                                                      Long diaryId) {
-//        Diary diary = diaryRepository.findById(diaryId)
-//                .orElseThrow(() -> new IllegalArgumentException("해당 일기가 없습니다"));
-//
-//        SentimentalAnalysis sentimentalAnalysis = SentimentalAnalysis.builder()
-//                .analysisMoodName(sentimentalAnalysisRequestDto.analysisMoodName())
-//                .analysisMoodColor(sentimentalAnalysisRequestDto.analysisMoodColor())
-//                .analysisContent(sentimentalAnalysisRequestDto.analysisContent())
-//                .diary(diary).build();
-//
-//        sentimentalAnalysisRepository.save(sentimentalAnalysis);
-//        diary.addSentimentAnalysis(sentimentalAnalysis);
-//
-//        return new SentimentalAnalysisResponseDto(
-//                sentimentalAnalysis.getAnalysisMoodName(),
-//                sentimentalAnalysis.getAnalysisMoodColor(),
-//                sentimentalAnalysis.getAnalysisContent()
-//        );
-//    }
     public SentimentalAnalysisResponseDto addAnalysis(SentimentalAnalysisRequestDto sentimentalAnalysisRequestDto, Long diaryId) {
         Diary diary = diaryRepository.findById(diaryId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 일기가 없습니다"));
@@ -169,7 +147,6 @@ public class SentimentalAnalysisService {
 
     public List<MoodCategoryResponse> getAllMoodListResponseDto() {
         Map<Degree, List<MoodDetailsDto>> moodGroup = new LinkedHashMap<>();
-        List<MoodDetailsDto> unknownList = new ArrayList<>();
 
         for (Degree degree : Degree.values()) {
             // "미분석"은 건너뜀
@@ -179,36 +156,22 @@ public class SentimentalAnalysisService {
 
         for (MoodMeter mood : MoodMeter.values()) {
             Degree degree = mood.getDegree();
-
             if (degree == null || degree == Degree.NONE) {
-                // "미분석" 또는 Degree 자체가 null이면 무시
                 continue;
             }
-
-            if (degree == Degree.UNKNOWN) {
-                unknownList.add(new MoodDetailsDto(mood.getMoodName(), mood.getColor()));
-            } else {
-                moodGroup.get(degree).add(new MoodDetailsDto(mood.getMoodName(), mood.getColor()));
-            }
+            MoodDetailsDto dto = new MoodDetailsDto(mood.getMoodName(),mood.getColor());
+            moodGroup.get(degree).add(dto);
         }
 
-        return getMoodCategoryResponses(unknownList, moodGroup);
-    }
-
-    private static List<MoodCategoryResponse> getMoodCategoryResponses(List<MoodDetailsDto> unknownList,
-                                                                       Map<Degree, List<MoodDetailsDto>> moodGroup) {
         List<MoodCategoryResponse> moodCategories = new ArrayList<>();
 
-        // "모르겠는"은 따로 UnknownMoodCategoryDto로 출력
-        if (!unknownList.isEmpty()) {
-            moodCategories.add(new UnknownMoodCategoryDto(unknownList));
+        for (Map.Entry<Degree, List<MoodDetailsDto>> entry : moodGroup.entrySet()) {
+            moodCategories.add(
+                    new MoodMeterCategoryDto(entry.getKey().getDegreeName(), entry.getValue())
+            );
         }
 
-        for (Map.Entry<Degree, List<MoodDetailsDto>> entry : moodGroup.entrySet()) {
-            // "모르겠는" 제외 (이미 위에서 처리)
-            if (entry.getKey() == Degree.UNKNOWN) continue;
-            moodCategories.add(new MoodMeterCategoryDto(entry.getKey().getDegreeName(), entry.getValue()));
-        }
         return moodCategories;
     }
+
 }
