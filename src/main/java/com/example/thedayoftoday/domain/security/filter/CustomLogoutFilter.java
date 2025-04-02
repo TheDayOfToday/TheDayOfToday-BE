@@ -1,6 +1,5 @@
 package com.example.thedayoftoday.domain.security.filter;
 
-
 import com.example.thedayoftoday.domain.security.repository.RefreshRepository;
 import com.example.thedayoftoday.domain.security.util.JWTUtil;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -64,7 +63,6 @@ public class CustomLogoutFilter extends GenericFilterBean {
 
         //refresh null check
         if (refresh == null) {
-
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             return;
         }
@@ -73,7 +71,6 @@ public class CustomLogoutFilter extends GenericFilterBean {
         try {
             jwtUtil.isExpired(refresh);
         } catch (ExpiredJwtException e) {
-
             //response status code
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             return;

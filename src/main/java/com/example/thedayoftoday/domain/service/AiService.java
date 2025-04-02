@@ -1,11 +1,9 @@
 package com.example.thedayoftoday.domain.service;
 
 import com.example.thedayoftoday.domain.dto.DiaryBasicResponseDto;
-import com.example.thedayoftoday.domain.dto.WeeklyAnalysisResponseDto;
 import com.example.thedayoftoday.domain.dto.WeeklyTitleFeedbackResponseDto;
 import com.example.thedayoftoday.domain.entity.Diary;
 import com.example.thedayoftoday.domain.entity.DiaryMood;
-import com.example.thedayoftoday.domain.entity.WeeklyData;
 import com.example.thedayoftoday.domain.entity.enumType.Degree;
 import com.example.thedayoftoday.domain.entity.enumType.MoodMeter;
 import com.example.thedayoftoday.domain.repository.DiaryRepository;
@@ -285,7 +283,7 @@ public class AiService {
 
         } catch (Exception e) {
             log.warn("감정 추천 실패. 평범함 감정으로 대체됨. 오류: {}", e.getMessage());
-            MoodMeter defaultMood = MoodMeter.NORMAL;
+            MoodMeter defaultMood = MoodMeter.UNKNOWN;
             return new DiaryMood(defaultMood.getMoodName(), defaultMood.getColor());
         }
     }
@@ -360,16 +358,17 @@ public class AiService {
 
     public Degree analyzeDegree(String combinedWeeklyDiary) {
         if (combinedWeeklyDiary == null || combinedWeeklyDiary.isBlank()) {
-            return Degree.NEUTRAL; // 기본값 처리
+            return Degree.NONE; // 기본값 처리
         }
 
         String prompt = """
         다음은 사용자의 일주일간 일기 모음입니다.
 
         전체 감정 흐름을 종합해 다음 중 하나로 판단해주세요:
-        - 긍정
-        - 부정
-        - 중립
+        - 좋은
+        - 나쁜
+        - 편안한
+        - 힘든
 
         반드시 위 단어 중 하나만 한국어로 대답해주세요.
 
@@ -380,17 +379,18 @@ public class AiService {
         Map<String, Object> requestBody = new HashMap<>();
         requestBody.put("model", "gpt-3.5-turbo");
         requestBody.put("messages", List.of(
-                Map.of("role", "system", "content", "You are an emotional analyzer. Return only one word: 긍정, 부정, 중립."),
+                Map.of("role", "system", "content", "You are an emotional analyzer. Return only one word: 좋은, 나쁜, 편안한, 힘든. "),
                 Map.of("role", "user", "content", prompt)
         ));
 
         String response = callOpenAiApi(requestBody).trim();
 
         return switch (response) {
-            case "긍정" -> Degree.POSITIVE;
-            case "부정" -> Degree.NEGATIVE;
-            case "중립" -> Degree.NEUTRAL;
-            default -> Degree.NEUTRAL; // 잘못된 응답 처리
+            case "좋은" -> Degree.GOOD;
+            case "나쁜" -> Degree.BAD;
+            case "편안한" -> Degree.COMFORT;
+            case "힘든" -> Degree.HARD;
+            default -> Degree.NONE; // 잘못된 응답 처리
         };
     }
     //파일 읽어들이기
