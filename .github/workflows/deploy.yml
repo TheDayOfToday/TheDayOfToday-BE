@@ -31,7 +31,7 @@ jobs:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
-          source: "."  # 전체 프로젝트 디렉토리 복사
+          source: "."
           target: "~/TheDayOfToday-BE"
 
       - name: Run Blue-Green Deployment on EC2
@@ -43,19 +43,19 @@ jobs:
           script: |
             cd ~/TheDayOfToday-BE
 
-            # Step 1: Build new container with a new tag (무조건 새로 build)
+            # Step 1: Build new Docker image
             docker build --no-cache -t thedayoftoday-app:latest .
 
-            # Step 2: Run new container with a different name
-            docker run -d --name app_v1_new -p 8080:8080 thedayoftoday-app
+            # Step 2: Run new container on 8081
+            docker run -d --name app_v2 -p 8081:8080 thedayoftoday-app
 
-            # Step 3: Swap Nginx configuration (이미 설정되어 있다면 스킵 가능)
-            sudo ln -sf /etc/nginx/sites-available/thedayoftoday-v1 /etc/nginx/sites-enabled/
+            # Step 3: Switch Nginx to app_v2 (8081)
+            sudo ln -sf /etc/nginx/sites-available/thedayoftoday-v2 /etc/nginx/sites-enabled/
             sudo systemctl reload nginx
 
             # Step 4: Stop and remove old container
             docker stop app_v1 || true
             docker rm app_v1 || true
 
-            # Step 5: Rename new container to the original name
-            docker rename app_v1_new app_v1
+            # Step 5: Rename app_v2 → app_v1 (prepare for next deploy)
+            docker rename app_v2 app_v1
