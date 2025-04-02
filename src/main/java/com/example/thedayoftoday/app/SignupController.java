@@ -1,8 +1,6 @@
 package com.example.thedayoftoday.app;
 
 import com.example.thedayoftoday.domain.dto.SignupRequestDto;
-import com.example.thedayoftoday.domain.entity.User;
-import com.example.thedayoftoday.domain.entity.enumType.RoleType;
 import com.example.thedayoftoday.domain.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

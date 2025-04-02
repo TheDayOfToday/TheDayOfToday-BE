@@ -1,6 +1,5 @@
 package com.example.thedayoftoday.app;
 
-
 import com.example.thedayoftoday.domain.dto.WeeklyAnalysisResponseDto;
 import com.example.thedayoftoday.domain.service.WeeklyAnalysisService;
 import org.springframework.web.bind.annotation.*;

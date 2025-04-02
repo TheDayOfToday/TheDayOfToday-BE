@@ -33,12 +33,9 @@ public class JWTFilter extends OncePerRequestFilter {
             return;
         }
 
-        String accessToken = authorizationHeader.substring(7);  // "Bearer " 이후의 토큰 추출
-        System.out.println("Received Authorization token: " + accessToken);
+        String accessToken = authorizationHeader.substring(7);
 
-        // 토큰이 없거나 빈 값이면 필터 진행
         if (accessToken.trim().isEmpty()) {
-            System.out.println("No access token provided, proceeding without authentication.");
             filterChain.doFilter(request, response);
             return;
         }
@@ -60,13 +57,15 @@ public class JWTFilter extends OncePerRequestFilter {
 
         String email = jwtUtil.getUsername(accessToken);
         String role = jwtUtil.getRole(accessToken);
+        Long userId = jwtUtil.getUserId(accessToken);
 
-        CustomUserDetails customUserDetails = new CustomUserDetails(email, role);
+        CustomUserDetails customUserDetails = new CustomUserDetails(email, role, userId);
 
         Authentication authToken = new UsernamePasswordAuthenticationToken(
                 customUserDetails, null, customUserDetails.getAuthorities()
         );
         SecurityContextHolder.getContext().setAuthentication(authToken);
+        System.out.println("[JWTFilter] Set authentication with userId = " + userId);
 
         filterChain.doFilter(request, response);
     }

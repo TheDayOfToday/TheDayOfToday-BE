@@ -1,21 +1,25 @@
 package com.example.thedayoftoday.domain.dto;
 
+import com.example.thedayoftoday.domain.entity.enumType.Degree;
 import com.example.thedayoftoday.domain.entity.enumType.MoodMeter;
 
 import java.time.LocalDate;
+import java.time.temporal.WeekFields;
 
 public record   WeeklyAnalysisResponseDto(
         int year,
         int month,
         int week,
         String title,
-        MoodMeter analysisMoodmeter,  // MoodMeter enum 적용
+        Degree degree,  // MoodMeter enum 적용
         String feedback,
         LocalDate startDate,  // LocalDate 적용
-        LocalDate endDate,
-        String message
+        LocalDate endDate
 ) {
     public static WeeklyAnalysisResponseDto noData(int year, int month, int week) {
-        return new WeeklyAnalysisResponseDto(year, month, week, null, null, null, null, null, "해당 주차에 대한 분석 데이터가 없습니다.");
-    }
+        LocalDate base = LocalDate.of(year, month, 1);
+        WeekFields weekFields = WeekFields.ISO;
+        LocalDate start = base.with(weekFields.weekOfMonth(), week).with(weekFields.dayOfWeek(), 1);
+        LocalDate end = start.plusDays(6);
+        return new WeeklyAnalysisResponseDto(year, month, week, null, null, null, start, end);    }
 }

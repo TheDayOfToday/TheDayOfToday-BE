@@ -17,7 +17,6 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -80,14 +79,16 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         String role = auth.getAuthority();
 
         //토큰 생성
-        String access = jwtUtil.createAccessToken("access", email, role);
-        String refresh = jwtUtil.createRefreshToken("refresh", email, role);
+        Long userId = ((com.example.thedayoftoday.domain.security.CustomUserDetails) authentication.getPrincipal()).getUserId();
+
+        String access = jwtUtil.createAccessToken("access", email, role, userId);
+        String refresh = jwtUtil.createRefreshToken("refresh", email, role, userId);
 
         //Refresh 토큰 저장
         addRefreshEntity(email, refresh, 86400000L);
 
         //응답 설정
-        response.setHeader("Authorization", "Bearer" + access);
+        response.setHeader("Authorization", "Bearer " + access);
         response.addCookie(createCookie("refresh", refresh));
         response.setStatus(HttpStatus.OK.value());
     }

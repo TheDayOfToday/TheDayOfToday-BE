@@ -1,10 +1,15 @@
 package com.example.thedayoftoday.domain.entity.enumType;
 
-public enum Degree {
+import lombok.Getter;
 
-    NEUTRAL("중립"),
-    POSITIVE("긍정"),
-    NEGATIVE("부정");
+@Getter
+public enum Degree {
+    GOOD("좋은"),
+    BAD("나쁜"),
+    COMFORT("편안한"),
+    HARD("힘든"),
+    UNKNOWN("모르겠는"),
+    NONE("미분석");
 
     private final String degreeName;
 
@@ -12,7 +17,4 @@ public enum Degree {
         this.degreeName = degreeName;
     }
 
-    public String getDegreeName() {
-        return degreeName;
-    }
 }
