@@ -1,13 +1,35 @@
-name: Deploy to EC2
+name: CI/CD for TheDayOfToday
 
 on:
+  push:
+    branches: [main]
   pull_request:
-    types: [closed]
     branches: [main]
 
 jobs:
+  test:
+    name: Build and Test on PR
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v3
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Build with Gradle (no tests skipped)
+        run: |
+          chmod +x ./gradlew
+          ./gradlew build
+
   deploy:
-    if: github.event.pull_request.merged == true
+    name: Deploy to EC2 on main push
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    needs: test
     runs-on: ubuntu-latest
 
     steps:
@@ -24,53 +46,70 @@ jobs:
         run: |
           chmod +x ./gradlew
           ./gradlew build -x test
+          ls -lh build/libs
 
-      - name: Copy project & Dockerfile to EC2
+      - name: Set JAR name
+        id: get_jar
+        run: |
+          JAR=build/libs/thedayoftoday-0.0.1-SNAPSHOT.jar
+          if [ ! -f "$JAR" ]; then
+            echo "JAR not found!"
+            exit 1
+          fi
+          echo "jar_name=$JAR" >> $GITHUB_OUTPUT
+
+      - name: Copy JAR & Dockerfile to EC2
         uses: appleboy/scp-action@v0.1.4
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           source: |
-            build/libs/thedayoftoday-0.0.1-SNAPSHOT.jar
+            ${{ steps.get_jar.outputs.jar_name }}
             Dockerfile
           target: ~/TheDayOfToday-BE
 
-      - name: Run Blue-Green Deployment on EC2
+      - name: Deploy on EC2 with Blue-Green Strategy
         uses: appleboy/ssh-action@v0.1.10
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
+            set -e
+
             cd ~/TheDayOfToday-BE
 
             echo "${{ secrets.APP_PROPS }}" > application.properties
-            echo "${{ secrets.JWT_PROPS }}" > application-jwt.properties
+            echo "${{ secrets.APP_JWT_PROPS }}" > application-jwt.properties
 
-            echo "🧹 기존 app_v2 컨테이너 정리 중..."
             docker stop app_v2 || true
             docker rm app_v2 || true
 
-            echo "🐳 Docker 이미지 빌드 중..."
-            docker build --no-cache -t thedayoftoday-app . 
+            docker build --no-cache -t thedayoftoday-app .
 
-            echo "🚀 새로운 app_v2 컨테이너 실행 중..."
             docker run -d --name app_v2 \
               -p 8081:8080 \
               -v $(pwd)/application.properties:/app/application.properties \
               -v $(pwd)/application-jwt.properties:/app/application-jwt.properties \
-              thedayoftoday-app || (echo '❌ 컨테이너 실행 실패!' && exit 1)
+              thedayoftoday-app
 
-            echo "🔁 Nginx 설정을 app_v2로 변경 중..."
-            sudo ln -sf /etc/nginx/sites-available/thedayoftoday-v2 /etc/nginx/sites-enabled/
+            for i in {1..15}; do
+              if docker ps | grep app_v2 > /dev/null; then
+                echo "Container started"
+                break
+              fi
+              echo "Waiting for container to start... ($i sec)"
+              sleep 1
+            done
+
+            docker ps | grep app_v2 > /dev/null || (echo "Container failed to start"; docker logs app_v2; exit 1)
+
+            sudo ln -sf /etc/nginx/sites-available/thedayoftoday-v2 /etc/nginx/sites-enabled/default
             sudo systemctl reload nginx
 
-            echo "🧼 기존 app_v1 컨테이너 정리 중..."
             docker stop app_v1 || true
             docker rm app_v1 || true
-
-            echo "🔄 app_v2 → app_v1 이름 변경 중..."
             docker rename app_v2 app_v1
 
-            echo "✅ 배포 완료!"
+            echo "Deployment complete"
