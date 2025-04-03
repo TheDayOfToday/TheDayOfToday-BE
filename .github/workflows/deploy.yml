@@ -54,7 +54,7 @@ jobs:
             cd ~/TheDayOfToday-BE
 
             echo "${{ secrets.APP_PROPS }}" > application.properties
-            echo "${{ secrets.JWT_PROPS }}" > application-jwt.properties
+            echo "${{ secrets.APP_JWT_PROPS }}" > application-jwt.properties
 
             echo "🧹 기존 app_v2 컨테이너 정리 중..."
             docker stop app_v2 || true
