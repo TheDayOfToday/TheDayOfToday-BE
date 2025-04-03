@@ -25,6 +25,9 @@ jobs:
           chmod +x ./gradlew
           ./gradlew build -x test
 
+      - name: Check built JAR file
+        run: ls -lh build/libs
+
       - name: Copy entire project to EC2
         uses: appleboy/scp-action@v0.1.4
         with:
