@@ -27,17 +27,17 @@ jobs:
 
       - name: Get built JAR file name
         id: get_jar
-        shell: bash  # 반드시 bash로 설정해야 GITHUB_OUTPUT 작동
+        shell: bash
         run: |
-          JAR_NAME=$(ls build/libs/*.jar | grep -v plain | head -n 1)
+          JAR_NAME=$(find build/libs -name "*.jar" | head -n 1)
           echo "jar_name=$JAR_NAME"
           echo "jar_name=$JAR_NAME" >> $GITHUB_OUTPUT
 
-      - name: Verify jar_name is not empty
+      - name: DEBUG: Check extracted jar_name
         run: |
-          echo "Resolved jar name: ${{ steps.get_jar.outputs.jar_name }}"
+          echo "jar_name: ${{ steps.get_jar.outputs.jar_name }}"
           if [ -z "${{ steps.get_jar.outputs.jar_name }}" ]; then
-            echo "ERROR: jar_name is empty!"
+            echo "jar_name is EMPTY! Aborting"
             exit 1
           fi
 
