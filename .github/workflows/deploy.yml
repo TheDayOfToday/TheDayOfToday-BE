@@ -43,19 +43,25 @@ jobs:
           script: |
             cd ~/TheDayOfToday-BE
 
-            # Step 1: Build new Docker image
+            echo "🧹 기존 app_v2 컨테이너 정리 중..."
+            docker stop app_v2 || true
+            docker rm app_v2 || true
+
+            echo "🐳 Docker 이미지 빌드 중..."
             docker build --no-cache -t thedayoftoday-app:latest .
 
-            # Step 2: Run new container on 8081
-            docker run -d --name app_v2 -p 8081:8080 thedayoftoday-app
+            echo "🚀 새로운 app_v2 컨테이너 실행 중..."
+            docker run -d --name app_v2 -p 8081:8080 thedayoftoday-app || (echo '❌ 컨테이너 실행 실패!' && exit 1)
 
-            # Step 3: Switch Nginx to app_v2 (8081)
+            echo "🔁 Nginx 설정을 app_v2로 변경 중..."
             sudo ln -sf /etc/nginx/sites-available/thedayoftoday-v2 /etc/nginx/sites-enabled/
             sudo systemctl reload nginx
 
-            # Step 4: Stop and remove old container
+            echo "🧼 기존 app_v1 컨테이너 정리 중..."
             docker stop app_v1 || true
             docker rm app_v1 || true
 
-            # Step 5: Rename app_v2 → app_v1 (prepare for next deploy)
+            echo "🔄 app_v2 → app_v1 이름 변경 중..."
             docker rename app_v2 app_v1
+
+            echo "✅ 배포 완료!"
