@@ -27,16 +27,23 @@ jobs:
 
       - name: Get built JAR file name
         id: get_jar
+        shell: bash
         run: |
           JAR_NAME=$(ls build/libs/*.jar | grep -v plain | head -n 1)
           echo "jar_name=$JAR_NAME"
           echo "jar_name=$JAR_NAME" >> $GITHUB_OUTPUT
 
-      - name: Confirm JAR & Dockerfile exist
+      - name: Check JAR name is not empty
         run: |
-          echo "✅ Checking files..."
-          test -f ${{ steps.get_jar.outputs.jar_name }} || (echo "❌ JAR file not found!" && exit 1)
-          test -f Dockerfile || (echo "❌ Dockerfile not found!" && exit 1)
+          if [ -z "${{ steps.get_jar.outputs.jar_name }}" ]; then
+            echo "jar_name is empty. Aborting."
+            exit 1
+          fi
+
+      - name: Check JAR and Dockerfile exist
+        run: |
+          test -f ${{ steps.get_jar.outputs.jar_name }} || (echo "JAR file not found" && exit 1)
+          test -f Dockerfile || (echo "Dockerfile not found" && exit 1)
           ls -lh ${{ steps.get_jar.outputs.jar_name }}
           ls -lh Dockerfile
 
@@ -59,39 +66,29 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             set -e
-
             cd ~/TheDayOfToday-BE
 
             echo "${{ secrets.APP_PROPS }}" > application.properties
             echo "${{ secrets.APP_JWT_PROPS }}" > application-jwt.properties
 
-            echo "🧹 기존 app_v2 컨테이너 정리 중..."
             docker stop app_v2 || true
             docker rm app_v2 || true
 
-            echo "🐳 Docker 이미지 빌드 중..."
-            docker build --no-cache -t thedayoftoday-app . || (echo "❌ Docker build failed!" && exit 1)
+            docker build --no-cache -t thedayoftoday-app . || (echo "Docker build failed" && exit 1)
 
-            echo "🚀 새로운 app_v2 컨테이너 실행 중..."
             docker run -d --name app_v2 \
               -p 8081:8080 \
               -v $(pwd)/application.properties:/app/application.properties \
               -v $(pwd)/application-jwt.properties:/app/application-jwt.properties \
-              thedayoftoday-app || (echo '❌ 컨테이너 실행 실패!' && exit 1)
+              thedayoftoday-app || (echo 'Container run failed' && exit 1)
 
-            echo "⏳ 컨테이너 상태 확인 중..."
             sleep 5
-            docker ps | grep app_v2 || (echo '❌ app_v2 컨테이너가 실행되지 않았습니다! 로그:' && docker logs app_v2 && exit 1)
+            docker ps | grep app_v2 || (echo 'app_v2 container did not start' && docker logs app_v2 && exit 1)
 
-            echo "🔁 Nginx 설정을 app_v2로 변경 중..."
             sudo ln -sf /etc/nginx/sites-available/thedayoftoday-v2 /etc/nginx/sites-enabled/default
             sudo systemctl reload nginx
 
-            echo "🧼 기존 app_v1 컨테이너 정리 중..."
             docker stop app_v1 || true
             docker rm app_v1 || true
 
-            echo "🔄 app_v2 → app_v1 이름 변경 중..."
             docker rename app_v2 app_v1
-
-            echo "✅ 배포 완료!"
