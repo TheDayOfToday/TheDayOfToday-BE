@@ -24,7 +24,9 @@ jobs:
         run: |
           chmod +x ./gradlew
           ./gradlew build -x test
-          echo "빌드된 JAR 파일 목록:"
+          echo "Checking build/libs directory..."
+          ls -l build/libs || echo "Directory build/libs does not exist!"
+          echo "Listing files in build/libs..."
           ls -lh build/libs
 
       - name: Set fixed JAR path
@@ -32,6 +34,7 @@ jobs:
         shell: bash
         run: |
           JAR=build/libs/thedayoftoday-0.0.1-SNAPSHOT.jar
+          echo "Checking if JAR exists at $JAR..."
           if [ ! -f "$JAR" ]; then
             echo "ERROR: JAR not found at $JAR"
             ls -l build/libs
@@ -42,7 +45,9 @@ jobs:
 
       - name: Check file existence
         run: |
+          echo "Checking if JAR file exists at ${{ steps.get_jar.outputs.jar_name }}..."
           ls -l ${{ steps.get_jar.outputs.jar_name }} || (echo "JAR not found" && exit 1)
+          echo "Checking if Dockerfile exists..."
           ls -l Dockerfile || (echo "Dockerfile not found" && exit 1)
 
       - name: Copy JAR & Dockerfile to EC2
@@ -64,16 +69,21 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             set -e
+            echo "Starting Blue-Green Deployment on EC2..."
+
             cd ~/TheDayOfToday-BE
 
             echo "${{ secrets.APP_PROPS }}" > application.properties
             echo "${{ secrets.APP_JWT_PROPS }}" > application-jwt.properties
 
+            echo "Stopping and removing existing app_v2 container..."
             docker stop app_v2 || true
             docker rm app_v2 || true
 
+            echo "Building new Docker image..."
             docker build --no-cache -t thedayoftoday-app .
 
+            echo "Starting app_v2 container..."
             nohup docker run -d --name app_v2 \
               -p 8081:8080 \
               -v $(pwd)/application.properties:/app/application.properties \
@@ -83,10 +93,15 @@ jobs:
             sleep 5
             docker ps | grep app_v2 || (docker logs app_v2 && exit 1)
 
+            echo "Switching Nginx to point to app_v2..."
             sudo ln -sf /etc/nginx/sites-available/thedayoftoday-v2 /etc/nginx/sites-enabled/default
             sudo systemctl reload nginx
 
+            echo "Cleaning up old app_v1 container..."
             docker stop app_v1 || true
             docker rm app_v1 || true
 
+            echo "Renaming app_v2 to app_v1..."
             docker rename app_v2 app_v1
+
+            echo "Deployment complete!"
