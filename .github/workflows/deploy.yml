@@ -24,31 +24,17 @@ jobs:
         run: |
           chmod +x ./gradlew
           ./gradlew build -x test
-          echo "Checking build/libs directory..."
-          ls -l build/libs || echo "Directory build/libs does not exist!"
-          echo "Listing files in build/libs..."
           ls -lh build/libs
 
-      - name: Set fixed JAR path
+      - name: Set JAR name
         id: get_jar
-        shell: bash
         run: |
           JAR=build/libs/thedayoftoday-0.0.1-SNAPSHOT.jar
-          echo "Checking if JAR exists at $JAR..."
           if [ ! -f "$JAR" ]; then
-            echo "ERROR: JAR not found at $JAR"
-            ls -l build/libs
+            echo "JAR not found!"
             exit 1
           fi
-          echo "jar_name=$JAR"
           echo "jar_name=$JAR" >> $GITHUB_OUTPUT
-
-      - name: Check file existence
-        run: |
-          echo "Checking if JAR file exists at ${{ steps.get_jar.outputs.jar_name }}..."
-          ls -l ${{ steps.get_jar.outputs.jar_name }} || (echo "JAR not found" && exit 1)
-          echo "Checking if Dockerfile exists..."
-          ls -l Dockerfile || (echo "Dockerfile not found" && exit 1)
 
       - name: Copy JAR & Dockerfile to EC2
         uses: appleboy/scp-action@v0.1.4
@@ -56,10 +42,12 @@ jobs:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
-          source: "build/libs/thedayoftoday-0.0.1-SNAPSHOT.jar,Dockerfile"
+          source: |
+            ${{ steps.get_jar.outputs.jar_name }}
+            Dockerfile
           target: ~/TheDayOfToday-BE
 
-      - name: Run Blue-Green Deployment on EC2
+      - name: Deploy on EC2 with Blue-Green Strategy
         uses: appleboy/ssh-action@v0.1.10
         with:
           host: ${{ secrets.EC2_HOST }}
@@ -67,39 +55,39 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             set -e
-            echo "Starting Blue-Green Deployment on EC2..."
 
             cd ~/TheDayOfToday-BE
 
             echo "${{ secrets.APP_PROPS }}" > application.properties
             echo "${{ secrets.APP_JWT_PROPS }}" > application-jwt.properties
 
-            echo "Stopping and removing existing app_v2 container..."
             docker stop app_v2 || true
             docker rm app_v2 || true
 
-            echo "Building new Docker image..."
             docker build --no-cache -t thedayoftoday-app .
 
-            echo "Starting app_v2 container..."
-            nohup docker run -d --name app_v2 \
+            docker run -d --name app_v2 \
               -p 8081:8080 \
               -v $(pwd)/application.properties:/app/application.properties \
               -v $(pwd)/application-jwt.properties:/app/application-jwt.properties \
-              thedayoftoday-app > app.log 2>&1 &
+              thedayoftoday-app
 
-            sleep 5
-            docker ps | grep app_v2 || (docker logs app_v2 && exit 1)
+            for i in {1..15}; do
+              if docker ps | grep app_v2 > /dev/null; then
+                echo "Container started"
+                break
+              fi
+              echo "Waiting for container to start... ($i sec)"
+              sleep 1
+            done
 
-            echo "Switching Nginx to point to app_v2..."
+            docker ps | grep app_v2 > /dev/null || (echo "Container failed to start"; docker logs app_v2; exit 1)
+
             sudo ln -sf /etc/nginx/sites-available/thedayoftoday-v2 /etc/nginx/sites-enabled/default
             sudo systemctl reload nginx
 
-            echo "Cleaning up old app_v1 container..."
             docker stop app_v1 || true
             docker rm app_v1 || true
-
-            echo "Renaming app_v2 to app_v1..."
             docker rename app_v2 app_v1
 
-            echo "Deployment complete!"
+            echo "Deployment complete"
