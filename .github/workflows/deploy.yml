@@ -24,22 +24,21 @@ jobs:
         run: |
           chmod +x ./gradlew
           ./gradlew build -x test
+          echo "빌드된 JAR 파일 목록:"
+          ls -lh build/libs
 
-      - name: Get built JAR file name
+      - name: Set fixed JAR path
         id: get_jar
-        shell: bash  # 반드시 bash로 설정해야 GITHUB_OUTPUT 작동
+        shell: bash
         run: |
-          JAR_NAME=$(ls build/libs/*.jar | grep -v plain | head -n 1)
-          echo "jar_name=$JAR_NAME"
-          echo "jar_name=$JAR_NAME" >> $GITHUB_OUTPUT
-
-      - name: Verify jar_name is not empty
-        run: |
-          echo "Resolved jar name: ${{ steps.get_jar.outputs.jar_name }}"
-          if [ -z "${{ steps.get_jar.outputs.jar_name }}" ]; then
-            echo "ERROR: jar_name is empty!"
+          JAR=build/libs/thedayoftoday-0.0.1-SNAPSHOT.jar
+          if [ ! -f "$JAR" ]; then
+            echo "ERROR: JAR not found at $JAR"
+            ls -l build/libs
             exit 1
           fi
+          echo "jar_name=$JAR"
+          echo "jar_name=$JAR" >> $GITHUB_OUTPUT
 
       - name: Check file existence
         run: |
@@ -75,11 +74,11 @@ jobs:
 
             docker build --no-cache -t thedayoftoday-app .
 
-            docker run -d --name app_v2 \
+            nohup docker run -d --name app_v2 \
               -p 8081:8080 \
               -v $(pwd)/application.properties:/app/application.properties \
               -v $(pwd)/application-jwt.properties:/app/application-jwt.properties \
-              thedayoftoday-app
+              thedayoftoday-app > app.log 2>&1 &
 
             sleep 5
             docker ps | grep app_v2 || (docker logs app_v2 && exit 1)
