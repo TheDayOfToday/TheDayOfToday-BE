@@ -1,7 +1,6 @@
 name: Deploy to EC2
 
 on:
-  workflow_dispatch:  # 수동 실행 허용
   pull_request:
     types: [closed]
     branches: [main]
@@ -32,7 +31,6 @@ jobs:
         id: jar
         run: |
           echo "JAR_NAME=$(ls build/libs/*.jar | grep -v plain | head -n 1)" >> $GITHUB_ENV
-
       - name: Copy project & Dockerfile to EC2
         uses: appleboy/scp-action@v0.1.4
         with:
