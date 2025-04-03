@@ -27,25 +27,24 @@ jobs:
 
       - name: Get built JAR file name
         id: get_jar
-        shell: bash
+        shell: bash  # 반드시 bash로 설정해야 GITHUB_OUTPUT 작동
         run: |
           JAR_NAME=$(ls build/libs/*.jar | grep -v plain | head -n 1)
           echo "jar_name=$JAR_NAME"
           echo "jar_name=$JAR_NAME" >> $GITHUB_OUTPUT
 
-      - name: Check JAR name is not empty
+      - name: Verify jar_name is not empty
         run: |
+          echo "Resolved jar name: ${{ steps.get_jar.outputs.jar_name }}"
           if [ -z "${{ steps.get_jar.outputs.jar_name }}" ]; then
-            echo "jar_name is empty. Aborting."
+            echo "ERROR: jar_name is empty!"
             exit 1
           fi
 
-      - name: Check JAR and Dockerfile exist
+      - name: Check file existence
         run: |
-          test -f ${{ steps.get_jar.outputs.jar_name }} || (echo "JAR file not found" && exit 1)
-          test -f Dockerfile || (echo "Dockerfile not found" && exit 1)
-          ls -lh ${{ steps.get_jar.outputs.jar_name }}
-          ls -lh Dockerfile
+          ls -l ${{ steps.get_jar.outputs.jar_name }} || (echo "JAR not found" && exit 1)
+          ls -l Dockerfile || (echo "Dockerfile not found" && exit 1)
 
       - name: Copy JAR & Dockerfile to EC2
         uses: appleboy/scp-action@v0.1.4
@@ -74,16 +73,16 @@ jobs:
             docker stop app_v2 || true
             docker rm app_v2 || true
 
-            docker build --no-cache -t thedayoftoday-app . || (echo "Docker build failed" && exit 1)
+            docker build --no-cache -t thedayoftoday-app .
 
             docker run -d --name app_v2 \
               -p 8081:8080 \
               -v $(pwd)/application.properties:/app/application.properties \
               -v $(pwd)/application-jwt.properties:/app/application-jwt.properties \
-              thedayoftoday-app || (echo 'Container run failed' && exit 1)
+              thedayoftoday-app
 
             sleep 5
-            docker ps | grep app_v2 || (echo 'app_v2 container did not start' && docker logs app_v2 && exit 1)
+            docker ps | grep app_v2 || (docker logs app_v2 && exit 1)
 
             sudo ln -sf /etc/nginx/sites-available/thedayoftoday-v2 /etc/nginx/sites-enabled/default
             sudo systemctl reload nginx
