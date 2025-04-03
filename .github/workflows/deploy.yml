@@ -1,13 +1,14 @@
 name: Deploy to EC2
 
 on:
+  workflow_dispatch: # 수동 실행 가능
   pull_request:
     types: [closed]
     branches: [main]
 
 jobs:
   deploy:
-    if: github.event.pull_request.merged == true
+    if: github.event.pull_request.merged == true || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
 
     steps:
@@ -25,19 +26,14 @@ jobs:
           chmod +x ./gradlew
           ./gradlew build -x test
 
-      - name: Get built JAR file name
-        id: get_jar
-        run: |
-          echo "JAR_NAME=$(ls build/libs/*.jar | grep -v plain | head -n 1)" >> $GITHUB_ENV
-
-      - name: Copy project & Dockerfile to EC2
+      - name: Copy JAR & Dockerfile to EC2
         uses: appleboy/scp-action@v0.1.4
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           source: |
-            ${{ env.JAR_NAME }}
+            build/libs/thedayoftoday-0.0.1-SNAPSHOT.jar
             Dockerfile
           target: ~/TheDayOfToday-BE
 
@@ -60,22 +56,19 @@ jobs:
             echo "🐳 Docker 이미지 빌드 중..."
             docker build --no-cache -t thedayoftoday-app .
 
-            echo "🚀 새로운 app_v2 컨테이너 실행 중..."
+            echo "🚀 app_v2 컨테이너 실행 중..."
             docker run -d --name app_v2 \
               -p 8081:8080 \
               -v $(pwd)/application.properties:/app/application.properties \
               -v $(pwd)/application-jwt.properties:/app/application-jwt.properties \
               thedayoftoday-app
 
-            echo "⏳ 애플리케이션 준비 대기 중..."
-            for i in {1..10}; do
-              curl -f http://localhost:8081 && break
-              echo "대기 중... ($i)"
-              sleep 3
-            done
+            echo "⏳ 컨테이너 상태 확인 중..."
+            sleep 10
+            docker ps | grep app_v2 || (echo '❌ app_v2 실행 실패! 로그 출력:' && docker logs app_v2 && exit 1)
 
-            echo "🔁 Nginx 설정을 app_v2로 변경 중..."
-            sudo ln -sf /etc/nginx/sites-available/thedayoftoday-v2 /etc/nginx/sites-enabled/
+            echo "🔁 Nginx 프록시 설정 app_v2로 변경 중..."
+            sudo ln -sf /etc/nginx/sites-available/thedayoftoday-v2 /etc/nginx/sites-enabled/default
             sudo systemctl reload nginx
 
             echo "🧼 기존 app_v1 컨테이너 정리 중..."
