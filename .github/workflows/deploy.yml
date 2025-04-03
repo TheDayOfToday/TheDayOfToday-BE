@@ -25,21 +25,18 @@ jobs:
           chmod +x ./gradlew
           ./gradlew build -x test
 
-      - name: Get built JAR file name
+      - name: Set fixed JAR path
         id: get_jar
         shell: bash
         run: |
-          JAR_NAME=$(find build/libs -name "*.jar" | head -n 1)
-          echo "jar_name=$JAR_NAME"
-          echo "jar_name=$JAR_NAME" >> $GITHUB_OUTPUT
-
-      - name: DEBUG: Check extracted jar_name
-        run: |
-          echo "jar_name: ${{ steps.get_jar.outputs.jar_name }}"
-          if [ -z "${{ steps.get_jar.outputs.jar_name }}" ]; then
-            echo "jar_name is EMPTY! Aborting"
+          JAR=build/libs/thedayoftoday-0.0.1-SNAPSHOT.jar
+          if [ ! -f "$JAR" ]; then
+            echo "ERROR: JAR not found at $JAR"
+            ls -l build/libs
             exit 1
           fi
+          echo "jar_name=$JAR"
+          echo "jar_name=$JAR" >> $GITHUB_OUTPUT
 
       - name: Check file existence
         run: |
