@@ -1,7 +1,9 @@
 package com.example.thedayoftoday.app;
 
 import com.example.thedayoftoday.domain.dto.WeeklyAnalysisResponseDto;
+import com.example.thedayoftoday.domain.security.CustomUserDetails;
 import com.example.thedayoftoday.domain.service.WeeklyAnalysisService;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -14,8 +16,10 @@ public class WeeklyAnalysisController {
     }
 
     @GetMapping("/{year}/{month}/{week}")
-    public WeeklyAnalysisResponseDto getWeeklyAnalysis(
-            @PathVariable int year, @PathVariable int month, @PathVariable int week) {
-        return weeklyAnalysisService.getWeeklyAnalysis(year, month, week);
+    public WeeklyAnalysisResponseDto getWeeklyAnalysis(@AuthenticationPrincipal CustomUserDetails userDetails,
+                                                       @PathVariable int year, @PathVariable int month,
+                                                       @PathVariable int week) {
+        Long userId = userDetails.getUserId();
+        return weeklyAnalysisService.getWeeklyAnalysis(userId, year, month, week);
     }
 }

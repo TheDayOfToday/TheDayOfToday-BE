@@ -9,7 +9,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.temporal.WeekFields;
-import java.util.Calendar;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
@@ -25,7 +24,37 @@ public class WeeklyAnalysisService {
         this.diaryRepository = diaryRepository;
     }
 
-    public WeeklyAnalysisResponseDto getWeeklyAnalysis(int year, int month, int week) {
+    public LocalDate[] calculateStartAndEndDate(int year, int month, int week) {
+        WeekFields weekFields = WeekFields.ISO;
+        LocalDate baseDate = LocalDate.of(year, month, 1);
+        LocalDate firstMonday = baseDate.with(weekFields.dayOfWeek(), 1);
+        LocalDate startDate = firstMonday.plusWeeks(week - 1);
+        LocalDate endDate = startDate.plusDays(6);
+        return new LocalDate[]{startDate, endDate};
+    }
+
+
+    public WeeklyAnalysisResponseDto getWeeklyAnalysis(Long userId, int year, int month, int week) {
+        LocalDate[] weekRange = calculateStartAndEndDate(year, month, week);
+        LocalDate startDate = weekRange[0];
+        LocalDate endDate = weekRange[1];
+
+        WeeklyData targetWeekData = weeklyDataRepository
+                .findByUser_UserIdAndStartDateLessThanEqualAndEndDateGreaterThanEqual(userId, endDate, startDate)
+                .orElse(null);
+
+        return (targetWeekData != null)
+                ? new WeeklyAnalysisResponseDto(
+                year, month, week,
+                targetWeekData.getTitle(),
+                targetWeekData.getDegree(),
+                targetWeekData.getFeedback(),
+                targetWeekData.getStartDate(),
+                targetWeekData.getEndDate())
+                : WeeklyAnalysisResponseDto.noData(year, month, week);
+    }
+
+  /*  public WeeklyAnalysisResponseDto getWeeklyAnalysis(int year, int month, int week) {
         List<WeeklyData> weeklyDataList = weeklyDataRepository.findAll();
 
         WeeklyData targetWeekData = weeklyDataList.stream()
@@ -45,6 +74,7 @@ public class WeeklyAnalysisService {
     }
 
     private boolean isMatchingWeek(WeeklyData data, int year, int month, int week) {
+
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(java.sql.Date.valueOf(data.getStartDate()));
         int dataYear = calendar.get(Calendar.YEAR);
@@ -52,25 +82,16 @@ public class WeeklyAnalysisService {
         int dataWeek = calendar.get(Calendar.WEEK_OF_MONTH);
 
         return dataYear == year && dataMonth == month && dataWeek == week;
-    }
+    }*/
 
-    public List<Diary> getWeeklyDiary(long userId, int year, int month, int week) {
-
-        WeekFields weekFields = WeekFields.ISO; //월요일 기준으로 잡음
-
-        LocalDate baseDate = LocalDate.of(year, month, 1);
-
-        LocalDate startOfWeek = baseDate
-                .with(weekFields.weekOfMonth(), week)
-                .with(weekFields.dayOfWeek(), 1); // ISO 기준: 1은 월요일
-
-        LocalDate endOfWeek = startOfWeek.plusDays(6);
-
-        LocalDateTime startDateTime = startOfWeek.atStartOfDay();
-        LocalDateTime endDateTime = endOfWeek.atTime(LocalTime.MAX);
+    public List<Diary> extractedWeeklyDiaryData(long userId, int year, int month, int week) {
+        LocalDate[] weekRange = calculateStartAndEndDate(year, month, week);
+        LocalDateTime startDateTime = weekRange[0].atStartOfDay();
+        LocalDateTime endDateTime = weekRange[1].atTime(LocalTime.MAX);
 
         return diaryRepository.findByUser_UserIdAndCreateTimeBetween(userId, startDateTime, endDateTime);
     }
+
     //만약 2.1(수) 이렇게 되어있으면 1월 마지막주, 2월 첫째주 다 들어감
 
     public String combineWeeklyDiary(List<Diary> diaries) {
@@ -81,5 +102,4 @@ public class WeeklyAnalysisService {
                 })
                 .collect(Collectors.joining("\n\n"));
     }
-
 }
