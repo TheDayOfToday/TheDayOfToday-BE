@@ -37,19 +37,16 @@ public class WeeklySummaryScheduler {
             int month = now.getMonthValue();
             int week = now.get(weekFields.weekOfMonth());
 
-            List<Diary> diaries = weeklyAnalysisService.getWeeklyDiary(user.getUserId(), year, month, week);
-            String combined = weeklyAnalysisService.combineWeeklyDiary(diaries);
+            LocalDate[] weekRange = weeklyAnalysisService.calculateStartAndEndDate(year, month, week);
+            LocalDate startDate = weekRange[0];
+            LocalDate endDate = weekRange[1];
 
+            List<Diary> diaries = weeklyAnalysisService.extractedWeeklyDiaryData(user.getUserId(), year, month, week);
+            String combined = weeklyAnalysisService.combineWeeklyDiary(diaries);
             if (combined.isBlank()) continue;
 
             WeeklyTitleFeedbackResponseDto feedbackDto = aiService.analyzeWeeklyDiaryWithTitle(combined);
             Degree degree = aiService.analyzeDegree(combined);
-
-            LocalDate baseDate = now.withDayOfMonth(1);
-            LocalDate startDate = baseDate
-                    .with(weekFields.weekOfMonth(), week)
-                    .with(weekFields.dayOfWeek(), 1);
-            LocalDate endDate = startDate.plusDays(6);
 
             WeeklyData weeklyData = WeeklyData.builder()
                     .user(user)
