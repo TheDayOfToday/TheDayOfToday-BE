@@ -24,6 +24,8 @@ jobs:
         run: |
           chmod +x ./gradlew
           ./gradlew build -x test
+          echo "빌드된 JAR 파일 목록:"
+          ls -lh build/libs
 
       - name: Set fixed JAR path
         id: get_jar
@@ -72,11 +74,11 @@ jobs:
 
             docker build --no-cache -t thedayoftoday-app .
 
-            docker run -d --name app_v2 \
+            nohup docker run -d --name app_v2 \
               -p 8081:8080 \
               -v $(pwd)/application.properties:/app/application.properties \
               -v $(pwd)/application-jwt.properties:/app/application-jwt.properties \
-              thedayoftoday-app
+              thedayoftoday-app > app.log 2>&1 &
 
             sleep 5
             docker ps | grep app_v2 || (docker logs app_v2 && exit 1)
