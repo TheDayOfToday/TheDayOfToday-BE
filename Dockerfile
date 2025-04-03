@@ -1,6 +1,6 @@
 FROM eclipse-temurin:21-jdk
 WORKDIR /app
-COPY build/libs/thedayoftoday-0.0.1-SNAPSHOT.jar app.jar
+COPY build/libs/*.jar app.jar
 COPY src/main/resources/application.properties /app/application.properties
 COPY src/main/resources/application-jwt.properties /app/application-jwt.properties
 EXPOSE 8080
