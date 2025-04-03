@@ -25,14 +25,20 @@ jobs:
           chmod +x ./gradlew
           ./gradlew build -x test
 
-      - name: Check built files
-        run: ls -lh build/libs
-
       - name: Get built JAR file name
         id: get_jar
         run: |
           JAR_NAME=$(ls build/libs/*.jar | grep -v plain | head -n 1)
+          echo "jar_name=$JAR_NAME"
           echo "jar_name=$JAR_NAME" >> $GITHUB_OUTPUT
+
+      - name: Confirm JAR & Dockerfile exist
+        run: |
+          echo "✅ Checking files..."
+          test -f ${{ steps.get_jar.outputs.jar_name }} || (echo "❌ JAR file not found!" && exit 1)
+          test -f Dockerfile || (echo "❌ Dockerfile not found!" && exit 1)
+          ls -lh ${{ steps.get_jar.outputs.jar_name }}
+          ls -lh Dockerfile
 
       - name: Copy JAR & Dockerfile to EC2
         uses: appleboy/scp-action@v0.1.4
@@ -52,7 +58,10 @@ jobs:
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
+            set -e
+
             cd ~/TheDayOfToday-BE
+
             echo "${{ secrets.APP_PROPS }}" > application.properties
             echo "${{ secrets.APP_JWT_PROPS }}" > application-jwt.properties
 
@@ -68,8 +77,9 @@ jobs:
               -p 8081:8080 \
               -v $(pwd)/application.properties:/app/application.properties \
               -v $(pwd)/application-jwt.properties:/app/application-jwt.properties \
-              thedayoftoday-app
+              thedayoftoday-app || (echo '❌ 컨테이너 실행 실패!' && exit 1)
 
+            echo "⏳ 컨테이너 상태 확인 중..."
             sleep 5
             docker ps | grep app_v2 || (echo '❌ app_v2 컨테이너가 실행되지 않았습니다! 로그:' && docker logs app_v2 && exit 1)
 
