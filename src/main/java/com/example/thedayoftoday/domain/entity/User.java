@@ -7,16 +7,16 @@ import lombok.*;
 import java.util.ArrayList;
 import java.util.List;
 
-@Builder
 @Entity
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 @Setter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor
+@Builder
 public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "user_id")
     private Long userId;
 
     private String name;
@@ -38,27 +38,6 @@ public class User {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @Builder.Default
     private List<WeeklyData> weeklyDataList = new ArrayList<>();
-
-    @Builder
-    public User(
-            String name,
-            String email,
-            String password,
-            String phoneNumber,
-            RoleType role,
-            List<Diary> diaries,
-            List<Notice> notices,
-            List<WeeklyData> weeklyDataList
-    ) {
-        this.name = name;
-        this.email = email;
-        this.password = password;
-        this.phoneNumber = phoneNumber;
-        this.role = role;
-        this.diaries = diaries;
-        this.notices = notices;
-        this.weeklyDataList = weeklyDataList;
-    }
 
     public void addDiary(Diary diary) {
         diaries.add(diary);

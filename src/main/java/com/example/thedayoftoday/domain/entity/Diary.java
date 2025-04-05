@@ -11,17 +11,19 @@ import lombok.*;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Builder(toBuilder = true)
 @AllArgsConstructor
+@Builder(toBuilder = true)
 public class Diary {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long diaryId;
+
     private String title;
 
     @Lob
     private String content;
+
     private LocalDateTime createTime;
 
     @Embedded
@@ -38,28 +40,9 @@ public class Diary {
     @Builder.Default
     private List<Conversation> conversations = new ArrayList<>();
 
-    @Builder
-    public Diary(String title,
-                 String content,
-                 LocalDateTime createTime,
-                 DiaryMood diaryMood,
-                 User user,
-                 String analysisContent) {
-        this.title = title;
-        this.content = content;
-        this.createTime = createTime;
-        this.diaryMood = diaryMood;
-        this.user = user;
-        this.analysisContent = analysisContent;
-    }
-
     public void addAnalysisContent(String analysisContent) {
         this.analysisContent = analysisContent;
     }
-
-//    public void addSentimentAnalysis(SentimentalAnalysis sentimentAnalysis) {
-//        this.sentimentAnalysis = sentimentAnalysis;
-//    }
 
     public void updateDiary(String title, String content) {
         this.title = title;
