@@ -1,6 +1,6 @@
 package com.example.thedayoftoday.domain.scheduler;
 
-import com.example.thedayoftoday.domain.dto.WeeklyTitleFeedbackResponseDto;
+import com.example.thedayoftoday.domain.dto.week.WeeklyTitleFeedbackResponseDto;
 import com.example.thedayoftoday.domain.entity.Diary;
 import com.example.thedayoftoday.domain.entity.User;
 import com.example.thedayoftoday.domain.entity.WeeklyData;

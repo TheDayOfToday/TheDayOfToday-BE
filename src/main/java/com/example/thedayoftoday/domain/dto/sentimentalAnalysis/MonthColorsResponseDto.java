@@ -1,4 +1,4 @@
-package com.example.thedayoftoday.domain.dto;
+package com.example.thedayoftoday.domain.dto.sentimentalAnalysis;
 
 import java.util.Map;
 

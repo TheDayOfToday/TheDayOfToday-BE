@@ -2,12 +2,12 @@ package com.example.thedayoftoday.domain.service;
 
 import static com.example.thedayoftoday.domain.entity.enumType.MoodMeter.fromMoodName;
 
-import com.example.thedayoftoday.domain.dto.MoodCategoryResponse;
-import com.example.thedayoftoday.domain.dto.MoodDetailsDto;
-import com.example.thedayoftoday.domain.dto.MoodMeterCategoryDto;
-import com.example.thedayoftoday.domain.dto.SentimentalAnalysisRequestDto;
-import com.example.thedayoftoday.domain.dto.SentimentalAnalysisResponseDto;
-import com.example.thedayoftoday.domain.dto.UnknownMoodCategoryDto;
+import com.example.thedayoftoday.domain.dto.sentimentalAnalysis.MoodCategoryResponse;
+import com.example.thedayoftoday.domain.dto.sentimentalAnalysis.MoodDetailsDto;
+import com.example.thedayoftoday.domain.dto.sentimentalAnalysis.MoodMeterCategoryDto;
+import com.example.thedayoftoday.domain.dto.sentimentalAnalysis.SentimentalAnalysisRequestDto;
+import com.example.thedayoftoday.domain.dto.sentimentalAnalysis.SentimentalAnalysisResponseDto;
+import com.example.thedayoftoday.domain.dto.sentimentalAnalysis.UnknownMoodCategoryDto;
 import com.example.thedayoftoday.domain.entity.Diary;
 import com.example.thedayoftoday.domain.entity.DiaryMood;
 import com.example.thedayoftoday.domain.entity.enumType.Degree;

@@ -1,7 +1,7 @@
 package com.example.thedayoftoday.domain.service;
 
-import com.example.thedayoftoday.domain.dto.DiaryBasicResponseDto;
-import com.example.thedayoftoday.domain.dto.WeeklyTitleFeedbackResponseDto;
+import com.example.thedayoftoday.domain.dto.diary.DiaryBasicResponseDto;
+import com.example.thedayoftoday.domain.dto.week.WeeklyTitleFeedbackResponseDto;
 import com.example.thedayoftoday.domain.entity.Diary;
 import com.example.thedayoftoday.domain.entity.DiaryMood;
 import com.example.thedayoftoday.domain.entity.enumType.Degree;

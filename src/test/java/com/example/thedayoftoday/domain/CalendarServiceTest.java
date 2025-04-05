@@ -1,6 +1,9 @@
 package com.example.thedayoftoday.domain;
 
-import com.example.thedayoftoday.domain.dto.*;
+import com.example.thedayoftoday.domain.dto.diary.DiaryEntryResponseDto;
+import com.example.thedayoftoday.domain.dto.sentimentalAnalysis.MonthColorsResponseDto;
+import com.example.thedayoftoday.domain.dto.sentimentalAnalysis.SentimentalAnalysisListResponseDto;
+import com.example.thedayoftoday.domain.dto.sentimentalAnalysis.SentimentalAnalysisResultDto;
 import com.example.thedayoftoday.domain.entity.Diary;
 import com.example.thedayoftoday.domain.entity.DiaryMood;
 import com.example.thedayoftoday.domain.repository.DiaryRepository;
