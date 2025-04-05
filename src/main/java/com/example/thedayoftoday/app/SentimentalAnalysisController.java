@@ -1,6 +1,6 @@
 package com.example.thedayoftoday.app;
 
-import com.example.thedayoftoday.domain.dto.MoodCategoryResponse;
+import com.example.thedayoftoday.domain.dto.diary.moodmeter.MoodCategoryResponse;
 import com.example.thedayoftoday.domain.dto.calendar.SentimentalAnalysisRequestDto;
 import com.example.thedayoftoday.domain.dto.calendar.SentimentalAnalysisResponseDto;
 import com.example.thedayoftoday.domain.service.SentimentalAnalysisService;

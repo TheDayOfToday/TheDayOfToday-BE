@@ -2,7 +2,7 @@ package com.example.thedayoftoday.domain;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
-import com.example.thedayoftoday.domain.dto.login.SignupRequestDto;
+import com.example.thedayoftoday.domain.dto.login.signup.SignupRequestDto;
 import com.example.thedayoftoday.domain.entity.User;
 import com.example.thedayoftoday.domain.repository.UserRepository;
 import com.example.thedayoftoday.domain.service.UserService;

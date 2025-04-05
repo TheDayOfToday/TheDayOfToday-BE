@@ -2,9 +2,9 @@ package com.example.thedayoftoday.domain.service;
 
 import static com.example.thedayoftoday.domain.entity.enumType.MoodMeter.fromMoodName;
 
-import com.example.thedayoftoday.domain.dto.MoodCategoryResponse;
-import com.example.thedayoftoday.domain.dto.MoodDetailsDto;
-import com.example.thedayoftoday.domain.dto.MoodMeterCategoryDto;
+import com.example.thedayoftoday.domain.dto.diary.moodmeter.MoodCategoryResponse;
+import com.example.thedayoftoday.domain.dto.diary.moodmeter.MoodDetailsDto;
+import com.example.thedayoftoday.domain.dto.diary.moodmeter.MoodMeterCategoryDto;
 import com.example.thedayoftoday.domain.dto.calendar.SentimentalAnalysisRequestDto;
 import com.example.thedayoftoday.domain.dto.calendar.SentimentalAnalysisResponseDto;
 import com.example.thedayoftoday.domain.entity.Diary;

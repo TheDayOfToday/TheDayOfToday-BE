@@ -2,7 +2,7 @@ package com.example.thedayoftoday.app;
 
 import com.example.thedayoftoday.domain.dto.diary.DiaryBasicResponseDto;
 import com.example.thedayoftoday.domain.dto.diary.DiaryRequestDto;
-import com.example.thedayoftoday.domain.dto.conversation.ConversationResponseDto;
+import com.example.thedayoftoday.domain.dto.diary.conversation.ConversationResponseDto;
 import com.example.thedayoftoday.domain.entity.DiaryMood;
 import com.example.thedayoftoday.domain.security.CustomUserDetails;
 import com.example.thedayoftoday.domain.service.AiService;
