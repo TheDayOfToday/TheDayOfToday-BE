@@ -90,3 +90,16 @@ jobs:
             echo "Renaming app_v2 to app_v1..."
             docker rename app_v2 app_v1
             echo "Deployment complete!"
+
+      - name: Notify Discord of Deployment Result
+        if: always()
+        run: |
+          STATUS="✅ 배포 성공"
+          if [ "${{ job.status }}" != "success" ]; then
+            STATUS="❌ 배포 실패"
+          fi
+
+          curl -H "Content-Type: application/json" \
+               -X POST \
+               -d "{\"username\": \"GitHub Actions\", \"content\": \"🚀 PR 머지 후 배포 완료 - $STATUS\n🔗 [PR 링크](${{ github.event.pull_request.html_url }})\"}" \
+               ${{ secrets.DISCORD_WEBHOOK_URL }}
