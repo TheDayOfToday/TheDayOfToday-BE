@@ -5,8 +5,8 @@ import static com.example.thedayoftoday.domain.entity.enumType.MoodMeter.fromMoo
 import com.example.thedayoftoday.domain.dto.MoodCategoryResponse;
 import com.example.thedayoftoday.domain.dto.MoodDetailsDto;
 import com.example.thedayoftoday.domain.dto.MoodMeterCategoryDto;
-import com.example.thedayoftoday.domain.dto.SentimentalAnalysisRequestDto;
-import com.example.thedayoftoday.domain.dto.SentimentalAnalysisResponseDto;
+import com.example.thedayoftoday.domain.dto.calendar.SentimentalAnalysisRequestDto;
+import com.example.thedayoftoday.domain.dto.calendar.SentimentalAnalysisResponseDto;
 import com.example.thedayoftoday.domain.entity.Diary;
 import com.example.thedayoftoday.domain.entity.DiaryMood;
 import com.example.thedayoftoday.domain.entity.enumType.Degree;

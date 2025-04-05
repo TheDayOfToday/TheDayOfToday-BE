@@ -1,6 +1,6 @@
 package com.example.thedayoftoday.domain.service;
 
-import com.example.thedayoftoday.domain.dto.WeeklyAnalysisResponseDto;
+import com.example.thedayoftoday.domain.dto.weeklyAnalysis.WeeklyAnalysisResponseDto;
 import com.example.thedayoftoday.domain.entity.Diary;
 import com.example.thedayoftoday.domain.entity.WeeklyData;
 import com.example.thedayoftoday.domain.repository.DiaryRepository;

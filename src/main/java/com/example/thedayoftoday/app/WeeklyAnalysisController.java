@@ -1,6 +1,6 @@
 package com.example.thedayoftoday.app;
 
-import com.example.thedayoftoday.domain.dto.WeeklyAnalysisResponseDto;
+import com.example.thedayoftoday.domain.dto.weeklyAnalysis.WeeklyAnalysisResponseDto;
 import com.example.thedayoftoday.domain.security.CustomUserDetails;
 import com.example.thedayoftoday.domain.service.WeeklyAnalysisService;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;

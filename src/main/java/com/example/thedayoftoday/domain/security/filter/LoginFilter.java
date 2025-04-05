@@ -1,6 +1,6 @@
 package com.example.thedayoftoday.domain.security.filter;
 
-import com.example.thedayoftoday.domain.dto.LoginRequestDto;
+import com.example.thedayoftoday.domain.dto.login.LoginRequestDto;
 import com.example.thedayoftoday.domain.security.entity.RefreshEntity;
 import com.example.thedayoftoday.domain.security.repository.RefreshRepository;
 import com.example.thedayoftoday.domain.security.util.JWTUtil;

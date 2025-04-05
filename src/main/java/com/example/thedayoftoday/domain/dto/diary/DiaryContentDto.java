@@ -1,4 +1,4 @@
-package com.example.thedayoftoday.domain.dto;
+package com.example.thedayoftoday.domain.dto.diary;
 
 public record DiaryContentDto(
         String title,
