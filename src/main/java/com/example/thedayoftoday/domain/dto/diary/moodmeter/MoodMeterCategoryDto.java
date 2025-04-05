@@ -1,4 +1,4 @@
-package com.example.thedayoftoday.domain.dto;
+package com.example.thedayoftoday.domain.dto.diary.moodmeter;
 
 import java.util.List;
 

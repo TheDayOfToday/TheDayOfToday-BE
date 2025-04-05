@@ -1,6 +1,6 @@
 package com.example.thedayoftoday.domain.service;
 
-import com.example.thedayoftoday.domain.dto.WeeklyAnalysisResponseDto;
+import com.example.thedayoftoday.domain.dto.weeklyAnalysis.WeeklyAnalysisResponseDto;
 import com.example.thedayoftoday.domain.entity.WeeklyData;
 import com.example.thedayoftoday.domain.repository.WeeklyDataRepository;
 import java.time.temporal.WeekFields;
@@ -12,7 +12,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
-import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;

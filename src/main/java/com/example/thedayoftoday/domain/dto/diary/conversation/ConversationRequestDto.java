@@ -1,4 +1,4 @@
-package com.example.thedayoftoday.domain.dto.conversation;
+package com.example.thedayoftoday.domain.dto.diary.conversation;
 
 import org.springframework.web.multipart.MultipartFile;
 

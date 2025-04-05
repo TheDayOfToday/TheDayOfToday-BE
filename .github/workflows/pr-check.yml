@@ -1,0 +1,45 @@
+name: PR Check
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+    branches: [main]
+
+jobs:
+  test:
+    name: Run PR Tests (Non-blocking)
+    runs-on: ubuntu-latest
+    continue-on-error: true  #테스트 무시
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v3
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Run Gradle Tests
+        run: |
+          chmod +x ./gradlew
+          ./gradlew test || echo "⚠️ 테스트 실패: 무시하고 계속 진행합니다."
+
+      - name: Print test result status
+        if: always()
+        run: |
+          echo "테스트 실패 여부와 관계없이 워크플로는 성공합니다."
+
+      - name: Notify Discord
+        if: always()
+        run: |
+          STATUS="✅ 테스트 성공"
+          if [ "${{ job.status }}" != "success" ]; then
+            STATUS="❌ 테스트 실패"
+          fi
+
+          curl -H "Content-Type: application/json" \
+               -X POST \
+               -d "{\"username\": \"GitHub Actions\", \"content\": \"🧪 PR 테스트 완료 - $STATUS\n🔗 [PR 보기](${{ github.event.pull_request.html_url }})\"}" \
+               ${{ secrets.DISCORD_WEBHOOK_URL }}

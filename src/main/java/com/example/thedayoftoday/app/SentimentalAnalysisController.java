@@ -1,16 +1,10 @@
 package com.example.thedayoftoday.app;
 
-import com.example.thedayoftoday.domain.dto.MoodCategoryResponse;
-import com.example.thedayoftoday.domain.dto.MoodMeterCategoryDto;
-import com.example.thedayoftoday.domain.dto.SentimentalAnalysisRequestDto;
-import com.example.thedayoftoday.domain.dto.SentimentalAnalysisResponseDto;
-import com.example.thedayoftoday.domain.dto.UnknownMoodCategoryDto;
+import com.example.thedayoftoday.domain.dto.diary.moodmeter.MoodCategoryResponse;
+import com.example.thedayoftoday.domain.dto.calendar.SentimentalAnalysisRequestDto;
+import com.example.thedayoftoday.domain.dto.calendar.SentimentalAnalysisResponseDto;
 import com.example.thedayoftoday.domain.service.SentimentalAnalysisService;
 
-import io.swagger.v3.oas.annotations.media.ArraySchema;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import java.util.List;
 
 import lombok.RequiredArgsConstructor;

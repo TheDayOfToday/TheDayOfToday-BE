@@ -35,6 +35,7 @@ public class Diary {
     private User user;
 
     @OneToMany(mappedBy = "diary", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    @Builder.Default
     private List<Conversation> conversations = new ArrayList<>();
 
     @Builder

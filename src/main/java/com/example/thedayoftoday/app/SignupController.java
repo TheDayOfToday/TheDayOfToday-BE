@@ -1,6 +1,6 @@
 package com.example.thedayoftoday.app;
 
-import com.example.thedayoftoday.domain.dto.SignupRequestDto;
+import com.example.thedayoftoday.domain.dto.login.signup.SignupRequestDto;
 import com.example.thedayoftoday.domain.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
