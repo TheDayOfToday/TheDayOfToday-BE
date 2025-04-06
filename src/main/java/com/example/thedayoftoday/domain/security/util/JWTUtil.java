@@ -47,12 +47,12 @@ public class JWTUtil {
     }
 
     public String createAccessToken(String category, String email, String role, Long userId) {
-        log.info("사용자의 만들어진 access Token {}, role: {}, expires in {} ms", email, role, accessExpirationTime);
+        log.info("사용자의 email {}, role: {}, expires in {} ms", email, role, accessExpirationTime);
         return createJwt("access", email, role, userId, accessExpirationTime);
     }
 
     public String createRefreshToken(String category, String email, String role, Long userId) {
-        log.info("사용자의 만들어진 Refresh Token {}, role: {}, expires in {} ms", email, role, refreshExpirationTime);
+        log.info("사용자의 email {}, role: {}, expires in {} ms", email, role, refreshExpirationTime);
         return createJwt("refresh", email, role, userId, refreshExpirationTime);
     }
 
