@@ -1,6 +1,6 @@
 package com.example.thedayoftoday.domain.service;
 
-import com.example.thedayoftoday.domain.dto.SignupRequestDto;
+import com.example.thedayoftoday.domain.dto.login.signup.SignupRequestDto;
 import com.example.thedayoftoday.domain.entity.User;
 import com.example.thedayoftoday.domain.entity.enumType.RoleType;
 import com.example.thedayoftoday.domain.repository.UserRepository;

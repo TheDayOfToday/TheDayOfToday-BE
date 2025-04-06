@@ -1,7 +1,7 @@
 package com.example.thedayoftoday.domain.service;
 
-import com.example.thedayoftoday.domain.dto.DiaryRequestDto;
-import com.example.thedayoftoday.domain.dto.DiaryInfoResponseDto;
+import com.example.thedayoftoday.domain.dto.diary.DiaryRequestDto;
+import com.example.thedayoftoday.domain.dto.diary.DiaryInfoResponseDto;
 import com.example.thedayoftoday.domain.entity.Diary;
 import com.example.thedayoftoday.domain.entity.DiaryMood;
 import com.example.thedayoftoday.domain.entity.User;

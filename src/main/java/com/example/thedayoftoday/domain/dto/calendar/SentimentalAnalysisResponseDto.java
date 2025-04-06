@@ -1,6 +1,6 @@
-package com.example.thedayoftoday.domain.dto;
+package com.example.thedayoftoday.domain.dto.calendar;
 
-public record SentimentalAnalysisRequestDto(
+public record SentimentalAnalysisResponseDto(
         String analysisMoodName,
         String analysisMoodColor,
         String analysisContent

@@ -58,7 +58,7 @@ public enum MoodMeter {
     COZY(Degree.COMFORT, "안락한", "#4fa43b"),
     TOUCHED(Degree.COMFORT, "감동적인", "#468c33"),
 
-    UNKNOWN(Degree.UNKNOWN, "모르겠는", "#ffffff");
+    UNKNOWN(Degree.UNKNOWN, "모르겠는", "#eeeeee");
 
     private final Degree degree;
     private final String moodName;

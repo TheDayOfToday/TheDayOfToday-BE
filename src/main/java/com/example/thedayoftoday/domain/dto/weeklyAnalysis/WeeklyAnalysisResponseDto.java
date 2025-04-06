@@ -1,7 +1,6 @@
-package com.example.thedayoftoday.domain.dto;
+package com.example.thedayoftoday.domain.dto.weeklyAnalysis;
 
 import com.example.thedayoftoday.domain.entity.enumType.Degree;
-import com.example.thedayoftoday.domain.entity.enumType.MoodMeter;
 
 import java.time.LocalDate;
 import java.time.temporal.WeekFields;

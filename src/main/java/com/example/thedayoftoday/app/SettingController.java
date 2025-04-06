@@ -1,6 +1,6 @@
 package com.example.thedayoftoday.app;
 
-import com.example.thedayoftoday.domain.dto.UserSettingDto;
+import com.example.thedayoftoday.domain.dto.setting.UserSettingDto;
 import com.example.thedayoftoday.domain.entity.User;
 import com.example.thedayoftoday.domain.repository.UserRepository;
 import com.example.thedayoftoday.domain.security.CustomUserDetails;

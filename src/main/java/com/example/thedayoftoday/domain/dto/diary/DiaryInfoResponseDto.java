@@ -1,4 +1,4 @@
-package com.example.thedayoftoday.domain.dto;
+package com.example.thedayoftoday.domain.dto.diary;
 
 import com.example.thedayoftoday.domain.entity.DiaryMood;
 
