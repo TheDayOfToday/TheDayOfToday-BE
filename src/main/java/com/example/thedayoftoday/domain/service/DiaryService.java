@@ -83,4 +83,10 @@ public class DiaryService {
                 analysisContent
         );
     }
+
+    /* 일단추가해둠
+        public List<MoodCategoryResponse> getMoodMeters() {
+        return sentimentalAnalysisService.getAllMoodListResponseDto();
+    }
+     */
 }
