@@ -97,6 +97,6 @@ public class CalendarService {
             analysisResults.add(new SentimentalAnalysisResultDto("분석 없음", null, "해당 날짜의 감정 분석 데이터가 없습니다."));
         }
 
-        return new SentimentalAnalysisListResponseDto(userId, date.toLocalDate().toString(), analysisResults);
+        return new SentimentalAnalysisListResponseDto(date.toLocalDate().toString(), analysisResults);
     }
 }

@@ -91,7 +91,6 @@ class CalendarServiceTest {
 
         SentimentalAnalysisListResponseDto result = calendarService.getSentimentalAnalysis(userId, date);
 
-        assertEquals(userId, result.userId());
         assertEquals("2025-02-15", result.date());
 
         List<SentimentalAnalysisResultDto> analysisResults = result.analysisResults();
