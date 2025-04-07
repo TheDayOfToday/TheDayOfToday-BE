@@ -72,7 +72,6 @@ class CalendarServiceTest {
 
         DiaryEntryResponseDto result = calendarService.getDiaryEntry(userId, date);
 
-        assertEquals(userId, result.userId());
         assertEquals("2025-02-15", result.date());
         assertNotNull(result.entries());
         assertFalse(result.entries().isEmpty());

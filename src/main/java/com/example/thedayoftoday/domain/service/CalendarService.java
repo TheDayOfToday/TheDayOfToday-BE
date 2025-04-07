@@ -63,7 +63,6 @@ public class CalendarService {
         }
 
         return new DiaryEntryResponseDto(
-                userId,
                 date.toLocalDate().toString(),
                 diaryEntries
         );
