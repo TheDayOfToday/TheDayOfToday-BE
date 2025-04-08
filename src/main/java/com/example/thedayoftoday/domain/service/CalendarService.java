@@ -55,11 +55,11 @@ public class CalendarService {
         );
 
         List<DiaryContentDto> diaryEntries = diaries.stream()
-                .map(diary -> new DiaryContentDto(diary.getTitle(), diary.getContent()))
+                .map(diary -> new DiaryContentDto(diary.getDiaryId(),diary.getTitle(), diary.getContent()))
                 .collect(Collectors.toList());
 
         if (diaryEntries.isEmpty()) {
-            diaryEntries.add(new DiaryContentDto("일기 없음", "해당 날짜에 작성된 일기가 없습니다."));
+            diaryEntries.add(new DiaryContentDto(null,"일기 없음", "해당 날짜에 작성된 일기가 없습니다."));
         }
 
         return new DiaryEntryResponseDto(
