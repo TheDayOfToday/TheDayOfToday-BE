@@ -18,13 +18,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/setting")
-public class SettingController {
+@RequestMapping("/user")
+public class UserController {
 
     private final UserRepository userRepository;
     private final UserService userService;
 
-    public SettingController(UserRepository userRepository, UserService userService) {
+    public UserController(UserRepository userRepository, UserService userService) {
         this.userRepository = userRepository;
         this.userService = userService;
     }

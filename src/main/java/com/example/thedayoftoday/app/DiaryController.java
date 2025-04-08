@@ -34,7 +34,7 @@ public class DiaryController {
     }
 
     //독백모드 버튼
-    @PostMapping("/single-mode/start")
+    @PostMapping("/monologue/start")
     public ResponseEntity<DiaryRequestDto> createDiaryWithMood(@RequestParam("file") MultipartFile file,
                                                                @AuthenticationPrincipal CustomUserDetails userDetails)
             throws IOException {
