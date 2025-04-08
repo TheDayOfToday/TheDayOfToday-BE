@@ -30,14 +30,15 @@ public class SettingController {
     }
 
     @GetMapping("/default")
-    public UserSettingDto getSetting(@AuthenticationPrincipal CustomUserDetails userDetails) {
+    public ResponseEntity<UserSettingDto> getSetting(@AuthenticationPrincipal CustomUserDetails userDetails) {
 
         Long userId = userDetails.getUserId();
         User user = userRepository.findById(userId).orElse(null);
         if (user == null) {
             throw new IllegalArgumentException("존재하지 않는 사용자입니다.");
         }
-        return new UserSettingDto(user.getName(), user.getEmail(), user.getPhoneNumber());
+        UserSettingDto userSettingDto = new UserSettingDto(user.getName(), user.getEmail(), user.getPhoneNumber());
+        return ResponseEntity.ok(userSettingDto);
     }
 
     @PutMapping("/update-password")
