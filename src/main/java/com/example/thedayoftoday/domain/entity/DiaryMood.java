@@ -2,8 +2,10 @@ package com.example.thedayoftoday.domain.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+@Getter
 @Embeddable
 @NoArgsConstructor
 public class DiaryMood {
@@ -18,11 +20,4 @@ public class DiaryMood {
         this.moodColor = moodColor;
     }
 
-    public String getMoodName() {
-        return moodName;
-    }
-
-    public String getMoodColor() {
-        return moodColor;
-    }
 }
