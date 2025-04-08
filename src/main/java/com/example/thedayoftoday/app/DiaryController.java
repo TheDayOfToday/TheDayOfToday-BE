@@ -50,16 +50,20 @@ public class DiaryController {
 
     //사용자가 감정 선택
     @PostMapping("/update-mood")
-    public ResponseEntity<Void> updateDiaryMood(@RequestParam(value = "diaryId") Long diaryId,
+    public ResponseEntity<Void> updateDiaryMood(@AuthenticationPrincipal CustomUserDetails userDetails,
+                                                @RequestParam(value = "diaryId") Long diaryId,
                                                 @RequestBody DiaryMood mood) {
-        diaryService.updateDiaryMood(diaryId, mood);
+        Long userId = userDetails.getUserId();
+        diaryService.updateDiaryMood(userId, diaryId, mood);
         return ResponseEntity.ok().build();
     }
 
     //사용자가 일기 수정
     @PutMapping("/update-diary")
-    public ResponseEntity<Void> updateDiaryContent(@RequestBody DiaryRequestDto requestDto) {
-        diaryService.updateDiaryContent(requestDto.diaryId(), requestDto.title(), requestDto.content());
+    public ResponseEntity<Void> updateDiaryContent(@AuthenticationPrincipal CustomUserDetails userDetails,
+                                                   @RequestBody DiaryRequestDto requestDto) {
+        Long userId = userDetails.getUserId();
+        diaryService.updateDiaryContent(userId, requestDto.diaryId(), requestDto.title(), requestDto.content());
         return ResponseEntity.ok().build();
     }
 
@@ -97,18 +101,22 @@ public class DiaryController {
 
     //대화모드 끝
     @PostMapping("/conversation-mode/complete")
-    public ResponseEntity<DiaryRequestDto> completeDiary(@RequestParam("diaryId") Long diaryId) {
+    public ResponseEntity<DiaryRequestDto> completeDiary(@AuthenticationPrincipal CustomUserDetails userDetails,
+                                                         @RequestParam("diaryId") Long diaryId) {
+        Long userId = userDetails.getUserId();
         String mergedText = conversationService.mergeConversationText(diaryId);
         DiaryBasicResponseDto diary = openAiService.convertToDiary(mergedText);
         DiaryMood mood = openAiService.recommendMood(diary.content());
-        diaryService.updateDiaryContent(diaryId, diary.title(), diary.content());
+        diaryService.updateDiaryContent(userId, diaryId, diary.title(), diary.content());
         return ResponseEntity.ok(new DiaryRequestDto(diaryId, diary.title(), diary.content(), mood));
     }
 
     //일기 삭제
     @DeleteMapping("/delete/{diaryId}")
-    public ResponseEntity<String> deleteDiary(@PathVariable Long diaryId) {
-        diaryService.deleteDiary(diaryId);
+    public ResponseEntity<String> deleteDiary(@AuthenticationPrincipal CustomUserDetails userDetails,
+                                              @PathVariable Long diaryId) {
+        Long userId = userDetails.getUserId();
+        diaryService.deleteDiary(userId, diaryId);
         return ResponseEntity.ok("삭제가 완료되었습니다.");
     }
 }
