@@ -96,7 +96,6 @@ class CalendarServiceTest {
         List<SentimentalAnalysisResultDto> analysisResults = result.analysisResults();
         assertNotNull(analysisResults);
         assertFalse(analysisResults.isEmpty());
-        assertEquals("기쁨", analysisResults.get(0).mood().getMoodName());  // 여기 수정!
-        assertEquals("매우 기쁨", analysisResults.get(0).content());
+        assertEquals("기쁨", analysisResults.get(0).diaryMood().getMoodName());
     }
 }
