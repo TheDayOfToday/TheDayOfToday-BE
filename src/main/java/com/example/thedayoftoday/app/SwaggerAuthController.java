@@ -1,6 +1,6 @@
 package com.example.thedayoftoday.app;
 
-import com.example.thedayoftoday.domain.dto.login.LoginRequestDto;
+import com.example.thedayoftoday.domain.dto.user.LoginRequestDto;
 import com.example.thedayoftoday.domain.security.CustomUserDetails;
 import com.example.thedayoftoday.domain.security.util.JWTUtil;
 import java.util.HashMap;

@@ -1,6 +1,6 @@
 package com.example.thedayoftoday.app;
 
-import com.example.thedayoftoday.domain.dto.login.signup.SignupRequestDto;
+import com.example.thedayoftoday.domain.dto.user.SignupRequestDto;
 import com.example.thedayoftoday.domain.dto.setting.UserInfoDto;
 import com.example.thedayoftoday.domain.entity.User;
 import com.example.thedayoftoday.domain.repository.UserRepository;
@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -43,12 +42,14 @@ public class UserController {
 
     @PutMapping("/update-password")
     public ResponseEntity<String> updatePassword(@AuthenticationPrincipal CustomUserDetails userDetails,
-                                               @RequestParam String newPassword) {
-
+                                                 @RequestBody String newPassword) {
         Long userId = userDetails.getUserId();
         User user = userRepository.findById(userId).orElse(null);
         if (user == null) {
             throw new IllegalArgumentException("존재하지 않는 사용자입니다.");
+        }
+        if (user.getPassword().equals(newPassword)) {
+            throw new IllegalArgumentException("기존의 비밀번호와 동일합니다.");
         }
         user.setPassword(newPassword);
         userRepository.save(user);
