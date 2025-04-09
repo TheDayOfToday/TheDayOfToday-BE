@@ -1,5 +1,6 @@
 package com.example.thedayoftoday.app;
 
+import com.example.thedayoftoday.domain.dto.user.PasswordUpdateRequest;
 import com.example.thedayoftoday.domain.dto.user.SignupRequestDto;
 import com.example.thedayoftoday.domain.dto.setting.UserInfoDto;
 import com.example.thedayoftoday.domain.entity.User;
@@ -45,14 +46,13 @@ public class UserController {
 
     @PutMapping("/update-password")
     public ResponseEntity<String> updatePassword(@AuthenticationPrincipal CustomUserDetails userDetails,
-                                                 @RequestBody String newPassword) {
+                                                 @RequestBody PasswordUpdateRequest passwordUpdateRequest) {
         Long userId = userDetails.getUserId();
-        User user = userRepository.findById(userId).orElse(null);
+        User user = userRepository.findById(userId).orElseThrow(()-> new IllegalArgumentException("존재하지 않은 사용자입니다."));
 
-        if (user == null) {
-            throw new IllegalArgumentException("존재하지 않는 사용자입니다.");
-        }
-        if (passwordEncoder.matches(newPassword, user.getPassword())) {
+        String newPassword = passwordUpdateRequest.newPassword();
+
+        if (passwordEncoder.matches(passwordUpdateRequest.newPassword(), user.getPassword())) {
             throw new IllegalArgumentException("기존의 비밀번호와 동일합니다.");
         }
 
