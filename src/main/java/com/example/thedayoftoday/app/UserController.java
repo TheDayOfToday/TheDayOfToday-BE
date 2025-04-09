@@ -42,7 +42,7 @@ public class UserController {
     }
 
     @PutMapping("/update-password")
-    public ResponseEntity<Void> updatePassword(@AuthenticationPrincipal CustomUserDetails userDetails,
+    public ResponseEntity<String> updatePassword(@AuthenticationPrincipal CustomUserDetails userDetails,
                                                @RequestParam String newPassword) {
 
         Long userId = userDetails.getUserId();
@@ -52,7 +52,7 @@ public class UserController {
         }
         user.setPassword(newPassword);
         userRepository.save(user);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok("비밀변호 변겅이 완료되었습니다.");
     }
 
     @PostMapping("/signup")

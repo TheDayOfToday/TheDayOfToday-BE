@@ -50,21 +50,21 @@ public class DiaryController {
 
     //사용자가 감정 선택
     @PostMapping("/update-mood")
-    public ResponseEntity<Void> updateDiaryMood(@AuthenticationPrincipal CustomUserDetails userDetails,
+    public ResponseEntity<String> updateDiaryMood(@AuthenticationPrincipal CustomUserDetails userDetails,
                                                 @RequestParam(value = "diaryId") Long diaryId,
                                                 @RequestBody DiaryMood mood) {
         Long userId = userDetails.getUserId();
         diaryService.updateDiaryMood(userId, diaryId, mood);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok("감정이 성공적으로 선택되었습니다.");
     }
 
     //사용자가 일기 수정
     @PutMapping("/update-diary")
-    public ResponseEntity<Void> updateDiaryContent(@AuthenticationPrincipal CustomUserDetails userDetails,
+    public ResponseEntity<String> updateDiaryContent(@AuthenticationPrincipal CustomUserDetails userDetails,
                                                    @RequestBody DiaryRequestDto requestDto) {
         Long userId = userDetails.getUserId();
         diaryService.updateDiaryContent(userId, requestDto.diaryId(), requestDto.title(), requestDto.content());
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok("일기 수정 완료");
     }
 
     //사용자 무드미터, 일기 토대로 감정 분석
