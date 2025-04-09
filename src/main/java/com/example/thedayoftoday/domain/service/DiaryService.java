@@ -7,6 +7,7 @@ import com.example.thedayoftoday.domain.entity.DiaryMood;
 import com.example.thedayoftoday.domain.entity.User;
 import com.example.thedayoftoday.domain.repository.DiaryRepository;
 import com.example.thedayoftoday.domain.repository.UserRepository;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,23 +26,27 @@ public class DiaryService {
     }
 
     @Transactional
-    public void updateDiaryMood(Long diaryId, DiaryMood mood) {
+    public void updateDiaryMood(Long userId, Long diaryId, DiaryMood mood) {
         Diary diary = diaryRepository.findByDiaryId(diaryId)
                 .orElseThrow(() -> new IllegalArgumentException("다이어리를 찾을 수 없습니다."));
+
+        authorizeUser(userId, diary);
 
         diary.updateDiaryMood(mood);
     }
 
     @Transactional
-    public void updateDiaryContent(Long diaryId, String title, String content) {
+    public void updateDiaryContent(Long userId, Long diaryId, String title, String content) {
         Diary diary = diaryRepository.findById(diaryId)
                 .orElseThrow(() -> new IllegalArgumentException("다이어리가 존재하지 않습니다."));
+        authorizeUser(userId, diary);
         diary.updateDiary(title, content);
     }
 
-    public void deleteDiary(Long diaryId) {
+    public void deleteDiary(Long userId, Long diaryId) {
         Diary diary = diaryRepository.findByDiaryId(diaryId)
                 .orElseThrow(() -> new IllegalArgumentException("다이어리가 존재하지 않습니다."));
+        authorizeUser(userId, diary);
         diaryRepository.delete(diary);
     }
 
@@ -83,4 +88,16 @@ public class DiaryService {
                 analysisContent
         );
     }
+
+    private static void authorizeUser(Long userId, Diary diary) {
+        if (!diary.getUser().getUserId().equals(userId)) {
+            throw new AccessDeniedException("권한 없음");
+        }
+    }
+
+    /* 일단추가해둠
+        public List<MoodCategoryResponse> getMoodMeters() {
+        return sentimentalAnalysisService.getAllMoodListResponseDto();
+    }
+     */
 }

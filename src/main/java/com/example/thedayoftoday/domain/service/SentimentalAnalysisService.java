@@ -38,113 +38,6 @@ import org.springframework.web.client.RestTemplate;
 @Transactional
 public class SentimentalAnalysisService {
 
-    private final DiaryRepository diaryRepository;
-    private final RestTemplate restTemplate;
-
-    @Value("${openai.api.key}")
-    private String apiKey;
-    private static final String GPT_URL = "https://api.openai.com/v1/chat/completions";
-
-    public SentimentalAnalysisService(DiaryRepository diaryRepository, RestTemplate restTemplate) {
-        this.diaryRepository = diaryRepository;
-        this.restTemplate = restTemplate;
-    }
-
-    //텍스트에 맞춰 AI가 분석한 무드미터한글, 감정분석한글 만들어주는것
-    public SentimentalAnalysisResponseDto processSentimentalAnalysis(String text) {
-        String moodName = analyzeMoodMeter(text);
-        String moodColor = getColorByMoodName(moodName);
-        String contentAnalysis = analyzeContentEmotion(text);
-
-        return new SentimentalAnalysisResponseDto(moodName, moodColor, contentAnalysis);
-    }
-
-    public SentimentalAnalysisResponseDto addAnalysis(SentimentalAnalysisRequestDto sentimentalAnalysisRequestDto, Long diaryId) {
-        Diary diary = diaryRepository.findById(diaryId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 일기가 없습니다"));
-
-        DiaryMood diaryMood = new DiaryMood(sentimentalAnalysisRequestDto.analysisMoodName(), sentimentalAnalysisRequestDto.analysisMoodColor());
-        diary = diary.toBuilder()
-                .diaryMood(diaryMood)
-                .analysisContent(sentimentalAnalysisRequestDto.analysisContent())
-                .build();
-
-        diaryRepository.save(diary);
-
-        return new SentimentalAnalysisResponseDto(
-                diaryMood.getMoodName(),
-                diaryMood.getMoodColor(),
-                diary.getAnalysisContent()
-        );
-    }
-
-    //감정분석 반환
-    public String analyzeContentEmotion(String text) {
-        Map<String, Object> requestBody = new HashMap<>();
-        requestBody.put("model", "gpt-3.5-turbo");
-        requestBody.put("messages", List.of(
-                Map.of("role", "system", "content", "Analyze the emotions of the given text."),
-                Map.of("role", "user", "content", "다음 텍스트의 감정을 분석해줘: " + text)
-        ));
-
-        String response = callOpenAiApi(requestBody);
-        return extractContent(response);
-    }
-
-    //무드미터반환(한글 3글자)
-    public String analyzeMoodMeter(String text) {
-        String allowedMoods = Arrays.stream(MoodMeter.values())
-                .map(MoodMeter::getMoodName)
-                .collect(Collectors.joining(", "));
-
-        Map<String, Object> requestBody = new HashMap<>();
-        requestBody.put("model", "gpt-3.5-turbo");
-        requestBody.put("messages", List.of(
-                Map.of("role", "system", "content",
-                        "Analyze the emotion in the given text and return only one word from the following list: "
-                                + allowedMoods),
-                Map.of("role", "user", "content", text)
-        ));
-
-        String response = callOpenAiApi(requestBody);
-        return extractMoodName(response);
-    }
-
-    public static String getColorByMoodName(String moodName) {
-        return fromMoodName(moodName).getColor();
-    }
-
-    private String callOpenAiApi(Map<String, Object> requestBody) {
-        HttpHeaders httpHeaders = new HttpHeaders();
-        httpHeaders.setContentType(MediaType.APPLICATION_JSON);
-        httpHeaders.setBearerAuth(apiKey);
-
-        HttpEntity<Map<String, Object>> entity = new HttpEntity<>(requestBody, httpHeaders);
-        ResponseEntity<String> response = restTemplate.exchange(GPT_URL, HttpMethod.POST, entity, String.class);
-
-        return response.getBody();
-    }
-
-    private String extractMoodName(String jsonResponse) {
-        try {
-            ObjectMapper objectMapper = new ObjectMapper();
-            JsonNode rootNode = objectMapper.readTree(jsonResponse);
-            return rootNode.path("choices").get(0).path("message").path("content").asText();
-        } catch (Exception e) {
-            throw new IllegalArgumentException("OpenAI 응답을 파싱하는 중 오류 발생: " + e.getMessage());
-        }
-    }
-
-    private String extractContent(String jsonResponse) {
-        try {
-            ObjectMapper objectMapper = new ObjectMapper();
-            JsonNode rootNode = objectMapper.readTree(jsonResponse);
-            return rootNode.path("choices").get(0).path("message").path("content").asText();
-        } catch (Exception e) {
-            throw new IllegalArgumentException("OpenAI 응답 파싱 중 오류 발생: " + e.getMessage());
-        }
-    }
-
     public List<MoodCategoryResponse> getAllMoodListResponseDto() {
         Map<Degree, List<MoodDetailsDto>> moodGroup = new LinkedHashMap<>();
 
@@ -170,7 +63,6 @@ public class SentimentalAnalysisService {
                     new MoodMeterCategoryDto(entry.getKey().getDegreeName(), entry.getValue())
             );
         }
-
         return moodCategories;
     }
 
