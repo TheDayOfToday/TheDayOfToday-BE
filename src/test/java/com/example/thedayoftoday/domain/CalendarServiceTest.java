@@ -72,7 +72,6 @@ class CalendarServiceTest {
 
         DiaryEntryResponseDto result = calendarService.getDiaryEntry(userId, date);
 
-        assertEquals(userId, result.userId());
         assertEquals("2025-02-15", result.date());
         assertNotNull(result.entries());
         assertFalse(result.entries().isEmpty());
@@ -92,13 +91,11 @@ class CalendarServiceTest {
 
         SentimentalAnalysisListResponseDto result = calendarService.getSentimentalAnalysis(userId, date);
 
-        assertEquals(userId, result.userId());
         assertEquals("2025-02-15", result.date());
 
         List<SentimentalAnalysisResultDto> analysisResults = result.analysisResults();
         assertNotNull(analysisResults);
         assertFalse(analysisResults.isEmpty());
-        assertEquals("기쁨", analysisResults.get(0).mood());
-        assertEquals("매우 기쁨", analysisResults.get(0).content());
+        assertEquals("기쁨", analysisResults.get(0).diaryMood().getMoodName());
     }
 }
