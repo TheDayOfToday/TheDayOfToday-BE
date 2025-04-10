@@ -115,7 +115,7 @@ public class DiaryController {
     }
 
     //대화모드 다음 버튼 누르면 음성 파일을 받아서 텍스트로 바꾸고 Conversation에 저장하고 텍스트 분석한 걸 바탕으로 질문 생성해서 던져줌
-    @PostMapping("/conversation-mode/next-question")
+    @PostMapping(value = "/conversation-mode/next-question", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ConversationResponseDto continueConversation(
             @RequestParam("question") String question,
             @RequestParam("file") MultipartFile file,
