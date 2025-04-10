@@ -40,22 +40,18 @@ public class DiaryController {
         this.diaryService = diaryService;
         this.diaryRepository = diaryRepository;
     }
-
-    //독백모드 버튼
     @PostMapping(value = "/monologue/start", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<String> createDiaryWithMood(@RequestParam("file") MultipartFile file,
-                                                      @AuthenticationPrincipal CustomUserDetails userDetails)
+    public ResponseEntity<DiaryIdResponseDto> createDiaryWithMood(@RequestParam("file") MultipartFile file,
+                                                                  @AuthenticationPrincipal CustomUserDetails userDetails)
             throws IOException {
         Long userId = userDetails.getUserId();
 
-        DiaryIdResponseDto emptyDiary = diaryService.createEmptyDiary(userId);
-
         String transcribedText = openAiService.transcribeAudio(file);
         DiaryBasicResponseDto diary = openAiService.convertToDiary(transcribedText);
+        DiaryMood mood = openAiService.recommendMood(diary.content());
+        DiaryIdResponseDto savedDiary = diaryService.createDiary(userId, diary.title(), diary.content(), mood);
 
-        diaryService.updateDiaryContent(userId, emptyDiary.diaryId(), diary.title(), diary.content());
-
-        return ResponseEntity.ok("음성이 성공적으로 분석되었습니다.");
+        return ResponseEntity.status(HttpStatus.CREATED).body(savedDiary);
     }
 
     @GetMapping("/update-mood")

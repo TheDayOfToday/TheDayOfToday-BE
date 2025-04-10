@@ -45,6 +45,23 @@ public class DiaryService {
         diary.updateDiaryMood(mood);
     }
 
+    public DiaryIdResponseDto createDiary(Long userId, String title, String content, DiaryMood mood) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("유저를 찾을 수 없습니다."));
+
+        Diary newDiary = Diary.builder()
+                .title(title)
+                .content(content)
+                .createTime(LocalDateTime.now())
+                .diaryMood(mood)
+                .user(user)
+                .build();
+
+        diaryRepository.save(newDiary);
+
+        return new DiaryIdResponseDto(newDiary.getDiaryId());
+    }
+
     @Transactional
     public void updateDiaryContent(Long userId, Long diaryId, String title, String content) {
         Diary diary = diaryRepository.findById(diaryId)
