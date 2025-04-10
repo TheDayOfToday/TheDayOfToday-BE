@@ -45,6 +45,7 @@ public class DiaryService {
         diary.updateDiaryMood(mood);
     }
 
+    @Transactional
     public DiaryIdResponseDto createDiary(Long userId, String title, String content, DiaryMood mood) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("유저를 찾을 수 없습니다."));
@@ -70,6 +71,7 @@ public class DiaryService {
         diary.updateDiary(title, content);
     }
 
+    @Transactional
     public void updateAnalysisContent(Long userId, Long diaryId, String content) {
         Diary diary = diaryRepository.findById(diaryId)
                 .orElseThrow(() -> new IllegalArgumentException("다이어리가 존재하지 않습니다."));
@@ -77,6 +79,7 @@ public class DiaryService {
         diary.upDateAnalysisContent(content);
     }
 
+    @Transactional
     public void deleteDiary(Long userId, Long diaryId) {
         Diary diary = diaryRepository.findByDiaryId(diaryId)
                 .orElseThrow(() -> new IllegalArgumentException("다이어리가 존재하지 않습니다."));
