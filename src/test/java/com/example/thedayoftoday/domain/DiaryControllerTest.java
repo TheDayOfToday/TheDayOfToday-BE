@@ -1,6 +1,7 @@
 package com.example.thedayoftoday.domain;
 
 import com.example.thedayoftoday.domain.dto.diary.DiaryBasicResponseDto;
+import com.example.thedayoftoday.domain.dto.diary.DiaryIdResponseDto;
 import com.example.thedayoftoday.domain.dto.diary.DiaryRequestDto;
 import com.example.thedayoftoday.domain.dto.diary.moodmeter.MoodCategoryResponse;
 import com.example.thedayoftoday.domain.entity.Diary;
@@ -27,8 +28,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import java.util.List;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -71,28 +71,38 @@ class DiaryControllerTest {
 
     @Test
     void createDiaryWithMood_정상요청_성공() throws Exception {
+        // given
         Long userId = 1L;
-        MockMultipartFile mockFile = new MockMultipartFile("file", "audio.wav", "audio/wav", "fake audio".getBytes());
+        MockMultipartFile mockFile = new MockMultipartFile(
+                "file",
+                "audio.wav",
+                "audio/wav",
+                "fake audio".getBytes()
+        );
 
-        DiaryRequestDto dummyDiary = new DiaryRequestDto(10L, "", "", null);
+        String transcribedText = "오늘 너무 좋았다.";
         DiaryBasicResponseDto basicResponse = new DiaryBasicResponseDto("제목", "내용");
         DiaryMood mood = new DiaryMood("행복", "#FF0000");
+        DiaryIdResponseDto diaryIdResponse = new DiaryIdResponseDto(10L);
         List<MoodCategoryResponse> moodCategories = List.of();
 
-        given(openAiService.transcribeAudio(any())).willReturn("오늘 너무 좋았다.");
+        given(openAiService.transcribeAudio(any())).willReturn(transcribedText);
         given(openAiService.convertToDiary(anyString())).willReturn(basicResponse);
         given(openAiService.recommendMood(anyString())).willReturn(mood);
-        given(diaryService.createEmptyDiary(userId)).willReturn(dummyDiary);
+        given(diaryService.createDiary(eq(userId), eq("제목"), eq("내용"), eq(mood)))
+                .willReturn(diaryIdResponse);
         given(diaryService.getAllMoodListResponseDto()).willReturn(moodCategories);
 
+        // when & then
         mockMvc.perform(MockMvcRequestBuilders.multipart("/diary/monologue/start")
                         .file(mockFile)
                         .with(request -> {
                             request.setMethod("POST");
                             return request;
                         }))
-                .andExpect(status().isOk());
+                .andExpect(status().isCreated());
     }
+
 
     @Test
     void updateMonologueDiaryMood_성공() throws Exception {
