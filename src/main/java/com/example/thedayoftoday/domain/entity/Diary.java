@@ -52,4 +52,8 @@ public class Diary {
     public void updateDiaryMood(DiaryMood diaryMood) {
         this.diaryMood = diaryMood;
     }
+
+    public void upDateAnalysisContent(String analysisContent) {
+        this.analysisContent = analysisContent;
+    }
 }
