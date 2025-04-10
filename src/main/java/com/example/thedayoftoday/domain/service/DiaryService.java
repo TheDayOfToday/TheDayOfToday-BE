@@ -1,5 +1,6 @@
 package com.example.thedayoftoday.domain.service;
 
+import com.example.thedayoftoday.domain.dto.diary.DiaryIdResponseDto;
 import com.example.thedayoftoday.domain.dto.diary.DiaryRequestDto;
 import com.example.thedayoftoday.domain.dto.diary.DiaryInfoResponseDto;
 import com.example.thedayoftoday.domain.dto.diary.moodmeter.MoodCategoryResponse;
@@ -45,6 +46,24 @@ public class DiaryService {
     }
 
     @Transactional
+    public DiaryIdResponseDto createDiary(Long userId, String title, String content, DiaryMood mood) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("유저를 찾을 수 없습니다."));
+
+        Diary newDiary = Diary.builder()
+                .title(title)
+                .content(content)
+                .createTime(LocalDateTime.now())
+                .diaryMood(mood)
+                .user(user)
+                .build();
+
+        diaryRepository.save(newDiary);
+
+        return new DiaryIdResponseDto(newDiary.getDiaryId());
+    }
+
+    @Transactional
     public void updateDiaryContent(Long userId, Long diaryId, String title, String content) {
         Diary diary = diaryRepository.findById(diaryId)
                 .orElseThrow(() -> new IllegalArgumentException("다이어리가 존재하지 않습니다."));
@@ -52,6 +71,7 @@ public class DiaryService {
         diary.updateDiary(title, content);
     }
 
+    @Transactional
     public void updateAnalysisContent(Long userId, Long diaryId, String content) {
         Diary diary = diaryRepository.findById(diaryId)
                 .orElseThrow(() -> new IllegalArgumentException("다이어리가 존재하지 않습니다."));
@@ -59,6 +79,7 @@ public class DiaryService {
         diary.upDateAnalysisContent(content);
     }
 
+    @Transactional
     public void deleteDiary(Long userId, Long diaryId) {
         Diary diary = diaryRepository.findByDiaryId(diaryId)
                 .orElseThrow(() -> new IllegalArgumentException("다이어리가 존재하지 않습니다."));
@@ -66,7 +87,7 @@ public class DiaryService {
         diaryRepository.delete(diary);
     }
 
-    public DiaryRequestDto createEmptyDiary(Long userId) {
+    public DiaryIdResponseDto createEmptyDiary(Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("유저를 찾을 수 없습니다."));
 
@@ -80,7 +101,7 @@ public class DiaryService {
 
         diaryRepository.save(newDiary);
 
-        return new DiaryRequestDto(newDiary.getDiaryId(), newDiary.getTitle(), newDiary.getContent(), newDiary.getDiaryMood());
+        return new DiaryIdResponseDto(newDiary.getDiaryId());
     }
 
     public DiaryMood getMoodByDiaryId(Long diaryId) {
@@ -145,5 +166,4 @@ public class DiaryService {
             throw new AccessDeniedException("권한 없음");
         }
     }
-
 }
