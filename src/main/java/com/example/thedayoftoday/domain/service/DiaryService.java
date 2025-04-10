@@ -166,5 +166,4 @@ public class DiaryService {
             throw new AccessDeniedException("권한 없음");
         }
     }
-
 }
