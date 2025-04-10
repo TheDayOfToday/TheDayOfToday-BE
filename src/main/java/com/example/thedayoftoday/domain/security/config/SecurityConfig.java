@@ -59,7 +59,7 @@ public class SecurityConfig {
                 .httpBasic(httpBasic -> httpBasic.disable())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        .requestMatchers("/", "/error", "/login", "/signup", "/swagger-ui/**",
+                        .requestMatchers("/", "/error", "/login", "user/signup", "/swagger-ui/**",
                                 "/v3/api-docs/**", "/reissue", "/diary/**", "/sentimental/**",
                                 "/weeklyAnalysis/**", "/calendar/**","/swagger-auth/**")
                         .permitAll()

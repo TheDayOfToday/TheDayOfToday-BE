@@ -2,8 +2,13 @@ package com.example.thedayoftoday.app;
 
 import com.example.thedayoftoday.domain.dto.diary.DiaryBasicResponseDto;
 import com.example.thedayoftoday.domain.dto.diary.DiaryRequestDto;
+import com.example.thedayoftoday.domain.dto.diary.MonologueDiaryContentDto;
+import com.example.thedayoftoday.domain.dto.diary.MonologueDiaryRequestDto;
 import com.example.thedayoftoday.domain.dto.diary.conversation.ConversationResponseDto;
+import com.example.thedayoftoday.domain.dto.diary.moodmeter.MoodCategoryResponse;
+import com.example.thedayoftoday.domain.entity.Diary;
 import com.example.thedayoftoday.domain.entity.DiaryMood;
+import com.example.thedayoftoday.domain.repository.DiaryRepository;
 import com.example.thedayoftoday.domain.security.CustomUserDetails;
 import com.example.thedayoftoday.domain.service.AiService;
 
@@ -11,7 +16,9 @@ import java.io.IOException;
 
 import com.example.thedayoftoday.domain.service.ConversationService;
 import com.example.thedayoftoday.domain.service.DiaryService;
+import java.util.List;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -27,32 +34,51 @@ public class DiaryController {
     private final DiaryService diaryService;
 
     public DiaryController(AiService openAiService, ConversationService conversationService,
-                           DiaryService diaryService) {
+                           DiaryService diaryService, DiaryRepository diaryRepository) {
         this.openAiService = openAiService;
         this.conversationService = conversationService;
         this.diaryService = diaryService;
     }
 
     //독백모드 버튼
-    @PostMapping("/monologue/start")
-    public ResponseEntity<DiaryRequestDto> createDiaryWithMood(@RequestParam("file") MultipartFile file,
-                                                               @AuthenticationPrincipal CustomUserDetails userDetails)
+    @PostMapping(value = "/monologue/start", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<MonologueDiaryRequestDto> createDiaryWithMood(@RequestParam("file") MultipartFile file,
+                                                                        @AuthenticationPrincipal CustomUserDetails userDetails)
             throws IOException {
         Long userId = userDetails.getUserId();
+
         DiaryRequestDto emptyDiary = diaryService.createEmptyDiary(userId);
+
         String transcribedText = openAiService.transcribeAudio(file);
         DiaryBasicResponseDto diary = openAiService.convertToDiary(transcribedText);
         DiaryMood mood = openAiService.recommendMood(transcribedText);
+
+        diaryService.updateDiaryContent(userId,emptyDiary.diaryId(),diary.title(),diary.content());
+
+        List<MoodCategoryResponse> moodCategories = diaryService.getAllMoodListResponseDto();
+
         return ResponseEntity.ok(
-                new DiaryRequestDto(emptyDiary.diaryId(), diary.title(), diary.content(), mood)
+                new MonologueDiaryRequestDto(emptyDiary.diaryId(), mood, moodCategories)
         );
+    }
+
+    @PostMapping("/update-monologue-mood")
+    public MonologueDiaryContentDto updateMonologueDiaryMood(@AuthenticationPrincipal CustomUserDetails userDetails,
+                                                        @RequestParam(value = "diaryId") Long diaryId,
+                                                        @RequestBody DiaryMood diaryMood) {
+        Long userId = userDetails.getUserId();
+        diaryService.updateDiaryMood(userId, diaryId, diaryMood);
+
+        Diary diary = diaryService.findDiaryByUserAndDiaryId(userId, diaryId);
+
+        return new MonologueDiaryContentDto(diaryId, diary.getTitle(), diary.getContent());
     }
 
     //사용자가 감정 선택
     @PostMapping("/update-mood")
     public ResponseEntity<String> updateDiaryMood(@AuthenticationPrincipal CustomUserDetails userDetails,
-                                                @RequestParam(value = "diaryId") Long diaryId,
-                                                @RequestBody DiaryMood mood) {
+                                                  @RequestParam(value = "diaryId") Long diaryId,
+                                                  @RequestBody DiaryMood mood) {
         Long userId = userDetails.getUserId();
         diaryService.updateDiaryMood(userId, diaryId, mood);
         return ResponseEntity.ok("감정이 성공적으로 선택되었습니다.");
@@ -61,13 +87,13 @@ public class DiaryController {
     //사용자가 일기 수정
     @PutMapping("/update-diary")
     public ResponseEntity<String> updateDiaryContent(@AuthenticationPrincipal CustomUserDetails userDetails,
-                                                   @RequestBody DiaryRequestDto requestDto) {
+                                                     @RequestBody DiaryRequestDto requestDto) {
         Long userId = userDetails.getUserId();
         diaryService.updateDiaryContent(userId, requestDto.diaryId(), requestDto.title(), requestDto.content());
         return ResponseEntity.ok("일기 수정 완료");
     }
 
-    //사용자 무드미터, 일기 토대로 감정 분석
+    //사용자 무드미터, 일기 토대로 감정 분
     @GetMapping("/analyze")
     public ResponseEntity<String> analyzeDiary(@RequestParam(value = "diaryId") Long diaryId) {
         DiaryMood mood = diaryService.getMoodByDiaryId(diaryId);

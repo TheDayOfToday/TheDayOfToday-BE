@@ -98,12 +98,6 @@ public class DiaryService {
         );
     }
 
-    private static void authorizeUser(Long userId, Diary diary) {
-        if (!diary.getUser().getUserId().equals(userId)) {
-            throw new AccessDeniedException("권한 없음");
-        }
-    }
-
     public List<MoodCategoryResponse> getAllMoodListResponseDto() {
         Map<Degree, List<MoodDetailsDto>> moodGroup = new LinkedHashMap<>();
 
@@ -130,9 +124,19 @@ public class DiaryService {
         }
         return moodCategories;
     }
-    /* 일단추가해둠
-        public List<MoodCategoryResponse> getMoodMeters() {
-        return sentimentalAnalysisService.getAllMoodListResponseDto();
+
+    public Diary findDiaryByUserAndDiaryId(Long userId, Long diaryId) {
+        Diary diary = diaryRepository.findById(diaryId)
+                .orElseThrow(() -> new IllegalArgumentException("일기를 찾을 수 없습니다."));
+
+        authorizeUser(userId, diary);
+        return diary;
     }
-     */
+
+    private static void authorizeUser(Long userId, Diary diary) {
+        if (!diary.getUser().getUserId().equals(userId)) {
+            throw new AccessDeniedException("권한 없음");
+        }
+    }
+
 }
