@@ -1,5 +1,6 @@
 package com.example.thedayoftoday.domain.service;
 
+import com.example.thedayoftoday.domain.dto.diary.DiaryIdResponseDto;
 import com.example.thedayoftoday.domain.dto.diary.DiaryRequestDto;
 import com.example.thedayoftoday.domain.dto.diary.DiaryInfoResponseDto;
 import com.example.thedayoftoday.domain.dto.diary.moodmeter.MoodCategoryResponse;
@@ -66,7 +67,7 @@ public class DiaryService {
         diaryRepository.delete(diary);
     }
 
-    public DiaryRequestDto createEmptyDiary(Long userId) {
+    public DiaryIdResponseDto createEmptyDiary(Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("유저를 찾을 수 없습니다."));
 
@@ -80,7 +81,7 @@ public class DiaryService {
 
         diaryRepository.save(newDiary);
 
-        return new DiaryRequestDto(newDiary.getDiaryId(), newDiary.getTitle(), newDiary.getContent(), newDiary.getDiaryMood());
+        return new DiaryIdResponseDto(newDiary.getDiaryId());
     }
 
     public DiaryMood getMoodByDiaryId(Long diaryId) {
