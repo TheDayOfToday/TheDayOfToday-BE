@@ -52,6 +52,13 @@ public class DiaryService {
         diary.updateDiary(title, content);
     }
 
+    public void updateAnalysisContent(Long userId, Long diaryId, String content) {
+        Diary diary = diaryRepository.findById(diaryId)
+                .orElseThrow(() -> new IllegalArgumentException("다이어리가 존재하지 않습니다."));
+        authorizeUser(userId, diary);
+        diary.upDateAnalysisContent(content);
+    }
+
     public void deleteDiary(Long userId, Long diaryId) {
         Diary diary = diaryRepository.findByDiaryId(diaryId)
                 .orElseThrow(() -> new IllegalArgumentException("다이어리가 존재하지 않습니다."));
