@@ -74,7 +74,7 @@ public class DiaryController {
     }
 
     //사용자가 감정 선택
-    @PostMapping("/update-mood")
+    @PostMapping("/moodmeter")
     public ResponseEntity<String> updateDiaryMood(@AuthenticationPrincipal CustomUserDetails userDetails,
                                                   @RequestParam(value = "diaryId") Long diaryId,
                                                   @RequestBody DiaryMood mood) {
@@ -84,7 +84,7 @@ public class DiaryController {
     }
 
     //사용자가 일기 수정
-    @PutMapping("/update-diary")
+    @PutMapping("/moodmeter")
     public ResponseEntity<String> updateDiaryContent(@AuthenticationPrincipal CustomUserDetails userDetails,
                                                      @RequestBody DiaryContentDto diaryContentDto) {
         Long userId = userDetails.getUserId();
