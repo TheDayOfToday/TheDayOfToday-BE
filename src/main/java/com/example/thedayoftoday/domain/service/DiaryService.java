@@ -1,12 +1,22 @@
 package com.example.thedayoftoday.domain.service;
 
+import com.example.thedayoftoday.domain.dto.diary.DiaryIdResponseDto;
 import com.example.thedayoftoday.domain.dto.diary.DiaryRequestDto;
 import com.example.thedayoftoday.domain.dto.diary.DiaryInfoResponseDto;
+import com.example.thedayoftoday.domain.dto.diary.moodmeter.MoodCategoryResponse;
+import com.example.thedayoftoday.domain.dto.diary.moodmeter.MoodDetailsDto;
+import com.example.thedayoftoday.domain.dto.diary.moodmeter.MoodMeterCategoryDto;
 import com.example.thedayoftoday.domain.entity.Diary;
 import com.example.thedayoftoday.domain.entity.DiaryMood;
 import com.example.thedayoftoday.domain.entity.User;
+import com.example.thedayoftoday.domain.entity.enumType.Degree;
+import com.example.thedayoftoday.domain.entity.enumType.MoodMeter;
 import com.example.thedayoftoday.domain.repository.DiaryRepository;
 import com.example.thedayoftoday.domain.repository.UserRepository;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,7 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 
 @Service
-@Transactional
+@Transactional(readOnly = true)
 public class DiaryService {
 
     private final DiaryRepository diaryRepository;
@@ -36,6 +46,24 @@ public class DiaryService {
     }
 
     @Transactional
+    public DiaryIdResponseDto createDiary(Long userId, String title, String content, DiaryMood mood) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("유저를 찾을 수 없습니다."));
+
+        Diary newDiary = Diary.builder()
+                .title(title)
+                .content(content)
+                .createTime(LocalDateTime.now())
+                .diaryMood(mood)
+                .user(user)
+                .build();
+
+        diaryRepository.save(newDiary);
+
+        return new DiaryIdResponseDto(newDiary.getDiaryId());
+    }
+
+    @Transactional
     public void updateDiaryContent(Long userId, Long diaryId, String title, String content) {
         Diary diary = diaryRepository.findById(diaryId)
                 .orElseThrow(() -> new IllegalArgumentException("다이어리가 존재하지 않습니다."));
@@ -43,6 +71,15 @@ public class DiaryService {
         diary.updateDiary(title, content);
     }
 
+    @Transactional
+    public void updateAnalysisContent(Long userId, Long diaryId, String content) {
+        Diary diary = diaryRepository.findById(diaryId)
+                .orElseThrow(() -> new IllegalArgumentException("다이어리가 존재하지 않습니다."));
+        authorizeUser(userId, diary);
+        diary.upDateAnalysisContent(content);
+    }
+
+    @Transactional
     public void deleteDiary(Long userId, Long diaryId) {
         Diary diary = diaryRepository.findByDiaryId(diaryId)
                 .orElseThrow(() -> new IllegalArgumentException("다이어리가 존재하지 않습니다."));
@@ -50,7 +87,7 @@ public class DiaryService {
         diaryRepository.delete(diary);
     }
 
-    public DiaryRequestDto createEmptyDiary(Long userId) {
+    public DiaryIdResponseDto createEmptyDiary(Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("유저를 찾을 수 없습니다."));
 
@@ -64,7 +101,7 @@ public class DiaryService {
 
         diaryRepository.save(newDiary);
 
-        return new DiaryRequestDto(newDiary.getDiaryId(), newDiary.getTitle(), newDiary.getContent(), newDiary.getDiaryMood());
+        return new DiaryIdResponseDto(newDiary.getDiaryId());
     }
 
     public DiaryMood getMoodByDiaryId(Long diaryId) {
@@ -89,15 +126,44 @@ public class DiaryService {
         );
     }
 
+    public List<MoodCategoryResponse> getAllMoodListResponseDto() {
+        Map<Degree, List<MoodDetailsDto>> moodGroup = new LinkedHashMap<>();
+
+        for (Degree degree : Degree.values()) {
+            if (degree == Degree.NONE) continue;
+            moodGroup.put(degree, new ArrayList<>());
+        }
+
+        for (MoodMeter mood : MoodMeter.values()) {
+            Degree degree = mood.getDegree();
+            if (degree == null || degree == Degree.NONE) {
+                continue;
+            }
+            MoodDetailsDto dto = new MoodDetailsDto(mood.getMoodName(),mood.getColor());
+            moodGroup.get(degree).add(dto);
+        }
+
+        List<MoodCategoryResponse> moodCategories = new ArrayList<>();
+
+        for (Map.Entry<Degree, List<MoodDetailsDto>> entry : moodGroup.entrySet()) {
+            moodCategories.add(
+                    new MoodMeterCategoryDto(entry.getKey().getDegreeName(), entry.getValue())
+            );
+        }
+        return moodCategories;
+    }
+
+    public Diary findDiaryByUserAndDiaryId(Long userId, Long diaryId) {
+        Diary diary = diaryRepository.findById(diaryId)
+                .orElseThrow(() -> new IllegalArgumentException("일기를 찾을 수 없습니다."));
+
+        authorizeUser(userId, diary);
+        return diary;
+    }
+
     private static void authorizeUser(Long userId, Diary diary) {
         if (!diary.getUser().getUserId().equals(userId)) {
             throw new AccessDeniedException("권한 없음");
         }
     }
-
-    /* 일단추가해둠
-        public List<MoodCategoryResponse> getMoodMeters() {
-        return sentimentalAnalysisService.getAllMoodListResponseDto();
-    }
-     */
 }

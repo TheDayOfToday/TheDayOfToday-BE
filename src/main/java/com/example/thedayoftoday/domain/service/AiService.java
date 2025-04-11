@@ -18,8 +18,8 @@ import java.io.InputStreamReader;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
+import org.modelmapper.internal.bytebuddy.asm.Advice.OffsetMapping.Target.ForField.ReadOnly;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.io.ByteArrayResource;
@@ -29,6 +29,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
@@ -36,6 +37,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 @Slf4j
 @Service
+@Transactional(readOnly = true)
 public class AiService {
 
     private final DiaryRepository diaryRepository;
