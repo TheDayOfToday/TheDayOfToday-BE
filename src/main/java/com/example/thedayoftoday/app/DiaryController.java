@@ -74,7 +74,7 @@ public class DiaryController {
     }
 
     //사용자가 감정 선택
-    @PostMapping("/update-mood")
+    @PostMapping("/moodmeter")
     public ResponseEntity<String> updateDiaryMood(@AuthenticationPrincipal CustomUserDetails userDetails,
                                                   @RequestParam(value = "diaryId") Long diaryId,
                                                   @RequestBody DiaryMood mood) {
@@ -84,7 +84,7 @@ public class DiaryController {
     }
 
     //사용자가 일기 수정
-    @PutMapping("/update-diary")
+    @PutMapping("/moodmeter")
     public ResponseEntity<String> updateDiaryContent(@AuthenticationPrincipal CustomUserDetails userDetails,
                                                      @RequestBody DiaryContentDto diaryContentDto) {
         Long userId = userDetails.getUserId();
@@ -94,7 +94,7 @@ public class DiaryController {
 
     //사용자 무드미터, 일기 토대로 감정 분석
     @PostMapping("/analyze")
-    public ResponseEntity<String> analyzeDiary(@AuthenticationPrincipal CustomUserDetails userDetails,
+    public ResponseEntity<AIAnalysisContentDto> analyzeDiary(@AuthenticationPrincipal CustomUserDetails userDetails,
                                                @RequestParam(value = "diaryId") Long diaryId) {
 
         Long userId = userDetails.getUserId();
@@ -102,8 +102,10 @@ public class DiaryController {
         DiaryMood mood = diaryService.getMoodByDiaryId(diaryId);
 
         String analysis = openAiService.analyzeDiary(diaryId, mood);
+
+        AIAnalysisContentDto aiAnalysisContentDto = new AIAnalysisContentDto(analysis);
         diaryService.updateAnalysisContent(userId, diaryId, analysis);
-        return ResponseEntity.ok(analysis);
+        return ResponseEntity.ok(aiAnalysisContentDto);
     }
 
     //대화모드 시작 버튼
