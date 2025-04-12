@@ -50,12 +50,6 @@ jobs:
           echo "Checking if Dockerfile exists..."
           ls -l Dockerfile || (echo "Dockerfile not found" && exit 1)
 
-      - name: Stop and remove existing app_v2 container if exists
-        run: |
-          docker ps -a | grep app_v2 || true
-          docker stop app_v2 || true
-          docker rm app_v2 || true
-
       - name: Copy JAR & Dockerfile to EC2
         uses: appleboy/scp-action@v0.1.4
         with:
@@ -78,24 +72,33 @@ jobs:
             echo "${{ secrets.APP_PROPS }}" > application.properties
             echo "${{ secrets.APP_JWT_PROPS }}" > application-jwt.properties
 
-            # Stopping and removing existing containers if running
+            # Stopping and removing existing app_v2 container if running
             echo "Stopping and removing existing app_v2 container..."
             docker stop app_v2 || true
             docker rm app_v2 || true
 
-            echo "Building new Docker image..."
-            docker build --no-cache -t thedayoftoday-app .
-
-            echo "Starting app_v2 container..."
-            nohup docker run -d --name app_v2 \
-              -p 8081:8080 \
-              -v $(pwd)/application.properties:/app/application.properties \
-              -v $(pwd)/application-jwt.properties:/app/application-jwt.properties \
-              thedayoftoday-app > app.log 2>&1 &
+            # Checking if port 8081 is available
+            echo "Checking if port 8081 is available..."
+            if docker ps | grep -q "8081->8080"; then
+              echo "Port 8081 is already in use. Trying another port..."
+              NEW_PORT=$(shuf -i 1000-9999 -n 1)
+              echo "Using port $NEW_PORT"
+              docker run -d --name app_v2 \
+                -p $NEW_PORT:8080 \
+                -v $(pwd)/application.properties:/app/application.properties \
+                -v $(pwd)/application-jwt.properties:/app/application-jwt.properties \
+                thedayoftoday-app
+            else
+              # If 8081 is free, use it
+              docker run -d --name app_v2 \
+                -p 8081:8080 \
+                -v $(pwd)/application.properties:/app/application.properties \
+                -v $(pwd)/application-jwt.properties:/app/application-jwt.properties \
+                thedayoftoday-app
+            fi
 
             sleep 5
             docker ps | grep app_v2 || (docker logs app_v2 && exit 1)
-
             echo "Switching Nginx to point to app_v2..."
             sudo ln -sf /etc/nginx/sites-available/thedayoftoday-v2 /etc/nginx/sites-enabled/default
             sudo systemctl reload nginx
@@ -105,6 +108,7 @@ jobs:
             docker stop app_v1 || true
             docker rm app_v1 || true
 
+            # Renaming app_v2 to app_v1
             echo "Renaming app_v2 to app_v1..."
             docker rename app_v2 app_v1
             echo "Deployment complete!"
