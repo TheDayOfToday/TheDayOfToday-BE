@@ -40,7 +40,7 @@ public class DiaryController {
         this.diaryService = diaryService;
         this.diaryRepository = diaryRepository;
     }
-    @PostMapping(value = "/monologue/start", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = "/monologue", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<DiaryIdResponseDto> createDiaryWithMood(@RequestParam("file") MultipartFile file,
                                                                   @AuthenticationPrincipal CustomUserDetails userDetails)
             throws IOException {
