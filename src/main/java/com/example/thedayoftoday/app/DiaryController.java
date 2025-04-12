@@ -54,7 +54,7 @@ public class DiaryController {
         return ResponseEntity.status(HttpStatus.CREATED).body(savedDiary);
     }
 
-    @GetMapping("/update-mood")
+    @GetMapping("/moodmeter")
     public RecommendRequestDto showDiaryMood(@AuthenticationPrincipal CustomUserDetails userDetails,
                                              @RequestParam(value = "diaryId") Long diaryId) {
         long userId = userDetails.getUserId();
@@ -84,7 +84,7 @@ public class DiaryController {
     }
 
     //사용자가 일기 수정
-    @PutMapping("/moodmeter")
+    @PutMapping("/update-diary")
     public ResponseEntity<String> updateDiaryContent(@AuthenticationPrincipal CustomUserDetails userDetails,
                                                      @RequestBody DiaryContentDto diaryContentDto) {
         Long userId = userDetails.getUserId();
