@@ -77,11 +77,20 @@ jobs:
             docker stop app_v2 || true
             docker rm app_v2 || true
 
-            # Always use port 8081, regardless of previous usage
+            # Check if port 8081 is in use
+            echo "Checking if port 8081 is in use..."
+            if docker ps | grep -q "8081->8080"; then
+              echo "Port 8081 is already in use by app_v1, stopping app_v1 and removing..."
+              docker stop app_v1 || true
+              docker rm app_v1 || true
+            fi
+
+            # Build the new Docker image
             echo "Building new Docker image..."
             docker build --no-cache -t thedayoftoday-app .
 
-            echo "Starting app_v2 container..."
+            # Starting the new app_v2 container
+            echo "Starting app_v2 container on port 8081..."
             docker run -d --name app_v2 \
               -p 8081:8080 \
               -v $(pwd)/application.properties:/app/application.properties \
@@ -90,6 +99,8 @@ jobs:
 
             sleep 5
             docker ps | grep app_v2 || (docker logs app_v2 && exit 1)
+
+            # Switching Nginx to point to app_v2
             echo "Switching Nginx to point to app_v2..."
             sudo ln -sf /etc/nginx/sites-available/thedayoftoday-v2 /etc/nginx/sites-enabled/default
             sudo systemctl reload nginx
