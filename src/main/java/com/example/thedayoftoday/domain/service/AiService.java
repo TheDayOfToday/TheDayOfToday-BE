@@ -73,9 +73,6 @@ public class AiService {
                     log.warn("임시 음성 파일 삭제 실패: {}", tempFile.getAbsolutePath());
                 }
             }
-        // 파일이 25MB 초과면 FFmpeg로 분할
-        if (tempFile.length() > MAX_FILE_SIZE) {
-            return transcribeLargeAudio(tempFile);
         }
     }
 
