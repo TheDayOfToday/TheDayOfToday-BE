@@ -56,19 +56,29 @@ public class AiService {
 
     //  음성 파일을 STT 변환 (Whisper API)
     public String transcribeAudio(MultipartFile audioFile) throws IOException {
-        File tempFile = convertMultipartFileToFile(audioFile);
+        File tempFile = null;
+        try {
+            tempFile = convertMultipartFileToFile(audioFile);
 
-        // MP3 파일이면 WAV로 변환
-        if (audioFile.getOriginalFilename() != null && audioFile.getOriginalFilename().endsWith(".mp3")) {
-            tempFile = convertMp3ToWav(tempFile);
+            // MP3 → WAV 변환
+            if (audioFile.getOriginalFilename() != null && audioFile.getOriginalFilename().endsWith(".mp3")) {
+                tempFile = convertMp3ToWav(tempFile);
+            }
+
+            // 25MB 이상이면 분할 처리
+            if (tempFile.length() > MAX_FILE_SIZE) {
+                return transcribeLargeAudio(tempFile);
+            }
+
+            return sendToWhisperApi(tempFile);
+        } finally {
+            if (tempFile != null && tempFile.exists()) {
+                boolean deleted = tempFile.delete();
+                if (!deleted) {
+                    log.warn("임시 음성 파일 삭제 실패: {}", tempFile.getAbsolutePath());
+                }
+            }
         }
-
-        // 파일이 25MB 초과면 FFmpeg로 분할
-        if (tempFile.length() > MAX_FILE_SIZE) {
-            return transcribeLargeAudio(tempFile);
-        }
-
-        return sendToWhisperApi(tempFile);
     }
 
     //  대용량 오디오 분할 및 STT 변환
