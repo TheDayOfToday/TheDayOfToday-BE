@@ -60,11 +60,6 @@ public class AiService {
         try {
             tempFile = convertMultipartFileToFile(audioFile);
 
-            // MP3 → WAV 변환
-            if (audioFile.getOriginalFilename() != null && audioFile.getOriginalFilename().endsWith(".mp3")) {
-                tempFile = convertMp3ToWav(tempFile);
-            }
-
             // 25MB 이상이면 분할 처리
             if (tempFile.length() > MAX_FILE_SIZE) {
                 return transcribeLargeAudio(tempFile);
@@ -119,34 +114,11 @@ public class AiService {
         return responseBody != null ? (String) responseBody.get("text") : "OPENAI로부터 아무런 응답이 없습니다";
     }
 
-    // MP3 → WAV 변환 (FFmpeg 사용)
-    private File convertMp3ToWav(File mp3File) throws IOException {
-        File wavFile = new File(mp3File.getParent(), mp3File.getName().replace(".mp3", ".wav"));
-
-        ProcessBuilder builder = new ProcessBuilder(
-                "ffmpeg", "-i", mp3File.getAbsolutePath(), "-ar", "16000", "-ac", "1", "-c:a", "pcm_s16le",
-                wavFile.getAbsolutePath()
-        );
-        builder.redirectErrorStream(true);
-        Process process = builder.start();
-
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                log.info(line);
-            }
-        }
-
-        checkProcessExitCode(process);
-
-        return wavFile;
-    }
-
     private static void checkProcessExitCode(Process process) throws IOException {
         try {
             int exitCode = process.waitFor();
             if (exitCode != 0) {
-                throw new IOException("FFmpeg로 MP3 파일을 WAV로 만드는데 실패");
+                throw new IOException("FFmpeg로 MP3 파일을 m4a로 만드는데 실패");
             }
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt(); // 현재 스레드의 인터럽트 상태 유지
@@ -157,7 +129,7 @@ public class AiService {
     // 오디오 파일을 FFmpeg로 25MB 이하로 분할
     private List<File> splitAudioFileWithFFmpeg(File inputFile) throws IOException {
         List<File> splitFiles = new ArrayList<>();
-        String outputPattern = inputFile.getParent() + "/split_%03d.wav";
+        String outputPattern = inputFile.getParent() + "/split_%03d.m4a";
 
         ProcessBuilder builder = new ProcessBuilder(
                 "ffmpeg", "-i", inputFile.getAbsolutePath(), "-f", "segment", "-segment_time", "30",
@@ -176,7 +148,7 @@ public class AiService {
         checkProcessExitCode(process);
 
         File parentDir = inputFile.getParentFile();
-        File[] files = parentDir.listFiles((dir, name) -> name.startsWith("split_") && name.endsWith(".wav"));
+        File[] files = parentDir.listFiles((dir, name) -> name.startsWith("split_") && name.endsWith(".m4a"));
         if (files != null) {
             splitFiles.addAll(List.of(files));
         }
@@ -252,7 +224,7 @@ public class AiService {
 
     // MultipartFile을 File로 변환
     private File convertMultipartFileToFile(MultipartFile file) throws IOException {
-        String fileName = Optional.ofNullable(file.getOriginalFilename()).orElse("default.tmp");
+        String fileName = Optional.ofNullable(file.getOriginalFilename()).orElse("default.m4a");
         File convFile = new File(System.getProperty("java.io.tmpdir"), fileName);
         try (FileOutputStream fos = new FileOutputStream(convFile)) {
             fos.write(file.getBytes());
