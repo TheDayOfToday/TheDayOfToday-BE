@@ -56,14 +56,23 @@ public class AiService {
 
     //  음성 파일을 STT 변환 (Whisper API)
     public String transcribeAudio(MultipartFile audioFile) throws IOException {
-        File tempFile = convertMultipartFileToFile(audioFile);
+        File tempFile = null;
+        try {
+            tempFile = convertMultipartFileToFile(audioFile);
 
-        // 파일이 25MB 초과면 FFmpeg로 분할
-        if (tempFile.length() > MAX_FILE_SIZE) {
-            return transcribeLargeAudio(tempFile);
-        }
+            // 25MB 이상이면 분할 처리
+            if (tempFile.length() > MAX_FILE_SIZE) {
+                return transcribeLargeAudio(tempFile);
+            }
 
-        return sendToWhisperApi(tempFile);
+            return sendToWhisperApi(tempFile);
+        } finally {
+            if (tempFile != null && tempFile.exists()) {
+                boolean deleted = tempFile.delete();
+                if (!deleted) {
+                    log.warn("임시 음성 파일 삭제 실패: {}", tempFile.getAbsolutePath());
+                }
+            }
     }
 
     //  대용량 오디오 분할 및 STT 변환
@@ -108,7 +117,7 @@ public class AiService {
         try {
             int exitCode = process.waitFor();
             if (exitCode != 0) {
-                throw new IOException("FFmpeg로 MP3 파일을 WAV로 만드는데 실패");
+                throw new IOException("FFmpeg로 MP3 파일을 m4a로 만드는데 실패");
             }
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt(); // 현재 스레드의 인터럽트 상태 유지
@@ -138,7 +147,7 @@ public class AiService {
         checkProcessExitCode(process);
 
         File parentDir = inputFile.getParentFile();
-        File[] files = parentDir.listFiles((dir, name) -> name.startsWith("split_") && name.endsWith(".wav"));
+        File[] files = parentDir.listFiles((dir, name) -> name.startsWith("split_") && name.endsWith(".m4a"));
         if (files != null) {
             splitFiles.addAll(List.of(files));
         }
@@ -243,10 +252,10 @@ public class AiService {
         requestBody.put("model", "gpt-3.5-turbo");
         requestBody.put("messages", List.of(
                 Map.of("role", "system", "content", """
-                다음 일기 내용을 분석해서 아래 리스트 중 감정 하나만 골라서 한국어로 반환해줘.
-                반드시 리스트에 있는 감정 중 하나만 말해줘. 다른 말은 하지 마.
-                감정 리스트: [%s]
-            """.formatted(allowedMoods)),
+                            다음 일기 내용을 분석해서 아래 리스트 중 감정 하나만 골라서 한국어로 반환해줘.
+                            반드시 리스트에 있는 감정 중 하나만 말해줘. 다른 말은 하지 마.
+                            감정 리스트: [%s]
+                        """.formatted(allowedMoods)),
                 Map.of("role", "user", "content", diaryText)
         ));
 
@@ -271,7 +280,7 @@ public class AiService {
                 아래는 사용자의 일기입니다.
                 사용자가 선택한 감정은 [%s]입니다. 이 감정을 반영하여 아래 일기를 분석해줘.
                 감정의 원인, 사용자 성향, 긍정적 마무리 코멘트 등을 한국어로 6문장으로 작성해줘.
-                        
+                
                 일기 내용:
                 %s
                 """.formatted(mood.getMoodName(), diary.getContent());
@@ -291,24 +300,25 @@ public class AiService {
         ));
         return callOpenAiApi(requestBody);
     }
+
     public WeeklyTitleFeedbackResponseDto analyzeWeeklyDiaryWithTitle(String combinedWeeklyDiary) {
         if (combinedWeeklyDiary == null || combinedWeeklyDiary.isBlank()) {
             return new WeeklyTitleFeedbackResponseDto("무기록", "해당 주간에는 작성된 일기가 없습니다.");
         }
 
         String prompt = """
-    아래는 사용자의 일주일간 일기 모음입니다.
-    각 일기에는 사용자가 선택한 감정이 포함되어 있습니다.
-
-    이 일기를 분석하여 감정의 흐름, 성향, 감정 변화의 원인 등을 바탕으로
-    아래 형식처럼 작성해주세요:
-
-    제목: 짧고 상징적인 한 줄 제목
-    피드백: 감정 흐름에 대한 공감 가는 피드백, 최소 6문장 이상
-
-    일기 모음:
-    %s
-    """.formatted(combinedWeeklyDiary);
+                아래는 사용자의 일주일간 일기 모음입니다.
+                각 일기에는 사용자가 선택한 감정이 포함되어 있습니다.
+                
+                이 일기를 분석하여 감정의 흐름, 성향, 감정 변화의 원인 등을 바탕으로
+                아래 형식처럼 작성해주세요:
+                
+                제목: 짧고 상징적인 한 줄 제목
+                피드백: 감정 흐름에 대한 공감 가는 피드백, 최소 6문장 이상
+                
+                일기 모음:
+                %s
+                """.formatted(combinedWeeklyDiary);
 
         Map<String, Object> requestBody = new HashMap<>();
         requestBody.put("model", "gpt-3.5-turbo");
@@ -336,19 +346,19 @@ public class AiService {
         }
 
         String prompt = """
-        다음은 사용자의 일주일간 일기 모음입니다.
-
-        전체 감정 흐름을 종합해 다음 중 하나로 판단해주세요:
-        - 좋은
-        - 나쁜
-        - 편안한
-        - 힘든
-
-        반드시 위 단어 중 하나만 한국어로 대답해주세요.
-
-        일기 모음:
-        %s
-        """.formatted(combinedWeeklyDiary);
+                다음은 사용자의 일주일간 일기 모음입니다.
+                
+                전체 감정 흐름을 종합해 다음 중 하나로 판단해주세요:
+                - 좋은
+                - 나쁜
+                - 편안한
+                - 힘든
+                
+                반드시 위 단어 중 하나만 한국어로 대답해주세요.
+                
+                일기 모음:
+                %s
+                """.formatted(combinedWeeklyDiary);
 
         Map<String, Object> requestBody = new HashMap<>();
         requestBody.put("model", "gpt-3.5-turbo");
@@ -367,6 +377,7 @@ public class AiService {
             default -> Degree.NONE; // 잘못된 응답 처리
         };
     }
+
     //파일 읽어들이기
     private byte[] readFileBytes(File file) throws IOException {
         return java.nio.file.Files.readAllBytes(file.toPath());
