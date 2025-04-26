@@ -377,7 +377,7 @@ public class AiService {
             case "힘든" -> Degree.HARD;
             default -> Degree.NONE; // 잘못된 응답 처리
         };
-    }
+    } 
 
     //파일 읽어들이기
     private byte[] readFileBytes(File file) throws IOException {
