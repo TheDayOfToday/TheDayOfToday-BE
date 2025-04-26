@@ -71,11 +71,10 @@ public class AiService {
                 boolean deleted = tempFile.delete();
                 if (!deleted) {
                     log.warn("임시 음성 파일 삭제 실패: {}", tempFile.getAbsolutePath());
-                }
-            }
+             }
+        }
     }
-    }
-
+}
     //  대용량 오디오 분할 및 STT 변환
     private String transcribeLargeAudio(File audioFile) throws IOException {
         List<File> splitFiles = splitAudioFileWithFFmpeg(audioFile);
