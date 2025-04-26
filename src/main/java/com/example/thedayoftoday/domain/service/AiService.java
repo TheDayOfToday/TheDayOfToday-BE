@@ -71,7 +71,8 @@ public class AiService {
                 boolean deleted = tempFile.delete();
                 if (!deleted) {
                     log.warn("임시 음성 파일 삭제 실패: {}", tempFile.getAbsolutePath());
-             }
+                 }
+            }
         }
     }
         
