@@ -1,5 +1,6 @@
 package com.example.thedayoftoday.app;
 
+import com.example.thedayoftoday.domain.dto.TestDto;
 import com.example.thedayoftoday.domain.dto.diary.*;
 import com.example.thedayoftoday.domain.dto.diary.conversation.ConversationResponseDto;
 import com.example.thedayoftoday.domain.dto.diary.moodmeter.MoodCategoryResponse;
@@ -42,7 +43,7 @@ public class DiaryController {
     }
     @PostMapping(value = "/monologue", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<DiaryIdResponseDto> createDiaryWithMood(@RequestParam("file") MultipartFile file,
-                                                                  @AuthenticationPrincipal CustomUserDetails userDetails)
+                                       @AuthenticationPrincipal CustomUserDetails userDetails)
             throws IOException {
         Long userId = userDetails.getUserId();
 

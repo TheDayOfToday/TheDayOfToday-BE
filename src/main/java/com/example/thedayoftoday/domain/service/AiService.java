@@ -9,7 +9,7 @@ import com.example.thedayoftoday.domain.entity.enumType.MoodMeter;
 import com.example.thedayoftoday.domain.repository.DiaryRepository;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
- 
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -40,6 +40,9 @@ import org.springframework.web.multipart.MultipartFile;
 @Transactional(readOnly = true)
 public class AiService {
 
+    private static final String NO_CONTENT = "작성된 내용이 없습니다.";
+    private static final String NO_TITLE = "작성된 제목이 없습니다.";
+    private static final String NO_AI_COMMENT = "작성된 AI 분석 내용이 없습니다.";
     private final DiaryRepository diaryRepository;
 
     public AiService(DiaryRepository diaryRepository) {
@@ -71,11 +74,11 @@ public class AiService {
                 boolean deleted = tempFile.delete();
                 if (!deleted) {
                     log.warn("임시 음성 파일 삭제 실패: {}", tempFile.getAbsolutePath());
-                 }
+                }
             }
         }
     }
-        
+
     //  대용량 오디오 분할 및 STT 변환
     private String transcribeLargeAudio(File audioFile) throws IOException {
         List<File> splitFiles = splitAudioFileWithFFmpeg(audioFile);
@@ -157,7 +160,13 @@ public class AiService {
 
     // 텍스트를 "일기 형식"으로 변환
     public DiaryBasicResponseDto convertToDiary(String text) {
+
+        if (!checkTextLength(text)) {
+            return new DiaryBasicResponseDto(NO_TITLE, NO_CONTENT);
+        }
+
         Map<String, Object> requestBody = new HashMap<>();
+
         requestBody.put("model", "gpt-3.5-turbo");
         requestBody.put("messages", List.of(
                 Map.of("role", "system", "content", "You are a diary-writing assistant. " +
@@ -175,8 +184,8 @@ public class AiService {
             ObjectMapper objectMapper = new ObjectMapper();
             JsonNode rootNode = objectMapper.readTree(response); //response를 직렬화시켜주기위해 사용
 
-            String title = rootNode.has("title") ? rootNode.get("title").asText() : "제목 없음";
-            String content = rootNode.has("content") ? rootNode.get("content").asText() : "내용 없음";
+            String title = rootNode.has("title") ? rootNode.get("title").asText() : NO_TITLE;
+            String content = rootNode.has("content") ? rootNode.get("content").asText() : NO_CONTENT;
 
             return new DiaryBasicResponseDto(title, content);
         } catch (Exception e) {
@@ -244,6 +253,11 @@ public class AiService {
     }
 
     public DiaryMood recommendMood(String diaryText) {
+        if (Objects.equals(diaryText, NO_CONTENT)) {
+            MoodMeter defaultMood = MoodMeter.UNKNOWN;
+            return new DiaryMood(defaultMood.getMoodName(), defaultMood.getColor());
+        }
+
         String allowedMoods = Arrays.stream(MoodMeter.values())
                 .map(MoodMeter::getMoodName)
                 .map(name -> "\"" + name + "\"")
@@ -254,7 +268,7 @@ public class AiService {
         requestBody.put("messages", List.of(
                 Map.of("role", "system", "content", """
                             다음 일기 내용을 분석해서 아래 리스트 중 감정 하나만 골라서 한국어로 반환해줘.
-                            반드시 리스트에 있는 감정 중 하나만 말해줘. 다른 말은 하지 마.
+                            반드시 리스트에 있는 감정 중 '모르겠는'을 빼고 하나만 말해줘. 다른 말은 하지 마.
                             감정 리스트: [%s]
                         """.formatted(allowedMoods)),
                 Map.of("role", "user", "content", diaryText)
@@ -276,6 +290,10 @@ public class AiService {
     public String analyzeDiary(Long diaryId, DiaryMood mood) {
         Diary diary = diaryRepository.findByDiaryId(diaryId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 다이어리가 존재하지 않습니다."));
+
+        if(Objects.equals(diary.getContent(), NO_CONTENT)){
+            return NO_AI_COMMENT;
+        }
 
         String prompt = """
                 아래는 사용자의 일기입니다.
@@ -364,7 +382,8 @@ public class AiService {
         Map<String, Object> requestBody = new HashMap<>();
         requestBody.put("model", "gpt-3.5-turbo");
         requestBody.put("messages", List.of(
-                Map.of("role", "system", "content", "You are an emotional analyzer. Return only one word: 좋은, 나쁜, 편안한, 힘든. "),
+                Map.of("role", "system", "content",
+                        "You are an emotional analyzer. Return only one word: 좋은, 나쁜, 편안한, 힘든. "),
                 Map.of("role", "user", "content", prompt)
         ));
 
@@ -377,10 +396,15 @@ public class AiService {
             case "힘든" -> Degree.HARD;
             default -> Degree.NONE; // 잘못된 응답 처리
         };
-    } 
+    }
 
     //파일 읽어들이기
     private byte[] readFileBytes(File file) throws IOException {
         return java.nio.file.Files.readAllBytes(file.toPath());
+    }
+
+    boolean checkTextLength(String text) {
+        String[] words = text.split("\\s+");
+        return words.length >= 8;
     }
 }
