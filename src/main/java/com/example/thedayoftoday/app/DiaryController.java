@@ -13,8 +13,10 @@ import java.io.IOException;
 
 import com.example.thedayoftoday.domain.service.ConversationService;
 import com.example.thedayoftoday.domain.service.DiaryService;
+
 import java.util.List;
 import java.util.Objects;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -40,6 +42,7 @@ public class DiaryController {
         this.diaryService = diaryService;
         this.diaryRepository = diaryRepository;
     }
+
     @PostMapping(value = "/monologue", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<DiaryIdResponseDto> createDiaryWithMood(@RequestParam("file") MultipartFile file,
                                                                   @AuthenticationPrincipal CustomUserDetails userDetails)
@@ -59,7 +62,7 @@ public class DiaryController {
                                              @RequestParam(value = "diaryId") Long diaryId) {
         long userId = userDetails.getUserId();
 
-        Diary diary = diaryRepository.findById(diaryId).orElseThrow(() -> new IllegalArgumentException("해당 일기가 없습니다"));
+        Diary diary = diaryRepository.findById(diaryId).orElseThrow(() -> new IllegalArgumentException("해당 일기가 없습니다."));
 
         if (!Objects.equals(diary.getUser().getUserId(), userId)) {
             throw new AccessDeniedException("자신의 일기만 조회할 수 있습니다.");
@@ -83,6 +86,14 @@ public class DiaryController {
         return ResponseEntity.ok("감정이 성공적으로 저장되었습니다.");
     }
 
+    //일기 조회
+    @GetMapping("/show")
+    public DiaryContentDto showDiary(@AuthenticationPrincipal CustomUserDetails userDetails,
+                                     @RequestParam(value = "diaryId") Long diaryId) {
+        Diary diary = diaryRepository.findById(diaryId).orElseThrow(() -> new IllegalArgumentException("해당 일기가 없습니다."));
+        return new DiaryContentDto(diaryId, diary.getTitle(), diary.getContent());
+    }
+
     //사용자가 일기 수정
     @PutMapping("/update-diary")
     public ResponseEntity<String> updateDiaryContent(@AuthenticationPrincipal CustomUserDetails userDetails,
@@ -95,7 +106,7 @@ public class DiaryController {
     //사용자 무드미터, 일기 토대로 감정 분석
     @PostMapping("/analyze")
     public ResponseEntity<AIAnalysisContentDto> analyzeDiary(@AuthenticationPrincipal CustomUserDetails userDetails,
-                                               @RequestParam(value = "diaryId") Long diaryId) {
+                                                             @RequestParam(value = "diaryId") Long diaryId) {
 
         Long userId = userDetails.getUserId();
 
