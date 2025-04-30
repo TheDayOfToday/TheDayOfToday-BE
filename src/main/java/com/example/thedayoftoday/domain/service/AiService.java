@@ -18,6 +18,7 @@ import java.io.InputStreamReader;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import javax.swing.text.html.Option;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.internal.bytebuddy.asm.Advice.OffsetMapping.Target.ForField.ReadOnly;
 import org.springframework.beans.factory.annotation.Value;
@@ -303,32 +304,39 @@ public class AiService {
         Diary diary = diaryRepository.findByDiaryId(diaryId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 다이어리가 존재하지 않습니다."));
 
+        Optional<String> userName = diaryRepository.findUserNameByDiaryId(diaryId);
+
         if (Objects.equals(diary.getContent(), NO_CONTENT)) {
             return NO_AI_COMMENT;
         }
-
-        String prompt = """
-                아래는 사용자의 일기입니다.
-                사용자가 선택한 감정은 [%s]입니다. 이 감정을 반영하여 아래 일기를 분석해줘.
-                감정의 원인, 사용자 성향, 긍정적 마무리 코멘트 등을 합쳐서 6문장으로 만들어줘.
-                
-                일기 내용:
-                %s
-                """.formatted(mood.getMoodName(), diary.getContent());
-
-        String result = callGptForAnalysis(prompt);
+        String result = callGptForAnalysis(diary.getContent(), mood, userName);
         diary.addAnalysisContent(result);
 
         return result;
     }
 
-    private String callGptForAnalysis(String prompt) {
+    private String callGptForAnalysis(String diaryContent, DiaryMood moodName, Optional<String> userName) {
+        String name = userName.orElse("사용자");
+
+        String systemMessage = """
+                 다음 일기 내용을 읽고, 다음 기준에 따라 분석을 해줘.
+                - 분석 대상은 %s님이야 반드시 이 이름+님으로 글을 시작해줘.
+                - 반드시 한 편의 짧은 글처럼 써줘. (9문장 정도)
+                - 모든 문장에는 예외없이 반드시 존댓말로 써줘.
+                - 처음엔 어떤 기분일지 말하고, 그 다음에 그렇게 생각한 이유를 분석해서 글을 써줘.
+                - 결과 앞에 'analysis:' 같은 키나 구분 문구는 절대로 붙이지 마.
+                - JSON 형식이나 리스트 형식 절대 사용하지 말고, 오직 한 문단의 자연스러운 글만 출력해.
+                - 마지막 문구는 자연스럽게 분석을 끝내는 것 처럼 작성해줘.
+                - 반드시 예외없이 '~겠죠?', '~일까요?', '~죠.' 같은 말투는 쓰지 말고, 단정적인 정중한 말로만 써줘.
+                """.formatted(name);
+
         Map<String, Object> requestBody = new HashMap<>();
         requestBody.put("model", "gpt-3.5-turbo");
         requestBody.put("messages", List.of(
-                Map.of("role", "system", "content", "다음 내용을 분석해서 감정의 원인, 성향, 긍정적 코멘트를 한국어로 6문장으로 정리해줘."),
-                Map.of("role", "user", "content", prompt)
+                Map.of("role", "system", "content", systemMessage),
+                Map.of("role", "user", "content", diaryContent)
         ));
+
         return callOpenAiApi(requestBody);
     }
 
