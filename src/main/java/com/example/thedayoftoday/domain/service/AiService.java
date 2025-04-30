@@ -169,8 +169,20 @@ public class AiService {
 
         requestBody.put("model", "gpt-3.5-turbo");
         requestBody.put("messages", List.of(
-                Map.of("role", "system", "content", "You are a diary-writing assistant. " +
-                        "Generate a diary entry in JSON format with the keys: 'title' and 'content'."),
+                Map.of("role", "system", "content", """
+                            너는 사람의 음성을 바탕으로 감정적인 한국어 일기를 작성해주는 도우미야.
+                        
+                            사용자는 하루 동안 겪은 일이나 감정을 음성으로 털어놓았고,
+                            너는 그 음성을 텍스트로 변환한 내용을 기반으로 일기를 써줘야 해.
+                        
+                            다음 조건을 꼭 지켜:
+                            - 출력 형식은 반드시 JSON 형식이어야 하며, 다음 두 키만 포함해야 해:
+                              - title: 일기의 감정을 상징적으로 표현한 10자 이내 제목
+                              - content: 실제 일기처럼 감정이 잘 드러나는 본문
+                            - 사용자가 말한 분량(길이)에 따라 자연스럽게 본문 길이를 조절해서 작성
+                            - 문장은 과거형 일기 문체로 작성해줘 ("~했다", "~였다" 등)
+                            - 설명, 주석, 텍스트 없이 오직 JSON만 출력해
+                        """),
                 Map.of("role", "user", "content", "다음 내용을 바탕으로 한국어로 일기를 작성해줘:\n" + text)
         ));
 
@@ -291,14 +303,14 @@ public class AiService {
         Diary diary = diaryRepository.findByDiaryId(diaryId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 다이어리가 존재하지 않습니다."));
 
-        if(Objects.equals(diary.getContent(), NO_CONTENT)){
+        if (Objects.equals(diary.getContent(), NO_CONTENT)) {
             return NO_AI_COMMENT;
         }
 
         String prompt = """
                 아래는 사용자의 일기입니다.
                 사용자가 선택한 감정은 [%s]입니다. 이 감정을 반영하여 아래 일기를 분석해줘.
-                감정의 원인, 사용자 성향, 긍정적 마무리 코멘트 등을 한국어로 6문장으로 작성해줘.
+                감정의 원인, 사용자 성향, 긍정적 마무리 코멘트 등을 합쳐서 6문장으로 만들어줘.
                 
                 일기 내용:
                 %s
