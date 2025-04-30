@@ -353,7 +353,7 @@ public class AiService {
                 아래 형식처럼 작성해주세요:
                 
                 제목: 짧고 상징적인 한 줄 제목
-                피드백: 감정 흐름에 대한 공감 가는 피드백, 최소 6문장 이상
+                피드백: 감정 흐름에 대한 피드백, 최소 6문장 이상
                 
                 일기 모음:
                 %s
@@ -362,7 +362,7 @@ public class AiService {
         Map<String, Object> requestBody = new HashMap<>();
         requestBody.put("model", "gpt-3.5-turbo");
         requestBody.put("messages", List.of(
-                Map.of("role", "system", "content", "너는 공감과 감정 분석에 능숙한 피드백 작성 도우미야."),
+                Map.of("role", "system", "content", "너는 감정 분석에 능숙한 피드백 작성 도우미야."),
                 Map.of("role", "user", "content", prompt)
         ));
 
