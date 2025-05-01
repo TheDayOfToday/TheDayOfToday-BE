@@ -58,9 +58,9 @@ public class Diary {
     }
 
     public Boolean isEmpty() {
-        if (this.analysisContent.isEmpty()) {
+        if (this.analysisContent == null) {
             return true;
         }
-        return false;
+        return this.analysisContent.isBlank();
     }
 }
