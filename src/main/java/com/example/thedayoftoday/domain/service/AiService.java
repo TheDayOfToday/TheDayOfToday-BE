@@ -280,8 +280,11 @@ public class AiService {
         requestBody.put("model", "gpt-3.5-turbo");
         requestBody.put("messages", List.of(
                 Map.of("role", "system", "content", """
-                            다음 일기 내용을 분석해서 아래 리스트 중 감정 하나만 골라서 한국어로 반환해줘.
-                            반드시 리스트에 있는 감정 중 '모르겠는'을 빼고 하나만 말해줘. 다른 말은 하지 마.
+                            다음 일기 내용을 읽고 아래 감정 리스트 중 '모르겠는'을 제외한 정확히 하나의 감정을 반드시 예외없이 한국어로만 반환해줘.
+                            아래 규칙을 반드시 지켜:
+                            - 반드시 예외없이 감정 리스트에 없는 감정은 절대 말하지 마.
+                            - 반드시 예외없이 '모르겠는'이라는 단어는 절대 출력하지 마.
+                            - 반드시 예외없이 감정 이름 외에 다른 문장이나 설명은 하지 마.
                             감정 리스트: [%s]
                         """.formatted(allowedMoods)),
                 Map.of("role", "user", "content", diaryText)
