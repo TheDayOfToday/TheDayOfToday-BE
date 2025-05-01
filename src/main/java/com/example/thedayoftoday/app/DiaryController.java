@@ -158,7 +158,7 @@ public class DiaryController {
         return ResponseEntity.ok(new DiaryIdResponseDto(diaryId));
     }
 
-    @DeleteMapping("/diary/{year}/{month}/{day}")
+    @DeleteMapping("/delete/{year}/{month}/{day}")
     @Transactional
     public ResponseEntity<Void> deleteDiary(
             @AuthenticationPrincipal CustomUserDetails userDetails,
