@@ -56,4 +56,11 @@ public class Diary {
     public void upDateAnalysisContent(String analysisContent) {
         this.analysisContent = analysisContent;
     }
+
+    public Boolean isEmpty() {
+        if (this.analysisContent == null) {
+            return true;
+        }
+        return this.analysisContent.isBlank();
+    }
 }

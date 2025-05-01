@@ -1,9 +1,8 @@
 package com.example.thedayoftoday.domain;
 
-import com.example.thedayoftoday.domain.dto.diary.DiaryEntryResponseDto;
 import com.example.thedayoftoday.domain.dto.calendar.MonthColorsResponseDto;
-import com.example.thedayoftoday.domain.dto.calendar.SentimentalAnalysisListResponseDto;
-import com.example.thedayoftoday.domain.dto.calendar.SentimentalAnalysisResultDto;
+import com.example.thedayoftoday.domain.dto.diary.AIAnalysisContentDto;
+import com.example.thedayoftoday.domain.dto.diary.DiaryBasicResponseDto;
 import com.example.thedayoftoday.domain.entity.Diary;
 import com.example.thedayoftoday.domain.entity.DiaryMood;
 import com.example.thedayoftoday.domain.repository.DiaryRepository;
@@ -16,10 +15,10 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -31,71 +30,82 @@ class CalendarServiceTest {
     @InjectMocks
     private CalendarService calendarService;
 
-    private Diary testDiary;
+    private Diary nonEmptyDiary;
+    private Diary emptyDiary;
 
     @BeforeEach
     void setUp() {
-        DiaryMood diaryMood = new DiaryMood("기쁨", "#FFD700"); // 기존 SentimentalAnalysis 대신 DiaryMood 사용
+        DiaryMood diaryMood = new DiaryMood("기쁨", "#FFD700");
 
-        testDiary = Diary.builder()
-                .title("테스트 일기")
-                .content("테스트 내용")
-                .createTime(LocalDateTime.of(2025, 2, 15, 10, 0))
-                .user(null)
-                .diaryMood(diaryMood) // 변경된 DiaryMood 추가
-                .analysisContent("매우 기쁨") // 감정 분석 내용 추가
+        nonEmptyDiary = Diary.builder()
+                .title("제목")
+                .content("내용")
+                .createTime(LocalDateTime.of(2025, 5, 1, 10, 0))
+                .diaryMood(diaryMood)
+                .analysisContent("기쁨의 감정이 느껴집니다.")
+                .build();
+
+        emptyDiary = Diary.builder()
+                .title(null)
+                .content(null)
+                .createTime(LocalDateTime.of(2025, 5, 1, 12, 0))
+                .diaryMood(null)
+                .analysisContent(null)
                 .build();
     }
 
     @Test
-    void testGetMonthColors() {
+    void getDiaryEntry_일기존재시반환() {
         Long userId = 1L;
-        LocalDateTime startDate = LocalDateTime.of(2025, 2, 1, 0, 0);
-        LocalDateTime endDate = LocalDateTime.of(2025, 2, 28, 23, 59);
-
-        when(diaryRepository.findByUser_UserIdAndCreateTimeBetween(userId, startDate, endDate))
-                .thenReturn(Collections.singletonList(testDiary));
-
-        MonthColorsResponseDto result = calendarService.getMonthColors(userId, startDate, endDate);
-
-        assertEquals(userId, result.userId());
-        assertNotNull(result.colors());
-    }
-
-    @Test
-    void testGetDiaryEntry() {
-        Long userId = 1L;
-        LocalDateTime date = LocalDateTime.of(2025, 2, 15, 0, 0);
-
-        when(diaryRepository.findByUser_UserIdAndCreateTimeBetween(anyLong(), any(), any()))
-                .thenReturn(Collections.singletonList(testDiary));
-
-        DiaryEntryResponseDto result = calendarService.getDiaryEntry(userId, date);
-
-        assertEquals("2025-02-15", result.date());
-        assertNotNull(result.entries());
-        assertFalse(result.entries().isEmpty());
-        assertEquals("테스트 일기", result.entries().get(0).title());
-        assertEquals("테스트 내용", result.entries().get(0).content());
-    }
-
-    @Test
-    void testGetSentimentalAnalysis() {
-        Long userId = 1L;
-        LocalDateTime date = LocalDateTime.of(2025, 2, 15, 0, 0);
-
-        List<Diary> mockDiaries = Collections.singletonList(testDiary);
+        LocalDateTime date = LocalDateTime.of(2025, 5, 1, 0, 0);
 
         when(diaryRepository.findByUser_UserIdAndCreateTimeBetween(eq(userId), any(), any()))
-                .thenReturn(mockDiaries);
+                .thenReturn(List.of(nonEmptyDiary));
 
-        SentimentalAnalysisListResponseDto result = calendarService.getSentimentalAnalysis(userId, date);
+        DiaryBasicResponseDto result = calendarService.getDiaryEntry(userId, date);
 
-        assertEquals("2025-02-15", result.date());
+        assertNotNull(result);
+        assertEquals("제목", result.title());
+        assertEquals("내용", result.content());
+    }
 
-        List<SentimentalAnalysisResultDto> analysisResults = result.analysisResults();
-        assertNotNull(analysisResults);
-        assertFalse(analysisResults.isEmpty());
-        assertEquals("기쁨", analysisResults.get(0).diaryMood().getMoodName());
+    @Test
+    void getDiaryEntry_모든일기비어있으면Null() {
+        Long userId = 1L;
+        LocalDateTime date = LocalDateTime.of(2025, 5, 1, 0, 0);
+
+        when(diaryRepository.findByUser_UserIdAndCreateTimeBetween(eq(userId), any(), any()))
+                .thenReturn(List.of(emptyDiary));
+
+        DiaryBasicResponseDto result = calendarService.getDiaryEntry(userId, date);
+        assertNull(result);
+    }
+
+    @Test
+    void getSentimentalAnalysis_일기존재시분석내용반환() {
+        Long userId = 1L;
+        LocalDateTime date = LocalDateTime.of(2025, 5, 1, 0, 0);
+
+        when(diaryRepository.findByUser_UserIdAndCreateTimeBetween(eq(userId), any(), any()))
+                .thenReturn(List.of(nonEmptyDiary));
+
+        AIAnalysisContentDto result = calendarService.getSentimentalAnalysis(userId, date);
+
+        assertNotNull(result);
+        assertEquals("기쁨의 감정이 느껴집니다.", result.analysis());
+    }
+
+    @Test
+    void getSentimentalAnalysis_모든일기비어있으면기본분석반환() {
+        Long userId = 1L;
+        LocalDateTime date = LocalDateTime.of(2025, 5, 1, 0, 0);
+
+        when(diaryRepository.findByUser_UserIdAndCreateTimeBetween(eq(userId), any(), any()))
+                .thenReturn(List.of(emptyDiary));
+
+        AIAnalysisContentDto result = calendarService.getSentimentalAnalysis(userId, date);
+
+        assertNotNull(result);
+        assertEquals("해당 날짜의 감정 분석 데이터가 없습니다.", result.analysis());
     }
 }

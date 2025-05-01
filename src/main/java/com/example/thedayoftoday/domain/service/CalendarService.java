@@ -1,7 +1,7 @@
 package com.example.thedayoftoday.domain.service;
 
-import com.example.thedayoftoday.domain.dto.diary.DiaryContentDto;
-import com.example.thedayoftoday.domain.dto.diary.DiaryEntryResponseDto;
+import com.example.thedayoftoday.domain.dto.diary.AIAnalysisContentDto;
+import com.example.thedayoftoday.domain.dto.diary.DiaryBasicResponseDto;
 import com.example.thedayoftoday.domain.dto.calendar.MonthColorsResponseDto;
 import com.example.thedayoftoday.domain.dto.calendar.SentimentalAnalysisListResponseDto;
 import com.example.thedayoftoday.domain.dto.calendar.SentimentalAnalysisResultDto;
@@ -16,7 +16,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
@@ -38,65 +37,39 @@ public class CalendarService {
             String dateKey = diary.getCreateTime().format(formatter);
             String moodColor = "미분석";
 
-            if (diary.getDiaryMood() != null) {
-                moodColor = diary.getDiaryMood().getMoodColor(); // MoodMeter 타입이라면 String 변환 필요
+            if (diary.getDiaryMood() != null && !diary.isEmpty()) {
+                moodColor = diary.getDiaryMood().getMoodColor();
             }
 
             colors.put(dateKey, moodColor);
         }
 
-        return new MonthColorsResponseDto(userId, colors);
+        return new MonthColorsResponseDto(colors);
     }
 
+    public DiaryBasicResponseDto getDiaryEntry(Long userId, LocalDateTime dateTime) {
+        LocalDateTime startOfDay = dateTime.toLocalDate().atStartOfDay();
+        LocalDateTime endOfDay = startOfDay.plusDays(1).minusNanos(1);
 
-    public DiaryEntryResponseDto getDiaryEntry(Long userId, LocalDateTime date) {
-        List<Diary> diaries = diaryRepository.findByUser_UserIdAndCreateTimeBetween(
-                userId,
-                date.withHour(0).withMinute(0).withSecond(0),
-                date.withHour(23).withMinute(59).withSecond(59)
-        );
-
-        List<DiaryContentDto> diaryEntries = diaries.stream()
-                .map(diary -> new DiaryContentDto(diary.getDiaryId(),diary.getTitle(), diary.getContent()))
-                .collect(Collectors.toList());
-
-        if (diaryEntries.isEmpty()) {
-            diaryEntries.add(new DiaryContentDto(null,"일기 없음", "해당 날짜에 작성된 일기가 없습니다."));
-        }
-
-        return new DiaryEntryResponseDto(
-                date.toLocalDate().toString(),
-                diaryEntries
-        );
+        return diaryRepository.findByUser_UserIdAndCreateTimeBetween(userId, startOfDay, endOfDay).stream()
+                .filter(diary -> !diary.isEmpty())
+                .findFirst()
+                .map(diary -> new DiaryBasicResponseDto(diary.getTitle(), diary.getContent()))
+                .orElse(null);
     }
 
-    public SentimentalAnalysisListResponseDto getSentimentalAnalysis(Long userId, LocalDateTime date) {
-        List<Diary> diaries = diaryRepository.findByUser_UserIdAndCreateTimeBetween(
-                userId,
-                date.withHour(0).withMinute(0).withSecond(0),
-                date.withHour(23).withMinute(59).withSecond(59)
-        );
+    public AIAnalysisContentDto getSentimentalAnalysis(Long userId, LocalDateTime date) {
+        LocalDateTime startOfDay = date.toLocalDate().atStartOfDay();
+        LocalDateTime endOfDay = startOfDay.plusDays(1).minusNanos(1);
 
-        List<SentimentalAnalysisResultDto> analysisResults = new ArrayList<>();
+        List<Diary> diaries = diaryRepository.findByUser_UserIdAndCreateTimeBetween(userId, startOfDay, endOfDay);
+        String analysisContent = "해당 날짜의 감정 분석 데이터가 없습니다.";
 
         for (Diary diary : diaries) {
-            DiaryMood mood = null;
-            String analysisContent = "해당 날짜의 감정 분석 데이터가 없습니다.";
-
-            if (diary.getDiaryMood() != null) {
-                mood=diary.getDiaryMood();
-            }
-            if (diary.getAnalysisContent() != null) {
+            if (!diary.isEmpty()) {
                 analysisContent = diary.getAnalysisContent();
             }
-
-            analysisResults.add(new SentimentalAnalysisResultDto(mood, analysisContent));
         }
-
-        if (analysisResults.isEmpty()) {
-            analysisResults.add(new SentimentalAnalysisResultDto(null, "해당 날짜의 감정 분석 데이터가 없습니다."));
-        }
-
-        return new SentimentalAnalysisListResponseDto(date.toLocalDate().toString(), analysisResults);
+        return new AIAnalysisContentDto(analysisContent);
     }
 }

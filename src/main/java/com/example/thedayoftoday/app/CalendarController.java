@@ -1,6 +1,8 @@
 package com.example.thedayoftoday.app;
 
-import com.example.thedayoftoday.domain.dto.diary.DiaryEntryResponseDto;
+import com.example.thedayoftoday.domain.dto.diary.AIAnalysisContentDto;
+import com.example.thedayoftoday.domain.dto.diary.DiaryBasicResponseDto;
+import com.example.thedayoftoday.domain.dto.diary.DiaryContentDto;
 import com.example.thedayoftoday.domain.dto.calendar.MonthColorsResponseDto;
 import com.example.thedayoftoday.domain.dto.calendar.SentimentalAnalysisListResponseDto;
 import com.example.thedayoftoday.domain.security.CustomUserDetails;
@@ -33,7 +35,7 @@ public class CalendarController {
     }
 
     @GetMapping("/diary/{year}/{month}/{day}")
-    public DiaryEntryResponseDto getDiaryEntry(@AuthenticationPrincipal CustomUserDetails userDetails,
+    public DiaryBasicResponseDto getDiaryEntry(@AuthenticationPrincipal CustomUserDetails userDetails,
                                                @PathVariable int year,
                                                @PathVariable int month,
                                                @PathVariable int day) {
@@ -43,7 +45,7 @@ public class CalendarController {
     }
 
     @GetMapping("/analysis/{year}/{month}/{day}")
-    public SentimentalAnalysisListResponseDto getSentimentalAnalysis(
+    public AIAnalysisContentDto getSentimentalAnalysis(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable int year,
             @PathVariable int month,
