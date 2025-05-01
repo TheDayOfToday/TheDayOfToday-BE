@@ -40,4 +40,5 @@ public interface DiaryRepository extends JpaRepository<Diary, Long> {
     @Query("SELECT d FROM Diary d JOIN FETCH d.user WHERE d.user.userId = :userId AND d.title LIKE %:title%")
     List<Diary> findByUserIdAndTitleWithUser(@Param("userId") Long userId, @Param("title") String title);
 
+    void deleteByUserIdAndCreateTimeBetween(Long userId, LocalDateTime start, LocalDateTime end);
 }

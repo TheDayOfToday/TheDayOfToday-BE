@@ -15,6 +15,7 @@ import java.io.IOException;
 import com.example.thedayoftoday.domain.service.ConversationService;
 import com.example.thedayoftoday.domain.service.DiaryService;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 
@@ -24,6 +25,7 @@ import org.springframework.http.ResponseEntity;
 
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -156,12 +158,21 @@ public class DiaryController {
         return ResponseEntity.ok(new DiaryIdResponseDto(diaryId));
     }
 
-    //일기 삭제
-    @DeleteMapping("/delete/{diaryId}")
-    public ResponseEntity<String> deleteDiary(@AuthenticationPrincipal CustomUserDetails userDetails,
-                                              @PathVariable Long diaryId) {
+    @DeleteMapping("/diary/{year}/{month}/{day}")
+    @Transactional
+    public ResponseEntity<Void> deleteDiary(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @PathVariable int year,
+            @PathVariable int month,
+            @PathVariable int day) {
+
         Long userId = userDetails.getUserId();
-        diaryService.deleteDiary(userId, diaryId);
-        return ResponseEntity.ok("삭제가 완료되었습니다.");
+
+        LocalDateTime start = LocalDateTime.of(year, month, day, 0, 0, 0);
+        LocalDateTime end = start.plusDays(1);
+
+        diaryRepository.deleteByUserIdAndCreateTimeBetween(userId, start, end);
+
+        return ResponseEntity.noContent().build(); // 204 No Content
     }
 }
