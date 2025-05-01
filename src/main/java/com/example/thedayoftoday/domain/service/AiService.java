@@ -9,7 +9,7 @@ import com.example.thedayoftoday.domain.entity.enumType.MoodMeter;
 import com.example.thedayoftoday.domain.repository.DiaryRepository;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
- 
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -18,6 +18,7 @@ import java.io.InputStreamReader;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import javax.swing.text.html.Option;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.internal.bytebuddy.asm.Advice.OffsetMapping.Target.ForField.ReadOnly;
 import org.springframework.beans.factory.annotation.Value;
@@ -40,6 +41,9 @@ import org.springframework.web.multipart.MultipartFile;
 @Transactional(readOnly = true)
 public class AiService {
 
+    private static final String NO_CONTENT = "작성된 내용이 없습니다.";
+    private static final String NO_TITLE = "작성된 제목이 없습니다.";
+    private static final String NO_AI_COMMENT = "작성된 AI 분석 내용이 없습니다.";
     private final DiaryRepository diaryRepository;
 
     public AiService(DiaryRepository diaryRepository) {
@@ -71,11 +75,11 @@ public class AiService {
                 boolean deleted = tempFile.delete();
                 if (!deleted) {
                     log.warn("임시 음성 파일 삭제 실패: {}", tempFile.getAbsolutePath());
-                 }
+                }
             }
         }
     }
-        
+
     //  대용량 오디오 분할 및 STT 변환
     private String transcribeLargeAudio(File audioFile) throws IOException {
         List<File> splitFiles = splitAudioFileWithFFmpeg(audioFile);
@@ -157,11 +161,29 @@ public class AiService {
 
     // 텍스트를 "일기 형식"으로 변환
     public DiaryBasicResponseDto convertToDiary(String text) {
+
+        if (!checkTextLength(text)) {
+            return new DiaryBasicResponseDto(NO_TITLE, NO_CONTENT);
+        }
+
         Map<String, Object> requestBody = new HashMap<>();
+
         requestBody.put("model", "gpt-3.5-turbo");
         requestBody.put("messages", List.of(
-                Map.of("role", "system", "content", "You are a diary-writing assistant. " +
-                        "Generate a diary entry in JSON format with the keys: 'title' and 'content'."),
+                Map.of("role", "system", "content", """
+                            너는 사람의 음성을 바탕으로 감정적인 한국어 일기를 작성해주는 도우미야.
+                        
+                            사용자는 하루 동안 겪은 일이나 감정을 음성으로 털어놓았고,
+                            너는 그 음성을 텍스트로 변환한 내용을 기반으로 일기를 써줘야 해.
+                        
+                            다음 조건을 꼭 지켜:
+                            - 출력 형식은 반드시 JSON 형식이어야 하며, 다음 두 키만 포함해야 해:
+                              - title: 일기의 감정을 상징적으로 표현한 10자 이내 제목
+                              - content: 실제 일기처럼 감정이 잘 드러나는 본문
+                            - 사용자가 말한 분량(길이)에 따라 자연스럽게 본문 길이를 조절해서 작성
+                            - 문장은 과거형 일기 문체로 작성해줘 ("~했다", "~였다" 등)
+                            - 설명, 주석, 텍스트 없이 오직 JSON만 출력해
+                        """),
                 Map.of("role", "user", "content", "다음 내용을 바탕으로 한국어로 일기를 작성해줘:\n" + text)
         ));
 
@@ -175,8 +197,8 @@ public class AiService {
             ObjectMapper objectMapper = new ObjectMapper();
             JsonNode rootNode = objectMapper.readTree(response); //response를 직렬화시켜주기위해 사용
 
-            String title = rootNode.has("title") ? rootNode.get("title").asText() : "제목 없음";
-            String content = rootNode.has("content") ? rootNode.get("content").asText() : "내용 없음";
+            String title = rootNode.has("title") ? rootNode.get("title").asText() : NO_TITLE;
+            String content = rootNode.has("content") ? rootNode.get("content").asText() : NO_CONTENT;
 
             return new DiaryBasicResponseDto(title, content);
         } catch (Exception e) {
@@ -244,6 +266,11 @@ public class AiService {
     }
 
     public DiaryMood recommendMood(String diaryText) {
+        if (Objects.equals(diaryText, NO_CONTENT)) {
+            MoodMeter defaultMood = MoodMeter.UNKNOWN;
+            return new DiaryMood(defaultMood.getMoodName(), defaultMood.getColor());
+        }
+
         String allowedMoods = Arrays.stream(MoodMeter.values())
                 .map(MoodMeter::getMoodName)
                 .map(name -> "\"" + name + "\"")
@@ -253,8 +280,11 @@ public class AiService {
         requestBody.put("model", "gpt-3.5-turbo");
         requestBody.put("messages", List.of(
                 Map.of("role", "system", "content", """
-                            다음 일기 내용을 분석해서 아래 리스트 중 감정 하나만 골라서 한국어로 반환해줘.
-                            반드시 리스트에 있는 감정 중 하나만 말해줘. 다른 말은 하지 마.
+                            다음 일기 내용을 읽고 아래 감정 리스트 중 '모르겠는'을 제외한 정확히 하나의 감정을 반드시 예외없이 한국어로만 반환해줘.
+                            아래 규칙을 반드시 지켜:
+                            - 반드시 예외없이 감정 리스트에 없는 감정은 절대 말하지 마.
+                            - 반드시 예외없이 '모르겠는'이라는 단어는 절대 출력하지 마.
+                            - 반드시 예외없이 감정 이름 외에 다른 문장이나 설명은 하지 마.
                             감정 리스트: [%s]
                         """.formatted(allowedMoods)),
                 Map.of("role", "user", "content", diaryText)
@@ -277,28 +307,39 @@ public class AiService {
         Diary diary = diaryRepository.findByDiaryId(diaryId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 다이어리가 존재하지 않습니다."));
 
-        String prompt = """
-                아래는 사용자의 일기입니다.
-                사용자가 선택한 감정은 [%s]입니다. 이 감정을 반영하여 아래 일기를 분석해줘.
-                감정의 원인, 사용자 성향, 긍정적 마무리 코멘트 등을 한국어로 6문장으로 작성해줘.
-                
-                일기 내용:
-                %s
-                """.formatted(mood.getMoodName(), diary.getContent());
+        Optional<String> userName = diaryRepository.findUserNameByDiaryId(diaryId);
 
-        String result = callGptForAnalysis(prompt);
+        if (Objects.equals(diary.getContent(), NO_CONTENT)) {
+            return NO_AI_COMMENT;
+        }
+        String result = callGptForAnalysis(diary.getContent(), mood, userName);
         diary.addAnalysisContent(result);
 
         return result;
     }
 
-    private String callGptForAnalysis(String prompt) {
+    private String callGptForAnalysis(String diaryContent, DiaryMood moodName, Optional<String> userName) {
+        String name = userName.orElse("사용자");
+
+        String systemMessage = """
+                 다음 일기 내용을 읽고, 다음 기준에 따라 분석을 해줘.
+                - 분석 대상은 %s님이야 반드시 이 이름+님으로 글을 시작해줘.
+                - 반드시 한 편의 짧은 글처럼 써줘. (9문장 정도)
+                - 모든 문장에는 예외없이 반드시 존댓말로 써줘.
+                - 처음엔 어떤 기분일지 말하고, 그 다음에 그렇게 생각한 이유를 분석해서 글을 써줘.
+                - 결과 앞에 'analysis:' 같은 키나 구분 문구는 절대로 붙이지 마.
+                - JSON 형식이나 리스트 형식 절대 사용하지 말고, 오직 한 문단의 자연스러운 글만 출력해.
+                - 마지막 문구는 자연스럽게 분석을 끝내는 것 처럼 작성해줘.
+                - 반드시 예외없이 '~겠죠?', '~일까요?', '~죠.' 같은 말투는 쓰지 말고, 단정적인 정중한 말로만 써줘.
+                """.formatted(name);
+
         Map<String, Object> requestBody = new HashMap<>();
         requestBody.put("model", "gpt-3.5-turbo");
         requestBody.put("messages", List.of(
-                Map.of("role", "system", "content", "다음 내용을 분석해서 감정의 원인, 성향, 긍정적 코멘트를 한국어로 6문장으로 정리해줘."),
-                Map.of("role", "user", "content", prompt)
+                Map.of("role", "system", "content", systemMessage),
+                Map.of("role", "user", "content", diaryContent)
         ));
+
         return callOpenAiApi(requestBody);
     }
 
@@ -315,7 +356,7 @@ public class AiService {
                 아래 형식처럼 작성해주세요:
                 
                 제목: 짧고 상징적인 한 줄 제목
-                피드백: 감정 흐름에 대한 공감 가는 피드백, 최소 6문장 이상
+                피드백: 감정 흐름에 대한 피드백, 최소 6문장 이상
                 
                 일기 모음:
                 %s
@@ -324,7 +365,7 @@ public class AiService {
         Map<String, Object> requestBody = new HashMap<>();
         requestBody.put("model", "gpt-3.5-turbo");
         requestBody.put("messages", List.of(
-                Map.of("role", "system", "content", "너는 공감과 감정 분석에 능숙한 피드백 작성 도우미야."),
+                Map.of("role", "system", "content", "너는 감정 분석에 능숙한 피드백 작성 도우미야."),
                 Map.of("role", "user", "content", prompt)
         ));
 
@@ -364,7 +405,8 @@ public class AiService {
         Map<String, Object> requestBody = new HashMap<>();
         requestBody.put("model", "gpt-3.5-turbo");
         requestBody.put("messages", List.of(
-                Map.of("role", "system", "content", "You are an emotional analyzer. Return only one word: 좋은, 나쁜, 편안한, 힘든. "),
+                Map.of("role", "system", "content",
+                        "You are an emotional analyzer. Return only one word: 좋은, 나쁜, 편안한, 힘든. "),
                 Map.of("role", "user", "content", prompt)
         ));
 
@@ -377,10 +419,15 @@ public class AiService {
             case "힘든" -> Degree.HARD;
             default -> Degree.NONE; // 잘못된 응답 처리
         };
-    } 
+    }
 
     //파일 읽어들이기
     private byte[] readFileBytes(File file) throws IOException {
         return java.nio.file.Files.readAllBytes(file.toPath());
+    }
+
+    boolean checkTextLength(String text) {
+        String[] words = text.split("\\s+");
+        return words.length >= 8;
     }
 }
