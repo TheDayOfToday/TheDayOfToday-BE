@@ -272,6 +272,7 @@ public class AiService {
         }
 
         String allowedMoods = Arrays.stream(MoodMeter.values())
+                .filter(mood -> mood != MoodMeter.UNKNOWN)
                 .map(MoodMeter::getMoodName)
                 .map(name -> "\"" + name + "\"")
                 .collect(Collectors.joining(", "));
