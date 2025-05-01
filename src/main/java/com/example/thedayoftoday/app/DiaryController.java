@@ -171,8 +171,7 @@ public class DiaryController {
         LocalDateTime start = LocalDateTime.of(year, month, day, 0, 0, 0);
         LocalDateTime end = start.plusDays(1);
 
-        diaryRepository.deleteByUserIdAndCreateTimeBetween(userId, start, end);
-
-        return ResponseEntity.noContent().build(); // 204 No Content
+        diaryRepository.deleteByUser_UserIdAndCreateTimeBetween(userId, start, end);
+        return ResponseEntity.noContent().build();
     }
 }
