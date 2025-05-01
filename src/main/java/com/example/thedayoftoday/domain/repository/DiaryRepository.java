@@ -16,6 +16,9 @@ public interface DiaryRepository extends JpaRepository<Diary, Long> {
     // 특정 유저 ID로 모든 Diary 조회
     List<Diary> findByUser_UserId(Long userId);
 
+    @Query("SELECT d.user.name FROM Diary d WHERE d.diaryId = :diaryId")
+    Optional<String> findUserNameByDiaryId(@Param("diaryId") Long diaryId);
+
     // 특정 유저 ID와 기간으로 Diary 조회
     List<Diary> findByUser_UserIdAndCreateTimeBetween(
             Long userId,
