@@ -11,6 +11,7 @@ import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -67,5 +68,16 @@ public class UserController {
     public ResponseEntity<String> addUser(@Valid @RequestBody SignupRequestDto signupRequestDto) {
         userService.join(signupRequestDto);
         return ResponseEntity.ok("회원가입이 완료되었습니다.");
+    }
+
+    @DeleteMapping("/delete")
+    public ResponseEntity<String> deleteUser(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        Long userId = userDetails.getUserId();
+        User user = userRepository.findById(userId).orElse(null);
+        if (user == null){
+            throw new IllegalArgumentException("해당 계정을 찾을 수 없습니다.");
+        }
+        userRepository.delete(user);
+        return ResponseEntity.ok("회원 삭제가 완료되었습니다.");
     }
 }
