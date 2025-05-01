@@ -48,7 +48,7 @@ public class DiaryController {
 
     @PostMapping(value = "/monologue", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<DiaryIdResponseDto> createDiaryWithMood(@RequestParam("file") MultipartFile file,
-                                       @AuthenticationPrincipal CustomUserDetails userDetails)
+                                                                  @AuthenticationPrincipal CustomUserDetails userDetails)
             throws IOException {
         Long userId = userDetails.getUserId();
 
@@ -91,10 +91,10 @@ public class DiaryController {
 
     //일기 조회
     @GetMapping("/show")
-    public DiaryContentDto showDiary(@AuthenticationPrincipal CustomUserDetails userDetails,
-                                     @RequestParam(value = "diaryId") Long diaryId) {
+    public DiaryBasicResponseDto showDiary(@AuthenticationPrincipal CustomUserDetails userDetails,
+                                           @RequestParam(value = "diaryId") Long diaryId) {
         Diary diary = diaryRepository.findById(diaryId).orElseThrow(() -> new IllegalArgumentException("해당 일기가 없습니다."));
-        return new DiaryContentDto(diaryId, diary.getTitle(), diary.getContent());
+        return new DiaryBasicResponseDto(diary.getTitle(), diary.getContent());
     }
 
     //사용자가 일기 수정
