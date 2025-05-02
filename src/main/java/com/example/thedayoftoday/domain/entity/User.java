@@ -57,4 +57,8 @@ public class User {
     public void changePassword(String password) {
         this.password = password;
     }
+
+    public void changeRecommendedBook(Book book) {
+        this.recommendedBook = book;
+    }
 }
