@@ -3,6 +3,8 @@ package com.example.thedayoftoday.domain.service;
 import com.example.thedayoftoday.domain.entity.Book;
 import com.example.thedayoftoday.domain.entity.User;
 import com.example.thedayoftoday.domain.repository.UserRepository;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,6 +27,7 @@ public class BookService {
 
     private final RestTemplate restTemplate = new RestTemplate();
     private final UserRepository userRepository;
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Value("${openai.api.key}")
     private String openAiApiKey;
@@ -60,15 +63,14 @@ public class BookService {
         user.changeRecommendedBook(book);
     }
 
-    private String getBookQuery (String diaryContent) {
+    private String getBookQuery(String diaryContent) {
         Map<String, Object> body = Map.of(
                 "model", "gpt-3.5-turbo",
                 "messages", List.of(
                         Map.of("role", "system", "content",
-                                "다음 일기를 보고 책을 하나 추천해줘.\n" +
-                                        "- 책 제목과 저자를 한 줄로 모두 포함해서 한글로 알려줘.\n" +
-                                        "- 예: 미움받을 용기 기시미 이치로\n" +
-                                        "- 다른 문장이나 설명은 절대 하지 마.\n"),
+                                "다음 일기를 보고 기존에 있는 관련된 책 하나를 추천해줘.\n" +
+                                        "- 오직 추천해주고 싶은 책 제목만 한 줄로 정확히 반환해줘.\n" +
+                                        "- 다른 문장이나 설명은 절대 하지 마."),
                         Map.of("role", "user", "content", diaryContent)
                 )
         );
@@ -84,7 +86,11 @@ public class BookService {
 
         List<Map<String, Object>> choices = (List<Map<String, Object>>) response.getBody().get("choices");
         Map<String, Object> message = (Map<String, Object>) choices.get(0).get("message");
-        return ((String) message.get("content")).trim();
+        String result = ((String) message.get("content")).trim();
+
+        log.info("GPT 추천 제목: {}", result);
+
+        return result;
     }
 
     private Book getBookInformation(String query) {
@@ -95,21 +101,28 @@ public class BookService {
                 "&QueryType=Keyword" +
                 "&SearchTarget=Book" +
                 "&MaxResults=1" +
-                "&Output=JS";
+                "&Output=js";
 
-        ResponseEntity<Map> response = restTemplate.getForEntity(url, Map.class);
-        List<Map<String, Object>> items = (List<Map<String, Object>>) response.getBody().get("item");
+        ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
+        String body = response.getBody();
 
-        if (items == null || items.isEmpty()) {
-            throw new RuntimeException("알라딘에서 책 정보를 찾을 수 없습니다.");
+        try {
+            Map<String, Object> parsed = objectMapper.readValue(body, new TypeReference<>() {});
+            List<Map<String, Object>> items = (List<Map<String, Object>>) parsed.get("item");
+
+            if (items == null || items.isEmpty()) {
+                throw new RuntimeException("알라딘에서 책 정보를 찾을 수 없습니다.");
+            }
+
+            Map<String, Object> bookData = items.get(0);
+            return Book.of(
+                    (String) bookData.get("title"),
+                    (String) bookData.get("author"),
+                    (String) bookData.get("description"),
+                    (String) bookData.get("cover")
+            );
+        } catch (Exception e) {
+            throw new RuntimeException("알라딘 응답 파싱 실패: " + e.getMessage(), e);
         }
-
-        Map<String, Object> bookData = items.get(0);
-        return Book.of(
-                (String) bookData.get("title"),
-                (String) bookData.get("author"),
-                (String) bookData.get("description"),
-                (String) bookData.get("cover")
-        );
     }
 }
