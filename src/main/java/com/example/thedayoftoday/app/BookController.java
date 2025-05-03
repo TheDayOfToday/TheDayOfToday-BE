@@ -30,11 +30,11 @@ public class BookController {
         Diary diary = diaryRepository.findById(diaryId)
                 .orElseThrow(() -> new IllegalArgumentException("일기를 찾을 수 없습니다."));
 
-        bookService.recommendBook(userDetails.getUserId(), diary.getContent());
+        bookService.recommendBook(userDetails.getUserId(), diary.getContent(), diary.getAnalysisContent());
         return ResponseEntity.ok().build();
     }
 
-    @GetMapping("/recommend")
+    @GetMapping("/show")
     public ResponseEntity<RecommendedBookResponseDto> getRecommendedBook(
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
