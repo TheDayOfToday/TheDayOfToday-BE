@@ -1,7 +1,6 @@
 package com.example.thedayoftoday.domain.service;
 
 import com.example.thedayoftoday.domain.dto.diary.DiaryIdResponseDto;
-import com.example.thedayoftoday.domain.dto.diary.DiaryRequestDto;
 import com.example.thedayoftoday.domain.dto.diary.DiaryInfoResponseDto;
 import com.example.thedayoftoday.domain.dto.diary.moodmeter.MoodCategoryResponse;
 import com.example.thedayoftoday.domain.dto.diary.moodmeter.MoodDetailsDto;
@@ -13,6 +12,7 @@ import com.example.thedayoftoday.domain.entity.enumType.Degree;
 import com.example.thedayoftoday.domain.entity.enumType.MoodMeter;
 import com.example.thedayoftoday.domain.repository.DiaryRepository;
 import com.example.thedayoftoday.domain.repository.UserRepository;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -20,8 +20,6 @@ import java.util.Map;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDateTime;
 
 @Service
 @Transactional(readOnly = true)
@@ -53,7 +51,7 @@ public class DiaryService {
         Diary newDiary = Diary.builder()
                 .title(title)
                 .content(content)
-                .createTime(LocalDateTime.now())
+                .createTime(LocalDate.now())
                 .diaryMood(mood)
                 .user(user)
                 .build();
@@ -94,7 +92,7 @@ public class DiaryService {
         Diary newDiary = Diary.builder()
                 .title("작성중인 일기")
                 .content("")
-                .createTime(LocalDateTime.now())
+                .createTime(LocalDate.now())
                 .diaryMood(null)
                 .user(user)
                 .build();

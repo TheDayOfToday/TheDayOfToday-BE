@@ -1,6 +1,7 @@
 package com.example.thedayoftoday.domain.repository;
 
 import com.example.thedayoftoday.domain.entity.Diary;
+import java.time.LocalDate;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -22,8 +23,8 @@ public interface DiaryRepository extends JpaRepository<Diary, Long> {
     // 특정 유저 ID와 기간으로 Diary 조회
     List<Diary> findByUser_UserIdAndCreateTimeBetween(
             Long userId,
-            LocalDateTime startDate,
-            LocalDateTime endDate
+            LocalDate startDate,
+            LocalDate endDate
     );
 
     // 특정 유저 ID로 모든 Diary 삭제
@@ -32,8 +33,8 @@ public interface DiaryRepository extends JpaRepository<Diary, Long> {
     // 특정 유저 ID와 기간으로 Diary 삭제
     void deleteByUser_UserIdAndCreateTimeBetween(
             Long userId,
-            LocalDateTime startDate,
-            LocalDateTime endDate
+            LocalDate startDate,
+            LocalDate endDate
     );
     Optional<Diary> findByDiaryId(Long diaryId);
 

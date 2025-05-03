@@ -15,6 +15,7 @@ import java.io.IOException;
 import com.example.thedayoftoday.domain.service.ConversationService;
 import com.example.thedayoftoday.domain.service.DiaryService;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
@@ -168,10 +169,9 @@ public class DiaryController {
 
         Long userId = userDetails.getUserId();
 
-        LocalDateTime start = LocalDateTime.of(year, month, day, 0, 0, 0);
-        LocalDateTime end = start.plusDays(1);
+        LocalDate date = LocalDate.of(year, month, day);
 
-        diaryRepository.deleteByUser_UserIdAndCreateTimeBetween(userId, start, end);
+        diaryRepository.deleteByUser_UserIdAndCreateTimeBetween(userId, date, date);
         return ResponseEntity.noContent().build();
     }
 }
