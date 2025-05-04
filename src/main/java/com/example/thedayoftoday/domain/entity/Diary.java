@@ -2,7 +2,7 @@ package com.example.thedayoftoday.domain.entity;
 
 import jakarta.persistence.*;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,7 +24,7 @@ public class Diary {
     @Lob
     private String content;
 
-    private LocalDateTime createTime;
+    private LocalDate createTime;
 
     @Embedded
     DiaryMood diaryMood;

@@ -27,6 +27,9 @@ public class User {
     @Enumerated(EnumType.STRING)
     private RoleType role;
 
+    @Embedded
+    private Book recommendedBook;
+
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @Builder.Default
     private List<Diary> diaries = new ArrayList<>();
@@ -53,5 +56,9 @@ public class User {
 
     public void changePassword(String password) {
         this.password = password;
+    }
+
+    public void changeRecommendedBook(Book book) {
+        this.recommendedBook = book;
     }
 }

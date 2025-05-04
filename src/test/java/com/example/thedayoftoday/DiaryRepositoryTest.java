@@ -3,6 +3,7 @@ package com.example.thedayoftoday;
 import com.example.thedayoftoday.domain.entity.Diary;
 import com.example.thedayoftoday.domain.entity.User;
 import com.example.thedayoftoday.domain.repository.DiaryRepository;
+import java.time.LocalDate;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,9 +12,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -82,14 +81,14 @@ class DiaryRepositoryTest {
         Diary diary1 = Diary.builder()
                 .title("Diary 1")
                 .content("Content 1")
-                .createTime(LocalDateTime.now())
+                .createTime(LocalDate.now())
                 .user(user)
                 .build();
 
         Diary diary2 = Diary.builder()
                 .title("Diary 2")
                 .content("Content 2")
-                .createTime(LocalDateTime.now())
+                .createTime(LocalDate.now())
                 .user(user)
                 .build();
 
@@ -115,7 +114,7 @@ class DiaryRepositoryTest {
                 .phoneNumber("010-1234-5678")
                 .build();        entityManager.persist(user);
 
-        LocalDateTime now = LocalDateTime.now();
+        LocalDate now = LocalDate.now();
         Diary diary1 = Diary.builder()
                 .title("Diary 1")
                 .content("Content 1")
@@ -168,14 +167,14 @@ class DiaryRepositoryTest {
         Diary diary1 = Diary.builder()
                 .title("Diary 1")
                 .content("Content 1")
-                .createTime(LocalDateTime.now())
+                .createTime(LocalDate.now())
                 .user(user)
                 .build();
 
         Diary diary2 = Diary.builder()
                 .title("Diary 2")
                 .content("Content 2")
-                .createTime(LocalDateTime.now())
+                .createTime(LocalDate.now())
                 .user(user)
                 .build();
 
@@ -202,7 +201,7 @@ class DiaryRepositoryTest {
                 .build();
         entityManager.persist(user);
 
-        LocalDateTime now = LocalDateTime.now();
+        LocalDate now = LocalDate.now();
         Diary diary1 = Diary.builder()
                 .title("Diary 1")
                 .content("Content 1")

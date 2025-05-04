@@ -2,17 +2,12 @@ package com.example.thedayoftoday.app;
 
 import com.example.thedayoftoday.domain.dto.diary.AIAnalysisContentDto;
 import com.example.thedayoftoday.domain.dto.diary.DiaryBasicResponseDto;
-import com.example.thedayoftoday.domain.dto.diary.DiaryContentDto;
 import com.example.thedayoftoday.domain.dto.calendar.MonthColorsResponseDto;
-import com.example.thedayoftoday.domain.dto.calendar.SentimentalAnalysisListResponseDto;
 import com.example.thedayoftoday.domain.security.CustomUserDetails;
 import com.example.thedayoftoday.domain.service.CalendarService;
-import org.springframework.http.ResponseEntity;
+import java.time.LocalDate;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
-
-import java.time.LocalDateTime;
 
 @RestController
 @RequestMapping("/calendar")
@@ -29,8 +24,8 @@ public class CalendarController {
                                                  @PathVariable int year,
                                                  @PathVariable int month) {
         Long userId = userDetails.getUserId();
-        LocalDateTime startDate = LocalDateTime.of(year, month, 1, 0, 0);
-        LocalDateTime endDate = startDate.plusMonths(1).minusSeconds(1);
+        LocalDate startDate = LocalDate.of(year, month, 1);
+        LocalDate endDate = startDate.plusMonths(1).minusDays(1); // 이번 달 말일
         return calendarService.getMonthColors(userId, startDate, endDate);
     }
 
@@ -40,7 +35,7 @@ public class CalendarController {
                                                @PathVariable int month,
                                                @PathVariable int day) {
         Long userId = userDetails.getUserId();
-        LocalDateTime date = LocalDateTime.of(year, month, day, 0, 0);
+        LocalDate date = LocalDate.of(year, month, day);
         return calendarService.getDiaryEntry(userId, date);
     }
 
@@ -51,7 +46,7 @@ public class CalendarController {
             @PathVariable int month,
             @PathVariable int day) {
         Long userId = userDetails.getUserId();
-        LocalDateTime date = LocalDateTime.of(year, month, day, 0, 0);
+        LocalDate date = LocalDate.of(month, year, day);
         return calendarService.getSentimentalAnalysis(userId, date);
     }
 }

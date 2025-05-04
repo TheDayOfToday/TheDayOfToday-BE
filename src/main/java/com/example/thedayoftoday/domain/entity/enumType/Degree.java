@@ -8,8 +8,7 @@ public enum Degree {
     BAD("나쁜"),
     COMFORT("편안한"),
     HARD("힘든"),
-    UNKNOWN(""),
-    NONE("미분석");
+    UNKNOWN("모르겠는");
 
     private final String degreeName;
 
