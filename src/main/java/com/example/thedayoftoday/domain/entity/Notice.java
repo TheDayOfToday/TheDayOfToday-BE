@@ -12,7 +12,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -32,14 +32,14 @@ public class Notice {
     @Lob
     private String noticeContent;
 
-    private LocalDateTime noticeTime;
+    private LocalDate noticeTime;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "userId", nullable = false)
     private User user;
 
     @Builder
-    public Notice(NoticeType noticeType, String noticeContent, LocalDateTime noticeTime, User user) {
+    public Notice(NoticeType noticeType, String noticeContent, LocalDate noticeTime, User user) {
         this.noticeType = noticeType;
         this.noticeContent = noticeContent;
         this.noticeTime = noticeTime;

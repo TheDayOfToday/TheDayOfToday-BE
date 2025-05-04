@@ -6,7 +6,7 @@ import com.example.thedayoftoday.domain.entity.WeeklyData;
 import com.example.thedayoftoday.domain.repository.DiaryRepository;
 import com.example.thedayoftoday.domain.repository.WeeklyDataRepository;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.temporal.WeekFields;
 import java.util.List;
@@ -57,8 +57,8 @@ public class WeeklyAnalysisService {
 
     public List<Diary> extractedWeeklyDiaryData(long userId, int year, int month, int week) {
         LocalDate[] weekRange = calculateStartAndEndDate(year, month, week);
-        LocalDateTime startDateTime = weekRange[0].atStartOfDay();
-        LocalDateTime endDateTime = weekRange[1].atTime(LocalTime.MAX);
+        LocalDate startDateTime = weekRange[0];
+        LocalDate endDateTime = weekRange[1];
 
         return diaryRepository.findByUser_UserIdAndCreateTimeBetween(userId, startDateTime, endDateTime);
     }

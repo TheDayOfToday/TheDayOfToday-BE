@@ -7,6 +7,7 @@ import com.example.thedayoftoday.domain.entity.Diary;
 import com.example.thedayoftoday.domain.entity.DiaryMood;
 import com.example.thedayoftoday.domain.repository.DiaryRepository;
 import com.example.thedayoftoday.domain.service.CalendarService;
+import java.time.LocalDate;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -14,7 +15,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.time.LocalDateTime;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -40,7 +40,7 @@ class CalendarServiceTest {
         nonEmptyDiary = Diary.builder()
                 .title("제목")
                 .content("내용")
-                .createTime(LocalDateTime.of(2025, 5, 1, 10, 0))
+                .createTime(LocalDate.of(2025, 5, 1))
                 .diaryMood(diaryMood)
                 .analysisContent("기쁨의 감정이 느껴집니다.")
                 .build();
@@ -48,7 +48,7 @@ class CalendarServiceTest {
         emptyDiary = Diary.builder()
                 .title(null)
                 .content(null)
-                .createTime(LocalDateTime.of(2025, 5, 1, 12, 0))
+                .createTime(LocalDate.of(2025, 5, 1))
                 .diaryMood(null)
                 .analysisContent(null)
                 .build();
@@ -57,7 +57,7 @@ class CalendarServiceTest {
     @Test
     void getDiaryEntry_일기존재시반환() {
         Long userId = 1L;
-        LocalDateTime date = LocalDateTime.of(2025, 5, 1, 0, 0);
+        LocalDate date = LocalDate.of(2025, 5, 1);
 
         when(diaryRepository.findByUser_UserIdAndCreateTimeBetween(eq(userId), any(), any()))
                 .thenReturn(List.of(nonEmptyDiary));
@@ -72,7 +72,7 @@ class CalendarServiceTest {
     @Test
     void getDiaryEntry_모든일기비어있으면Null() {
         Long userId = 1L;
-        LocalDateTime date = LocalDateTime.of(2025, 5, 1, 0, 0);
+        LocalDate date = LocalDate.of(2025, 5, 1);
 
         when(diaryRepository.findByUser_UserIdAndCreateTimeBetween(eq(userId), any(), any()))
                 .thenReturn(List.of(emptyDiary));
@@ -84,7 +84,7 @@ class CalendarServiceTest {
     @Test
     void getSentimentalAnalysis_일기존재시분석내용반환() {
         Long userId = 1L;
-        LocalDateTime date = LocalDateTime.of(2025, 5, 1, 0, 0);
+        LocalDate date = LocalDate.of(2025, 5, 1);
 
         when(diaryRepository.findByUser_UserIdAndCreateTimeBetween(eq(userId), any(), any()))
                 .thenReturn(List.of(nonEmptyDiary));
@@ -98,7 +98,7 @@ class CalendarServiceTest {
     @Test
     void getSentimentalAnalysis_모든일기비어있으면기본분석반환() {
         Long userId = 1L;
-        LocalDateTime date = LocalDateTime.of(2025, 5, 1, 0, 0);
+        LocalDate date = LocalDate.of(2025, 5, 1);
 
         when(diaryRepository.findByUser_UserIdAndCreateTimeBetween(eq(userId), any(), any()))
                 .thenReturn(List.of(emptyDiary));
@@ -107,5 +107,50 @@ class CalendarServiceTest {
 
         assertNotNull(result);
         assertEquals("해당 날짜의 감정 분석 데이터가 없습니다.", result.analysis());
+    }
+
+    @Test
+    void getMonthColors_감정분석된일기존재시_해당색상반환() {
+        Long userId = 1L;
+        LocalDate startDate = LocalDate.of(2025, 5, 1);
+        LocalDate endDate = LocalDate.of(2025, 5, 31);
+
+        DiaryMood mood = new DiaryMood("기쁨", "#FFD700");
+        Diary diary = Diary.builder()
+                .createTime(LocalDate.of(2025, 5, 10))
+                .diaryMood(mood)
+                .analysisContent("기쁨의 감정이 느껴집니다.")
+                .build();
+
+        when(diaryRepository.findByUser_UserIdAndCreateTimeBetween(eq(userId), eq(startDate), eq(endDate)))
+                .thenReturn(List.of(diary));
+
+        MonthColorsResponseDto result = calendarService.getMonthColors(userId, startDate, endDate);
+
+        assertNotNull(result);
+        assertEquals(1, result.colors().size());
+        assertEquals("#FFD700", result.colors().get("2025-05-10"));
+    }
+
+    @Test
+    void getMonthColors_감정미분석일기존재시_미분석문자반환() {
+        Long userId = 1L;
+        LocalDate startDate = LocalDate.of(2025, 5, 1);
+        LocalDate endDate = LocalDate.of(2025, 5, 31);
+
+        Diary diary = Diary.builder()
+                .createTime(LocalDate.of(2025, 5, 10))
+                .diaryMood(null)
+                .analysisContent(null)
+                .build();
+
+        when(diaryRepository.findByUser_UserIdAndCreateTimeBetween(eq(userId), eq(startDate), eq(endDate)))
+                .thenReturn(List.of(diary));
+
+        MonthColorsResponseDto result = calendarService.getMonthColors(userId, startDate, endDate);
+
+        assertNotNull(result);
+        assertEquals(1, result.colors().size());
+        assertEquals("미분석", result.colors().get("2025-05-10"));
     }
 }
