@@ -385,7 +385,7 @@ public class AiService {
 
     public Degree analyzeDegree(String combinedWeeklyDiary) {
         if (combinedWeeklyDiary == null || combinedWeeklyDiary.isBlank()) {
-            return Degree.NONE; // 기본값 처리
+            return null; // 기본값 처리
         }
 
         String prompt = """
@@ -418,7 +418,7 @@ public class AiService {
             case "나쁜" -> Degree.BAD;
             case "편안한" -> Degree.COMFORT;
             case "힘든" -> Degree.HARD;
-            default -> Degree.NONE; // 잘못된 응답 처리
+            default -> null; // 잘못된 응답 처리
         };
     }
 

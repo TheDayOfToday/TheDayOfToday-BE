@@ -128,13 +128,12 @@ public class DiaryService {
         Map<Degree, List<MoodDetailsDto>> moodGroup = new LinkedHashMap<>();
 
         for (Degree degree : Degree.values()) {
-            if (degree == Degree.NONE) continue;
             moodGroup.put(degree, new ArrayList<>());
         }
 
         for (MoodMeter mood : MoodMeter.values()) {
             Degree degree = mood.getDegree();
-            if (degree == null || degree == Degree.NONE) {
+            if (degree == null) {
                 continue;
             }
             MoodDetailsDto dto = new MoodDetailsDto(mood.getMoodName(),mood.getColor());
