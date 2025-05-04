@@ -33,17 +33,11 @@ public class WeeklySummaryScheduler {
 
         for (User user : allUsers) {
             LocalDate now = LocalDate.now();
-            WeekFields weekFields = WeekFields.ISO;
-
-            int year = now.getYear();
-            int month = now.getMonthValue();
-            int week = now.get(weekFields.weekOfMonth());
-
-            LocalDate[] weekRange = weeklyAnalysisService.calculateStartAndEndDate(year, month, week);
+            LocalDate[] weekRange = weeklyAnalysisService.calculateStartAndEndDate(now);
             LocalDate startDate = weekRange[0];
             LocalDate endDate = weekRange[1];
 
-            List<Diary> diaries = weeklyAnalysisService.extractedWeeklyDiaryData(user.getUserId(), year, month, week);
+            List<Diary> diaries = weeklyAnalysisService.extractedWeeklyDiaryData(user.getUserId(),weekRange);
             String combined = weeklyAnalysisService.combineWeeklyDiary(diaries);
             if (combined.isBlank()) continue;
 
