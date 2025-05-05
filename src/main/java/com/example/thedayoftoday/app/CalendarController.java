@@ -46,7 +46,7 @@ public class CalendarController {
             @PathVariable int month,
             @PathVariable int day) {
         Long userId = userDetails.getUserId();
-        LocalDate date = LocalDate.of(month, year, day);
+        LocalDate date = LocalDate.of(year, month, day);
         return calendarService.getSentimentalAnalysis(userId, date);
     }
 }

@@ -16,7 +16,7 @@ public class WeeklyAnalysisController {
         this.weeklyAnalysisService = weeklyAnalysisService;
     }
 
-    @GetMapping("/{year}/{month}/{week}")
+    @GetMapping("/{year}/{month}/{day}")
     public ResponseEntity<WeeklyAnalysisResponseDto> getWeeklyAnalysis(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable int year, @PathVariable int month,
