@@ -20,10 +20,10 @@ public class WeeklyAnalysisController {
     public ResponseEntity<WeeklyAnalysisResponseDto> getWeeklyAnalysis(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable int year, @PathVariable int month,
-            @PathVariable int week) {
+            @PathVariable int day) {
         Long userId = userDetails.getUserId();
         WeeklyAnalysisResponseDto weeklyAnalysisResponseDto = weeklyAnalysisService.getWeeklyAnalysis(userId, year,
-                month, week);
+                month, day);
 
         return ResponseEntity.ok(weeklyAnalysisResponseDto);
     }
