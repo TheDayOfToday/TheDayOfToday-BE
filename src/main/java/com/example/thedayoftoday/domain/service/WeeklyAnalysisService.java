@@ -26,17 +26,17 @@ public class WeeklyAnalysisService {
         this.diaryRepository = diaryRepository;
     }
 
-    public LocalDate[] calculateStartAndEndDate(int year, int month, int week) {
+    public LocalDate[] calculateStartAndEndDate(LocalDate date) {
         WeekFields weekFields = WeekFields.ISO;
-        LocalDate baseDate = LocalDate.of(year, month, 1);
-        LocalDate firstMonday = baseDate.with(weekFields.dayOfWeek(), 1);
-        LocalDate startDate = firstMonday.plusWeeks(week - 1);
+        int dayOfWeek = date.get(weekFields.dayOfWeek());
+        LocalDate startDate = date.minusDays(dayOfWeek - 1);
         LocalDate endDate = startDate.plusDays(6);
         return new LocalDate[]{startDate, endDate};
     }
 
-    public WeeklyAnalysisResponseDto getWeeklyAnalysis(Long userId, int year, int month, int week) {
-        LocalDate[] weekRange = calculateStartAndEndDate(year, month, week);
+    public WeeklyAnalysisResponseDto getWeeklyAnalysis(Long userId, int year, int month, int day) {
+        LocalDate date = LocalDate.of(year, month, day);
+        LocalDate[] weekRange = calculateStartAndEndDate(date);
         LocalDate startDate = weekRange[0];
         LocalDate endDate = weekRange[1];
 
@@ -46,17 +46,16 @@ public class WeeklyAnalysisService {
 
         return (targetWeekData != null)
                 ? new WeeklyAnalysisResponseDto(
-                year, month, week,
+                year, month, day,
                 targetWeekData.getTitle(),
                 targetWeekData.getDegree(),
                 targetWeekData.getFeedback(),
                 targetWeekData.getStartDate(),
                 targetWeekData.getEndDate())
-                : WeeklyAnalysisResponseDto.noData(year, month, week);
+                : WeeklyAnalysisResponseDto.noData(year, month, day);
     }
 
-    public List<Diary> extractedWeeklyDiaryData(long userId, int year, int month, int week) {
-        LocalDate[] weekRange = calculateStartAndEndDate(year, month, week);
+    public List<Diary> extractedWeeklyDiaryData(Long userId, LocalDate[] weekRange) {
         LocalDate startDateTime = weekRange[0];
         LocalDate endDateTime = weekRange[1];
 

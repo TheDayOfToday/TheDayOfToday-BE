@@ -3,16 +3,17 @@ package com.example.thedayoftoday.domain.service;
 import com.example.thedayoftoday.domain.dto.weeklyAnalysis.WeeklyAnalysisResponseDto;
 import com.example.thedayoftoday.domain.entity.WeeklyData;
 import com.example.thedayoftoday.domain.repository.WeeklyDataRepository;
-import java.time.temporal.WeekFields;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
 import java.util.Optional;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -39,77 +40,62 @@ class WeeklyAnalysisServiceTest {
     }
 
     @Test
-    void testGetWeeklyAnalysis_Week1_ShouldReturnCorrectData() {
+    void 주어진_날짜에_해당하는_주간데이터가_있으면_정상적으로_반환된다() {
         // given
         Long userId = 1L;
-        int year = 2025;
-        int month = 11;
-        int week = 1;
+        int year = 2025, month = 11, day = 1; // 11월 1일 → 주간: 10/27 ~ 11/2
+        LocalDate date = LocalDate.of(year, month, day);
 
-        // 주차 범위 계산: 서비스 로직과 동일하게 계산
-        LocalDate[] weekRange = calculateStartAndEndDate(year, month, week);
+        LocalDate[] range = weeklyAnalysisService.calculateStartAndEndDate(date);
+        LocalDate startDate = range[0];
+        LocalDate endDate = range[1];
+
+        when(weeklyDataRepository.findByUser_UserIdAndStartDateLessThanEqualAndEndDateGreaterThanEqual(
+                userId, endDate, startDate
+        )).thenReturn(Optional.of(sampleData));
+
+        // when
+        WeeklyAnalysisResponseDto result = weeklyAnalysisService.getWeeklyAnalysis(userId, year, month, day);
+
+        // then
+        assertNotNull(result);
+        assertEquals("1주차 감정 분석", result.title());
+        assertEquals("긍정긍정 맨~", result.feedback());
+        assertEquals(startDate, result.startDate());
+        assertEquals(endDate, result.endDate());
+
+        verify(weeklyDataRepository, times(1))
+                .findByUser_UserIdAndStartDateLessThanEqualAndEndDateGreaterThanEqual(userId, endDate, startDate);
+    }
+
+    @Test
+    void 주어진_날짜에_해당하는_주간데이터가_없으면_null값으로_반환된다() {
+        Long userId = 2L;
+        int year = 2025;
+        int month = 12;
+        int day = 25;
+        LocalDate date = LocalDate.of(year, month, day);
+
+        LocalDate[] weekRange = weeklyAnalysisService.calculateStartAndEndDate(date);
         LocalDate startOfWeek = weekRange[0];
         LocalDate endOfWeek = weekRange[1];
 
         when(weeklyDataRepository.findByUser_UserIdAndStartDateLessThanEqualAndEndDateGreaterThanEqual(
                 userId, endOfWeek, startOfWeek
-        )).thenReturn(Optional.of(sampleData));
+        )).thenReturn(Optional.empty());
 
         // when
-        WeeklyAnalysisResponseDto result = weeklyAnalysisService.getWeeklyAnalysis(userId, year, month, week);
+        WeeklyAnalysisResponseDto result = weeklyAnalysisService.getWeeklyAnalysis(userId, year, month, day);
 
         // then
-        assertEquals(sampleData.getTitle(), result.title());
-        assertEquals(sampleData.getFeedback(), result.feedback());
-        assertEquals(sampleData.getStartDate(), result.startDate());
-        assertEquals(sampleData.getEndDate(), result.endDate());
+        assertNotNull(result);
+        assertNull(result.title());
+        assertNull(result.feedback());
+        assertNull(result.degree());
+        assertEquals(startOfWeek, result.startDate());
+        assertEquals(endOfWeek, result.endDate());
 
         verify(weeklyDataRepository, times(1))
                 .findByUser_UserIdAndStartDateLessThanEqualAndEndDateGreaterThanEqual(userId, endOfWeek, startOfWeek);
     }
-
-    private LocalDate[] calculateStartAndEndDate(int year, int month, int week) {
-        WeekFields weekFields = WeekFields.ISO;
-        LocalDate baseDate = LocalDate.of(year, month, 1);
-        LocalDate firstMonday = baseDate.with(weekFields.dayOfWeek(), 1);
-        LocalDate startDate = firstMonday.plusWeeks(week - 1);
-        LocalDate endDate = startDate.plusDays(6);
-        return new LocalDate[]{startDate, endDate};
-    }
 }
-
-//    @Test
-//    void testGetWeeklyAnalysis_Success() {
-//        when(weeklyDataRepository.findAll()).thenReturn(List.of(sampleData));
-//
-//        WeeklyAnalysisResponseDto result = weeklyAnalysisService.getWeeklyAnalysis(1L,2025, 11, 1);
-//
-//        assertEquals(2025, result.year());
-//        assertEquals(11, result.month());
-//        assertEquals(2, result.week());
-//        assertEquals("2주차 감정 분석", result.title());
-//        assertEquals("긍정긍정 맨~", result.feedback());
-//        assertEquals(LocalDate.of(2025, 11, 3), result.startDate());
-//        assertEquals(LocalDate.of(2025, 11, 9), result.endDate());
-//
-//        verify(weeklyDataRepository, times(1)).findAll();
-//    }
-
-
-//    @Test
-//    void testGetWeeklyAnalysis_NoData() {
-//        when(weeklyDataRepository.findAll()).thenReturn(List.of());
-//
-//        WeeklyAnalysisResponseDto result = weeklyAnalysisService.getWeeklyAnalysis(1L,2025, 11, 2);
-//
-//        assertEquals(2025, result.year());
-//        assertEquals(11, result.month());
-//        assertEquals(2, result.week());
-//        assertNull(result.title());
-//        assertNull(result.feedback());
-//        assertNull(result.startDate());
-//        assertNull(result.endDate());
-//
-//        verify(weeklyDataRepository, times(1)).findAll();
-//    }
-
