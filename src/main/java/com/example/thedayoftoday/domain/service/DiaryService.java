@@ -85,6 +85,7 @@ public class DiaryService {
         diaryRepository.delete(diary);
     }
 
+    @Transactional
     public DiaryIdResponseDto createEmptyDiary(Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("유저를 찾을 수 없습니다."));
