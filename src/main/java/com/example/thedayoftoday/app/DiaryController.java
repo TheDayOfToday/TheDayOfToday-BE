@@ -150,10 +150,17 @@ public class DiaryController {
     //대화모드 끝
     @PostMapping("/conversation-mode/complete")
     public ResponseEntity<DiaryIdResponseDto> completeDiary(@AuthenticationPrincipal CustomUserDetails userDetails,
-                                                            @RequestParam("diaryId") Long diaryId) {
+                                                            @RequestParam("question") String question,
+                                                            @RequestParam("file") MultipartFile file,
+                                                            @RequestParam("diaryId") Long diaryId) throws IOException {
         Long userId = userDetails.getUserId();
+
+        String answer = openAiService.transcribeAudio(file);
+        conversationService.save(question, answer, diaryId);
+
         String mergedText = conversationService.mergeConversationText(diaryId);
         DiaryBasicResponseDto diary = openAiService.convertToDiary(mergedText);
+
         diaryService.updateDiaryContent(userId, diaryId, diary.title(), diary.content());
 
         return ResponseEntity.ok(new DiaryIdResponseDto(diaryId));
