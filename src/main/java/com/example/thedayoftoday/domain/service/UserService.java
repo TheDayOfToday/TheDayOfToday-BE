@@ -4,6 +4,7 @@ import com.example.thedayoftoday.domain.dto.user.SignupRequestDto;
 import com.example.thedayoftoday.domain.entity.User;
 import com.example.thedayoftoday.domain.entity.enumType.RoleType;
 import com.example.thedayoftoday.domain.repository.UserRepository;
+import com.example.thedayoftoday.exception.EmailDuplicationException;
 import jakarta.validation.Valid;
 
 import java.util.Optional;
@@ -25,7 +26,7 @@ public class UserService {
         boolean validUser = userRepository.existsByEmail(user.email());
 
         if (validUser) {
-            throw new IllegalArgumentException("해당 email은 이미 존재합니다");
+            throw new EmailDuplicationException("해당 Email은 이미 존재합니다.");
         }
 
         User newUser = User.builder()
