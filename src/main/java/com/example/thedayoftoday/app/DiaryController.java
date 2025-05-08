@@ -151,7 +151,8 @@ public class DiaryController {
     @PostMapping("/conversation-mode/complete")
     public ResponseEntity<DiaryIdResponseDto> completeDiary(@AuthenticationPrincipal CustomUserDetails userDetails,
                                                             @RequestParam("question") String question,
-                                                            @RequestParam(value ="file", required = false) MultipartFile file, @RequestParam("diaryId") Long diaryId) throws IOException {
+                                                            @RequestParam(value ="file", required = false) MultipartFile file,
+                                                            @RequestParam("diaryId") Long diaryId) throws IOException {
         Long userId = userDetails.getUserId();
 
         if(file !=null){
