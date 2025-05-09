@@ -22,6 +22,7 @@ public class Diary {
     private String title;
 
     @Lob
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String content;
 
     private LocalDate createTime;
