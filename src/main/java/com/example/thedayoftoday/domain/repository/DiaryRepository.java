@@ -1,7 +1,9 @@
 package com.example.thedayoftoday.domain.repository;
 
 import com.example.thedayoftoday.domain.entity.Diary;
+
 import java.time.LocalDate;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

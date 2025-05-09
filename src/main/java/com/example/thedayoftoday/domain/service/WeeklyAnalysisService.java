@@ -5,10 +5,12 @@ import com.example.thedayoftoday.domain.entity.Diary;
 import com.example.thedayoftoday.domain.entity.WeeklyData;
 import com.example.thedayoftoday.domain.repository.DiaryRepository;
 import com.example.thedayoftoday.domain.repository.WeeklyDataRepository;
+
 import java.time.LocalDate;
 import java.time.temporal.WeekFields;
 import java.util.List;
 import java.util.stream.Collectors;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
