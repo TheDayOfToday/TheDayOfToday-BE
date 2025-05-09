@@ -12,11 +12,13 @@ import com.example.thedayoftoday.domain.entity.enumType.Degree;
 import com.example.thedayoftoday.domain.entity.enumType.MoodMeter;
 import com.example.thedayoftoday.domain.repository.DiaryRepository;
 import com.example.thedayoftoday.domain.repository.UserRepository;
+
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -137,7 +139,7 @@ public class DiaryService {
             if (degree == null) {
                 continue;
             }
-            MoodDetailsDto dto = new MoodDetailsDto(mood.getMoodName(),mood.getColor());
+            MoodDetailsDto dto = new MoodDetailsDto(mood.getMoodName(), mood.getColor());
             moodGroup.get(degree).add(dto);
         }
 

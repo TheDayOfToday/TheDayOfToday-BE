@@ -15,5 +15,4 @@ public enum Degree {
     Degree(String degreeName) {
         this.degreeName = degreeName;
     }
-
 }

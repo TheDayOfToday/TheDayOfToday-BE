@@ -5,7 +5,9 @@ import com.example.thedayoftoday.domain.dto.diary.DiaryBasicResponseDto;
 import com.example.thedayoftoday.domain.dto.calendar.MonthColorsResponseDto;
 import com.example.thedayoftoday.domain.security.CustomUserDetails;
 import com.example.thedayoftoday.domain.service.CalendarService;
+
 import java.time.LocalDate;
+
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 

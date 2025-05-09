@@ -49,7 +49,7 @@ public class UserController {
     public ResponseEntity<String> updatePassword(@AuthenticationPrincipal CustomUserDetails userDetails,
                                                  @RequestBody PasswordUpdateRequest passwordUpdateRequest) {
         Long userId = userDetails.getUserId();
-        User user = userRepository.findById(userId).orElseThrow(()-> new IllegalArgumentException("존재하지 않은 사용자입니다."));
+        User user = userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("존재하지 않은 사용자입니다."));
 
         String newPassword = passwordUpdateRequest.newPassword();
 
@@ -74,7 +74,7 @@ public class UserController {
     public ResponseEntity<String> deleteUser(@AuthenticationPrincipal CustomUserDetails userDetails) {
         Long userId = userDetails.getUserId();
         User user = userRepository.findById(userId).orElse(null);
-        if (user == null){
+        if (user == null) {
             throw new IllegalArgumentException("해당 계정을 찾을 수 없습니다.");
         }
         userRepository.delete(user);

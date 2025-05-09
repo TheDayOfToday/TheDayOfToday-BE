@@ -19,5 +19,4 @@ public class DiaryMood {
         this.moodName = moodName;
         this.moodColor = moodColor;
     }
-
 }
