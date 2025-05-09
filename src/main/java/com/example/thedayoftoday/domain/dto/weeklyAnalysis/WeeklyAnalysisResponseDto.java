@@ -5,7 +5,7 @@ import com.example.thedayoftoday.domain.entity.enumType.Degree;
 import java.time.LocalDate;
 import java.time.temporal.WeekFields;
 
-public record   WeeklyAnalysisResponseDto(
+public record WeeklyAnalysisResponseDto(
         int year,
         int month,
         int day,
@@ -19,7 +19,8 @@ public record   WeeklyAnalysisResponseDto(
         LocalDate date = LocalDate.of(year, month, day);
         WeekFields weekFields = WeekFields.ISO;
         int dayOfWeek = date.get(weekFields.dayOfWeek());
-        LocalDate start = date.minusDays(dayOfWeek-1);
+        LocalDate start = date.minusDays(dayOfWeek - 1);
         LocalDate end = start.plusDays(6);
-        return new WeeklyAnalysisResponseDto(year, month, day, null, null, null, start, end);    }
+        return new WeeklyAnalysisResponseDto(year, month, day, null, null, null, start, end);
+    }
 }
