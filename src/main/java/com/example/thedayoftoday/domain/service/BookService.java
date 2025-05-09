@@ -82,7 +82,8 @@ public class BookService {
 
         HttpEntity<Map<String, Object>> request = new HttpEntity<>(body, headers);
         ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
-                GPT_URL, HttpMethod.POST, request, new ParameterizedTypeReference<>() {}
+                GPT_URL, HttpMethod.POST, request, new ParameterizedTypeReference<>() {
+                }
         );
 
         List<Map<String, Object>> choices = (List<Map<String, Object>>) response.getBody().get("choices");
@@ -116,7 +117,8 @@ public class BookService {
         log.debug("알라딘 응답 본문: {}", body);
 
         try {
-            Map<String, Object> parsed = objectMapper.readValue(body, new TypeReference<>() {});
+            Map<String, Object> parsed = objectMapper.readValue(body, new TypeReference<>() {
+            });
             List<Map<String, Object>> items = (List<Map<String, Object>>) parsed.get("item");
 
             if (items == null || items.isEmpty()) {

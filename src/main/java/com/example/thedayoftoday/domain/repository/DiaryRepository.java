@@ -2,10 +2,8 @@ package com.example.thedayoftoday.domain.repository;
 
 import com.example.thedayoftoday.domain.entity.Diary;
 import java.time.LocalDate;
-import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -36,6 +34,7 @@ public interface DiaryRepository extends JpaRepository<Diary, Long> {
             LocalDate startDate,
             LocalDate endDate
     );
+
     Optional<Diary> findByDiaryId(Long diaryId);
 
     @Query("SELECT d FROM Diary d JOIN FETCH d.user WHERE d.user.userId = :userId AND d.title LIKE %:title%")

@@ -35,7 +35,8 @@ public class SwaggerAuthController {
         Authentication authentication = authenticationManager.authenticate(token);
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
 
-        String access = jwtUtil.createAccessToken("access", userDetails.getUsername(), userDetails.getRole(), userDetails.getUserId());
+        String access = jwtUtil.createAccessToken("access", userDetails.getUsername(), userDetails.getRole(),
+                userDetails.getUserId());
 
         Map<String, String> result = new HashMap<>();
         result.put("accessToken", access);

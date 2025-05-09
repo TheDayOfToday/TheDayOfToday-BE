@@ -112,7 +112,8 @@ public class DiaryService {
         Diary diary = diaryRepository.findByDiaryId(diaryId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 다이어리가 존재하지 않습니다."));
 
-        DiaryMood diaryMood = (diary.getDiaryMood() != null) ? diary.getDiaryMood() : new DiaryMood("저장된 감정 없음", "#FFFFFF");
+        DiaryMood diaryMood =
+                (diary.getDiaryMood() != null) ? diary.getDiaryMood() : new DiaryMood("저장된 감정 없음", "#FFFFFF");
         String analysisContent = (diary.getAnalysisContent() != null) ? diary.getAnalysisContent() : "감정 분석 결과가 없습니다.";
 
         return new DiaryInfoResponseDto(
@@ -137,7 +138,7 @@ public class DiaryService {
             if (degree == null) {
                 continue;
             }
-            MoodDetailsDto dto = new MoodDetailsDto(mood.getMoodName(),mood.getColor());
+            MoodDetailsDto dto = new MoodDetailsDto(mood.getMoodName(), mood.getColor());
             moodGroup.get(degree).add(dto);
         }
 
