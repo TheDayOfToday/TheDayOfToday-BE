@@ -18,9 +18,7 @@ import java.io.InputStreamReader;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import javax.swing.text.html.Option;
 import lombok.extern.slf4j.Slf4j;
-import org.modelmapper.internal.bytebuddy.asm.Advice.OffsetMapping.Target.ForField.ReadOnly;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.io.ByteArrayResource;
@@ -258,7 +256,8 @@ public class AiService {
         Map<String, Object> requestBody = new HashMap<>();
         requestBody.put("model", "gpt-3.5-turbo");
         requestBody.put("messages", List.of(
-                Map.of("role", "system", "content", "이 질문에 대해서 한국어로 대답해주면서 간결하고 공감되는 다음 질문 하나만 생성해줘."),
+                Map.of("role", "system", "content", "이 질문에 대해서 한국어로 대답해주면서 간결하고 공감되는 다음 질문 하나만 생성해줘." +
+                        "- 다른 양식 넣지 말고 정확하게 질문만 한 문장으로 출력해줘"),
                 Map.of("role", "user", "content", "대답: " + answerText)
         ));
 
