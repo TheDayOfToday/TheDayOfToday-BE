@@ -18,7 +18,7 @@ public class Conversation {
     private String question;
 
     @Lob
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String answer;
 
     @ManyToOne(fetch = FetchType.LAZY)

@@ -256,8 +256,10 @@ public class AiService {
         Map<String, Object> requestBody = new HashMap<>();
         requestBody.put("model", "gpt-3.5-turbo");
         requestBody.put("messages", List.of(
-                Map.of("role", "system", "content", "이 질문에 대해서 한국어로 대답해주면서 간결하고 공감되는 다음 질문 하나만 생성해줘." +
-                        "- 다른 양식 넣지 말고 정확하게 질문만 한 문장으로 출력해줘"),
+                Map.of("role", "system", "content",
+                        "사용자의 대답을 보고 간결하면서도 감정을 담은 질문 하나만 만들어줘. " +
+                                "‘어떤 것이 궁금하신가요’ 같은 말은 절대 하지 말고, 진짜 친구가 따뜻하게 물어보듯 자연스럽게 말해줘. " +
+                                "질문이라는 단어도 사용하지 마. 대화하듯 말해줘."),
                 Map.of("role", "user", "content", "대답: " + answerText)
         ));
 
