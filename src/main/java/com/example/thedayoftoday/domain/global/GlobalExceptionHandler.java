@@ -1,5 +1,7 @@
-package com.example.thedayoftoday.exception;
+package com.example.thedayoftoday.domain.global;
 
+import com.example.thedayoftoday.domain.exception.EmailDuplicationException;
+import com.example.thedayoftoday.domain.exception.ErrorCodeMessage;
 import java.util.Objects;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

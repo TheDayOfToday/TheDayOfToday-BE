@@ -4,7 +4,7 @@ import com.example.thedayoftoday.domain.dto.user.SignupRequestDto;
 import com.example.thedayoftoday.domain.entity.User;
 import com.example.thedayoftoday.domain.entity.enumType.RoleType;
 import com.example.thedayoftoday.domain.repository.UserRepository;
-import com.example.thedayoftoday.exception.EmailDuplicationException;
+import com.example.thedayoftoday.domain.exception.EmailDuplicationException;
 import jakarta.validation.Valid;
 
 import java.util.Optional;
