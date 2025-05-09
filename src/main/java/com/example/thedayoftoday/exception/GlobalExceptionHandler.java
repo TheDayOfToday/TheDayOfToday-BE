@@ -13,8 +13,9 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(EmailDuplicationException.class)
     public ResponseEntity<ErrorCodeMessage> handleEmailDuplicate(EmailDuplicationException e) {
-        ErrorCodeMessage errorCodeMessage = new ErrorCodeMessage(e.getMessage());
-        return ResponseEntity.status(HttpStatus.CONFLICT).body(errorCodeMessage);
+        HttpStatus httpStatus = HttpStatus.CONFLICT;
+        ErrorCodeMessage errorCodeMessage = new ErrorCodeMessage(httpStatus.value(), e.getMessage());
+        return ResponseEntity.status(httpStatus).body(errorCodeMessage);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -23,9 +24,9 @@ public class GlobalExceptionHandler {
                 .map(ObjectError::getDefaultMessage)
                 .filter(Objects::nonNull)
                 .findFirst().orElse("잘못된 요청입니다");
-        ErrorCodeMessage errorCodeMessage = new ErrorCodeMessage(message);
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorCodeMessage);
+        HttpStatus httpStatus = HttpStatus.BAD_REQUEST;
+        ErrorCodeMessage errorCodeMessage = new ErrorCodeMessage(httpStatus.value(), message);
+        return ResponseEntity.status(httpStatus).body(errorCodeMessage);
     }
-
 
 }

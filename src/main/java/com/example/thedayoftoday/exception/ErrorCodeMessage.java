@@ -1,4 +1,4 @@
 package com.example.thedayoftoday.exception;
 
-public record ErrorCodeMessage(String message) {
+public record ErrorCodeMessage(int code, String message) {
 }
