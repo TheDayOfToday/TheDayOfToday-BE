@@ -1,6 +1,5 @@
 package com.example.thedayoftoday.domain.security.controller;
 
-
 import com.example.thedayoftoday.domain.security.entity.RefreshEntity;
 import com.example.thedayoftoday.domain.security.repository.RefreshRepository;
 import com.example.thedayoftoday.domain.security.util.JWTUtil;
@@ -94,7 +93,7 @@ public class ReissueController {
         Date date = new Date(System.currentTimeMillis() + expiredMs);
 
         RefreshEntity refreshEntity = new RefreshEntity();
-        refreshEntity.setEamil(username);
+        refreshEntity.setEmail(username);
         refreshEntity.setRefresh(refresh);
         refreshEntity.setExpiration(date.toString());
 

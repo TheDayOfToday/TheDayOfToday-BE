@@ -10,7 +10,6 @@ import com.example.thedayoftoday.domain.repository.WeeklyDataRepository;
 import com.example.thedayoftoday.domain.service.AiService;
 import com.example.thedayoftoday.domain.service.WeeklyAnalysisService;
 import java.time.LocalDate;
-import java.time.temporal.WeekFields;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -37,9 +36,11 @@ public class WeeklySummaryScheduler {
             LocalDate startDate = weekRange[0];
             LocalDate endDate = weekRange[1];
 
-            List<Diary> diaries = weeklyAnalysisService.extractedWeeklyDiaryData(user.getUserId(),weekRange);
+            List<Diary> diaries = weeklyAnalysisService.extractedWeeklyDiaryData(user.getUserId(), weekRange);
             String combined = weeklyAnalysisService.combineWeeklyDiary(diaries);
-            if (combined.isBlank()) continue;
+            if (combined.isBlank()) {
+                continue;
+            }
 
             WeeklyTitleFeedbackResponseDto feedbackDto = aiService.analyzeWeeklyDiaryWithTitle(combined);
             Degree degree = aiService.analyzeDegree(combined);

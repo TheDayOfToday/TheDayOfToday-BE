@@ -1,6 +1,5 @@
 package com.example.thedayoftoday.app;
 
-import com.example.thedayoftoday.domain.dto.TestDto;
 import com.example.thedayoftoday.domain.dto.diary.*;
 import com.example.thedayoftoday.domain.dto.diary.conversation.ConversationResponseDto;
 import com.example.thedayoftoday.domain.dto.diary.moodmeter.MoodCategoryResponse;
@@ -15,7 +14,6 @@ import java.io.IOException;
 import com.example.thedayoftoday.domain.service.ConversationService;
 import com.example.thedayoftoday.domain.service.DiaryService;
 
-import java.time.LocalDate;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
@@ -103,7 +101,8 @@ public class DiaryController {
     public ResponseEntity<String> updateDiaryContent(@AuthenticationPrincipal CustomUserDetails userDetails,
                                                      @RequestBody DiaryContentDto diaryContentDto) {
         Long userId = userDetails.getUserId();
-        diaryService.updateDiaryContent(userId, diaryContentDto.diaryId(), diaryContentDto.title(), diaryContentDto.content());
+        diaryService.updateDiaryContent(userId, diaryContentDto.diaryId(), diaryContentDto.title(),
+                diaryContentDto.content());
         return ResponseEntity.ok("일기 수정 완료");
     }
 
@@ -125,7 +124,8 @@ public class DiaryController {
 
     //대화모드 시작 버튼
     @PostMapping("/conversation-mode/start")
-    public ResponseEntity<DiaryIdResponseDto> startConversation(@AuthenticationPrincipal CustomUserDetails userDetails) {
+    public ResponseEntity<DiaryIdResponseDto> startConversation(
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
         Long userId = userDetails.getUserId();
         DiaryIdResponseDto responseDto = diaryService.createEmptyDiary(userId);
         return ResponseEntity.status(HttpStatus.CREATED).body(responseDto);
@@ -151,11 +151,11 @@ public class DiaryController {
     @PostMapping("/conversation-mode/complete")
     public ResponseEntity<DiaryIdResponseDto> completeDiary(@AuthenticationPrincipal CustomUserDetails userDetails,
                                                             @RequestParam("question") String question,
-                                                            @RequestParam(value ="file", required = false) MultipartFile file,
+                                                            @RequestParam(value = "file", required = false) MultipartFile file,
                                                             @RequestParam("diaryId") Long diaryId) throws IOException {
         Long userId = userDetails.getUserId();
 
-        if(file !=null){
+        if (file != null) {
             String answer = openAiService.transcribeAudio(file);
             conversationService.save(question, answer, diaryId);
         }
