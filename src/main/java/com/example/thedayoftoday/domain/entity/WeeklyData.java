@@ -1,7 +1,6 @@
 package com.example.thedayoftoday.domain.entity;
 
 import com.example.thedayoftoday.domain.entity.enumType.Degree;
-import com.example.thedayoftoday.domain.entity.enumType.MoodMeter;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;

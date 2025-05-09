@@ -4,10 +4,8 @@ import com.example.thedayoftoday.domain.entity.Diary;
 
 import java.time.LocalDate;
 
-import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 

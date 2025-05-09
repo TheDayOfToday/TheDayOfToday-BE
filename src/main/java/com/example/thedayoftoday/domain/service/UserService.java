@@ -45,7 +45,7 @@ public class UserService {
         if (validUser) {
             throw new EmailDuplicationException("해당 Email은 이미 존재합니다.");
         }
-        if(validPhoneNumber){
+        if (validPhoneNumber) {
             throw new PhoneNumberDuplicationExceptiono("해당 전화번호는 이미 존재합니다.");
         }
     }
