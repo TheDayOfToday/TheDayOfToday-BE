@@ -31,4 +31,11 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(httpStatus).body(errorCodeMessage);
     }
 
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ErrorCodeMessage> handleIllegalArgument(IllegalArgumentException e) {
+        HttpStatus httpStatus = HttpStatus.NOT_FOUND;
+        ErrorCodeMessage errorCodeMessage = new ErrorCodeMessage(httpStatus.value(), e.getMessage());
+        return ResponseEntity.status(httpStatus).body(errorCodeMessage);
+    }
+
 }
