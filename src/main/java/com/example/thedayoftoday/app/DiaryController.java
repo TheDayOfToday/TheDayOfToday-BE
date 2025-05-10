@@ -142,7 +142,7 @@ public class DiaryController {
         // Conversation 저장
         conversationService.save(question, answer, diaryId);
         // 텍스트 바탕으로 다음 질문 생성
-        String nextQuestion = openAiService.generateNextQuestion(answer);
+        String nextQuestion = openAiService.generateNextQuestion(conversationService.mergeConversationText(diaryId));
 
         return new ConversationResponseDto(nextQuestion);
     }

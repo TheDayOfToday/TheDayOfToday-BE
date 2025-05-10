@@ -159,11 +159,6 @@ public class AiService {
 
     // 텍스트를 "일기 형식"으로 변환
     public DiaryBasicResponseDto convertToDiary(String text) {
-
-        if (!checkTextLength(text)) {
-            return new DiaryBasicResponseDto(NO_TITLE, NO_CONTENT);
-        }
-
         Map<String, Object> requestBody = new HashMap<>();
 
         requestBody.put("model", "gpt-3.5-turbo");
@@ -172,17 +167,18 @@ public class AiService {
                             너는 사람의 음성을 바탕으로 감정적인 한국어 일기를 작성해주는 도우미야.
                         
                             사용자는 하루 동안 겪은 일이나 감정을 음성으로 털어놓았고,
-                            너는 그 음성을 텍스트로 변환한 내용을 기반으로 일기를 써줘야 해.
+                            너는 그 음성을 텍스트로 변환한 내용을 기반으로 자연스러운 일기로 변환해야 해.
                         
                             다음 조건을 꼭 지켜:
                             - 출력 형식은 반드시 JSON 형식이어야 하며, 다음 두 키만 포함해야 해:
                               - title: 일기의 감정을 상징적으로 표현한 10자 이내 제목
                               - content: 실제 일기처럼 감정이 잘 드러나는 본문
                             - 사용자가 말한 분량(길이)에 따라 자연스럽게 본문 길이를 조절해서 작성
+                            - 중간중간 잡음으로 인해 입력된 것 같은 텍스트는 반영하면 안됨
                             - 문장은 과거형 일기 문체로 작성해줘 ("~했다", "~였다" 등)
                             - 설명, 주석, 텍스트 없이 오직 JSON만 출력해
                         """),
-                Map.of("role", "user", "content", "다음 내용을 바탕으로 한국어로 일기를 작성해줘:\n" + text)
+                Map.of("role", "user", "content", "다음 내용을 바탕으로 한국어로 자연스럽게 일기를 작성해줘:\n" + text)
         ));
 
         String response = callOpenAiApi(requestBody);
@@ -252,15 +248,17 @@ public class AiService {
         return convFile;
     }
 
-    public String generateNextQuestion(String answerText) {
+    public String generateNextQuestion(String conversation) {
         Map<String, Object> requestBody = new HashMap<>();
         requestBody.put("model", "gpt-3.5-turbo");
         requestBody.put("messages", List.of(
                 Map.of("role", "system", "content",
-                        "사용자의 대답을 보고 간결하면서도 감정을 담은 질문 하나만 만들어줘. " +
-                                "‘어떤 것이 궁금하신가요’ 같은 말은 절대 하지 말고, 진짜 친구가 따뜻하게 물어보듯 자연스럽게 말해줘. " +
-                                "질문이라는 단어도 사용하지 마. 대화하듯 말해줘."),
-                Map.of("role", "user", "content", "대답: " + answerText)
+                        "해당 대화 내용을 보고 다음에 오면 자연스러울 것 같은 간결한 한 줄짜리 질문 하나만 만들어줘. " +
+                                " - ‘어떤 것이 궁금하신가요’ 같은 말은 절대 하지 말고, 진짜 친구가 따뜻하게 물어보듯 자연스럽게 말해줘." +
+                                " - 질문이라는 단어도 사용하지 마. 대화가 자연스럽게 이어질 수 있도록 말해줘." +
+                                " - 출력 양식은 질문 그 자체 text만 나와야해 다른 특수문자나 '질문 :' 같은 설명은 없어야 해" +
+                                " - 이전에 했던 질문들은 사용하면 절대 안돼. "),
+                Map.of("role", "user", "content", "대화 내용: " + conversation)
         ));
 
         return callOpenAiApi(requestBody);
@@ -426,10 +424,5 @@ public class AiService {
     //파일 읽어들이기
     private byte[] readFileBytes(File file) throws IOException {
         return java.nio.file.Files.readAllBytes(file.toPath());
-    }
-
-    boolean checkTextLength(String text) {
-        String[] words = text.split("\\s+");
-        return words.length >= 8;
     }
 }
