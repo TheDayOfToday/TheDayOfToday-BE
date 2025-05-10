@@ -159,11 +159,6 @@ public class AiService {
 
     // 텍스트를 "일기 형식"으로 변환
     public DiaryBasicResponseDto convertToDiary(String text) {
-
-        if (!checkTextLength(text)) {
-            return new DiaryBasicResponseDto(NO_TITLE, NO_CONTENT);
-        }
-
         Map<String, Object> requestBody = new HashMap<>();
 
         requestBody.put("model", "gpt-3.5-turbo");
@@ -429,10 +424,5 @@ public class AiService {
     //파일 읽어들이기
     private byte[] readFileBytes(File file) throws IOException {
         return java.nio.file.Files.readAllBytes(file.toPath());
-    }
-
-    boolean checkTextLength(String text) {
-        String[] words = text.split("\\s+");
-        return words.length >= 8;
     }
 }
