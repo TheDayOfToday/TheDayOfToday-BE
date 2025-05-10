@@ -252,15 +252,16 @@ public class AiService {
         return convFile;
     }
 
-    public String generateNextQuestion(String answerText) {
+    public String generateNextQuestion(String conversation) {
         Map<String, Object> requestBody = new HashMap<>();
         requestBody.put("model", "gpt-3.5-turbo");
         requestBody.put("messages", List.of(
                 Map.of("role", "system", "content",
-                        "사용자의 대답을 보고 간결하면서도 감정을 담은 질문 하나만 만들어줘. " +
-                                "‘어떤 것이 궁금하신가요’ 같은 말은 절대 하지 말고, 진짜 친구가 따뜻하게 물어보듯 자연스럽게 말해줘. " +
-                                "질문이라는 단어도 사용하지 마. 대화하듯 말해줘."),
-                Map.of("role", "user", "content", "대답: " + answerText)
+                        "해당 대화 내용을 보고 간결한 한 줄짜리 질문 하나만 만들어줘. " +
+                                " - ‘어떤 것이 궁금하신가요’ 같은 말은 절대 하지 말고, 진짜 친구가 따뜻하게 물어보듯 자연스럽게 말해줘." +
+                                " - 질문이라는 단어도 사용하지 마. 대화가 자연스럽게 이어질 수 있도록 말해줘." +
+                                " - 출력 양식은 질문 그 자체 text만 나와야해 다른 특수문자나 '질문 :' 같은 설명은 없어야 해"),
+                Map.of("role", "user", "content", "대화 내용: " + conversation)
         ));
 
         return callOpenAiApi(requestBody);
