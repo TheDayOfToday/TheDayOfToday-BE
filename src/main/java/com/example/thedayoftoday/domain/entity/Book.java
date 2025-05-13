@@ -2,6 +2,7 @@ package com.example.thedayoftoday.domain.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
+import jakarta.persistence.Lob;
 import lombok.*;
 
 @Embeddable
@@ -14,7 +15,8 @@ public class Book {
     private String title;
     private String author;
 
-    @Column(length = 2000)
+    @Lob
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String description;
 
     private String coverImageUrl;

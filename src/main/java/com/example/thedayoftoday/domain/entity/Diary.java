@@ -31,6 +31,7 @@ public class Diary {
     DiaryMood diaryMood;
 
     @Lob
+    @Column(columnDefinition = "TEXT")
     private String analysisContent;
 
     @ManyToOne(fetch = FetchType.LAZY)
