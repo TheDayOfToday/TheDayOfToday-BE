@@ -26,7 +26,7 @@ public class WeeklySummaryScheduler {
     private final UserRepository userRepository;
     private final WeeklyDataRepository weeklyDataRepository;
 
-    @Scheduled(cron = "59 55 11 * * TUE", zone = "Asia/Seoul")
+    @Scheduled(cron = "59 59 23 * * TUE", zone = "Asia/Seoul")
     public void summarizeWeeklyDiaries() {
         List<User> allUsers = userRepository.findAll();
 
