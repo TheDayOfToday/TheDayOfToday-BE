@@ -52,4 +52,3 @@ public class CalendarController {
         return calendarService.getSentimentalAnalysis(userId, date);
     }
 }
-

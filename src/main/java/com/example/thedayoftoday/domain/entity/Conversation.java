@@ -14,7 +14,7 @@ public class Conversation {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long conversationId;
 
-    @Column(nullable = false, length = 255)
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String question;
 
     @Lob
