@@ -25,7 +25,7 @@ public class WeeklyData {
     private Degree degree;
 
     @Lob
-    @Column(columnDefinition = "TEXT")
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String feedback;
 
     private LocalDate startDate;
