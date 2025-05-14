@@ -2,6 +2,7 @@ package com.example.thedayoftoday.domain.global;
 
 import com.example.thedayoftoday.domain.exception.EmailDuplicationException;
 import com.example.thedayoftoday.domain.exception.ErrorCodeMessage;
+import com.example.thedayoftoday.domain.exception.PhoneNumberDuplicationExceptiono;
 import java.util.Objects;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,6 +16,13 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(EmailDuplicationException.class)
     public ResponseEntity<ErrorCodeMessage> handleEmailDuplicate(EmailDuplicationException e) {
+        HttpStatus httpStatus = HttpStatus.CONFLICT;
+        ErrorCodeMessage errorCodeMessage = new ErrorCodeMessage(httpStatus.value(), e.getMessage());
+        return ResponseEntity.status(httpStatus).body(errorCodeMessage);
+    }
+
+    @ExceptionHandler(PhoneNumberDuplicationExceptiono.class)
+    public ResponseEntity<ErrorCodeMessage> handlePhoneNumberDuplicate(PhoneNumberDuplicationExceptiono e) {
         HttpStatus httpStatus = HttpStatus.CONFLICT;
         ErrorCodeMessage errorCodeMessage = new ErrorCodeMessage(httpStatus.value(), e.getMessage());
         return ResponseEntity.status(httpStatus).body(errorCodeMessage);
@@ -37,5 +45,6 @@ public class GlobalExceptionHandler {
         ErrorCodeMessage errorCodeMessage = new ErrorCodeMessage(httpStatus.value(), e.getMessage());
         return ResponseEntity.status(httpStatus).body(errorCodeMessage);
     }
+
 
 }
