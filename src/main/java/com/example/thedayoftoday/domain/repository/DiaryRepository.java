@@ -4,6 +4,7 @@ import com.example.thedayoftoday.domain.entity.Diary;
 
 import java.time.LocalDate;
 
+import com.example.thedayoftoday.domain.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
@@ -41,4 +42,6 @@ public interface DiaryRepository extends JpaRepository<Diary, Long> {
 
     @Query("SELECT d FROM Diary d JOIN FETCH d.user WHERE d.user.userId = :userId AND d.title LIKE %:title%")
     List<Diary> findByUserIdAndTitleWithUser(@Param("userId") Long userId, @Param("title") String title);
+
+    boolean existsByUserAndCreateTimeAfter(User user, LocalDate date);
 }
