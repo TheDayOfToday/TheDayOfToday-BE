@@ -68,8 +68,8 @@ public class BookService {
                 "model", "gpt-3.5-turbo",
                 "messages", List.of(
                         Map.of("role", "system", "content",
-                                "다음 일기와 감정분석을 보고 추천해주고 싶은 책의 제목을 한글로만 반환해줘.\n" +
-                                        "- 실제로 존재하는 책의 제목이어야 해\n" +
+                                "다음 일기와 감정분석을 보고 추천해주고 싶은 책의 제목만을 한글로만 출력해줘.\n" +
+                                        "- 알라딘에 검색하면 나오는 실제로 존재하는 책의 제목이어야 해\n" +
                                         "- 오직 추천해주고 싶은 책 제목만 한 줄로 정확히 반환해줘.\n" +
                                         "- 다른 문장이나 설명은 절대 하지 마. 쌍따옴표같은 특수문자도 넣지 마"),
                         Map.of("role", "user", "content", "일기내용:" + diaryContent + " 감정분석내용:" + analysisContent)
