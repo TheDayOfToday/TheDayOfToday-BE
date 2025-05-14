@@ -23,7 +23,7 @@ public class RedisService {
         ValueOperations<String, Object> valOperations = redisTemplate.opsForValue();
         Object code = valOperations.get(email);
         if(code == null){
-            throw new IllegalArgumentException("인증번호틀림");
+            throw new IllegalArgumentException("잘못된 인증번호입니다.");
         }
         return code.toString();
     }
