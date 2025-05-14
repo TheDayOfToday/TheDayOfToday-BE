@@ -2,8 +2,11 @@ package com.example.thedayoftoday.domain.service;
 
 import jakarta.mail.MessagingException;
 import java.util.Random;
+import java.util.concurrent.TimeUnit;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
@@ -14,11 +17,31 @@ import jakarta.mail.internet.MimeMessage;
 public class MailSendService {
     private static String number;
     private final JavaMailSender javaMailSender;
+    private final RedisTemplate<String, Object> redisTemplate;
+
     @Value("${spring.mail.username}")
     private String senderEmail;
 
-    public MailSendService(JavaMailSender javaMailSender) {
+    public MailSendService(JavaMailSender javaMailSender, RedisTemplate<String, Object> redisTemplate) {
         this.javaMailSender = javaMailSender;
+        this.redisTemplate = redisTemplate;
+    }
+
+    //email을 key값 code를 value로 하여 3분동안 저장한다.
+    public void setCodeMaximumTimeFromRedis(String email,String code){
+        ValueOperations<String, Object> valOperations = redisTemplate.opsForValue();
+        //만료기간 3분
+        valOperations.set(email,code,180, TimeUnit.SECONDS);
+    }
+
+    //key값인 email에 있는 value를 가져온다.
+    public String getCodeFromRedis(String email){
+        ValueOperations<String, Object> valOperations = redisTemplate.opsForValue();
+        Object code = valOperations.get(email);
+        if(code == null){
+            throw new IllegalArgumentException("잘못된 인증번호입니다.");
+        }
+        return code.toString();
     }
 
     public static void createNumber(){
