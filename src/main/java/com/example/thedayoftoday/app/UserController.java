@@ -1,5 +1,6 @@
 package com.example.thedayoftoday.app;
 
+import com.example.thedayoftoday.domain.dto.ResetPasswordRequestDto;
 import com.example.thedayoftoday.domain.dto.user.EmailCondeValidationDto;
 import com.example.thedayoftoday.domain.dto.user.PasswordUpdateRequest;
 import com.example.thedayoftoday.domain.dto.user.SendCodeRequestDto;
@@ -52,6 +53,31 @@ public class UserController {
         return ResponseEntity.ok(userInfoDto);
     }
 
+    @GetMapping("/find-email")
+    public ResponseEntity<String> findEmail(String email) {
+        if(!userRepository.existsByEmail(email)){
+            throw new IllegalArgumentException("존재하지 않는 이메일입니다.");
+        }
+        return ResponseEntity.ok("이메일이 존재합니다.");
+    }
+
+    @PutMapping("/reset-password")
+    public ResponseEntity<String> resetPassword(@RequestBody ResetPasswordRequestDto restPasswordRequestDto) {
+
+        User user = userRepository.findByEmail(restPasswordRequestDto.email())
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 이메일입니다."));
+
+        if (passwordEncoder.matches(restPasswordRequestDto.newPassword(), user.getPassword())) {
+            throw new IllegalArgumentException("기존의 비밀번호와 동일합니다.");
+        }
+
+        String encodedPassword = passwordEncoder.encode(restPasswordRequestDto.newPassword());
+        user.setPassword(encodedPassword);
+        userRepository.save(user);
+
+        return ResponseEntity.ok("비밀변호 변경이 완료되었습니다.");
+    }
+
     @PutMapping("/update-password")
     public ResponseEntity<String> updatePassword(@AuthenticationPrincipal CustomUserDetails userDetails,
                                                  @RequestBody PasswordUpdateRequest passwordUpdateRequest) {
@@ -68,7 +94,7 @@ public class UserController {
         user.setPassword(encodedPassword);
         userRepository.save(user);
 
-        return ResponseEntity.ok("비밀변호 변겅이 완료되었습니다.");
+        return ResponseEntity.ok("비밀변호 변경이 완료되었습니다.");
     }
 
     @PostMapping("/signup")
