@@ -1,12 +1,12 @@
 package com.example.thedayoftoday.app;
 
 import com.example.thedayoftoday.domain.dto.user.EmailCondeValidationDto;
-import com.example.thedayoftoday.domain.dto.user.LoginRequestDto;
 import com.example.thedayoftoday.domain.dto.user.PasswordUpdateRequest;
 import com.example.thedayoftoday.domain.dto.user.SendCodeRequestDto;
 import com.example.thedayoftoday.domain.dto.user.SignupRequestDto;
 import com.example.thedayoftoday.domain.dto.setting.UserInfoDto;
 import com.example.thedayoftoday.domain.entity.User;
+import com.example.thedayoftoday.domain.exception.EmailCodeNotMatchException;
 import com.example.thedayoftoday.domain.repository.UserRepository;
 import com.example.thedayoftoday.domain.security.CustomUserDetails;
 import com.example.thedayoftoday.domain.service.MailSendService;
@@ -86,7 +86,7 @@ public class UserController {
     public ResponseEntity<String> checkCode(@RequestBody EmailCondeValidationDto emailCondeValidationDto) {
         String code = mailSendService.getCodeFromRedis(emailCondeValidationDto.email());
         if (!code.equals(emailCondeValidationDto.code())) {
-            throw new IllegalArgumentException("두 인증번호가 다릅니다.");
+            throw new EmailCodeNotMatchException("두 인증번호가 다릅니다");
         }
         return ResponseEntity.ok("정상적으로 인증되었습니다.");
     }

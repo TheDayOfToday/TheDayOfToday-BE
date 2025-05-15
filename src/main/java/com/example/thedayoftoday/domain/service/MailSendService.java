@@ -3,6 +3,9 @@ package com.example.thedayoftoday.domain.service;
 import com.example.thedayoftoday.domain.dto.user.LoginRequestDto;
 import com.example.thedayoftoday.domain.dto.user.SendCodeRequestDto;
 import com.example.thedayoftoday.domain.dto.user.SignupRequestDto;
+import com.example.thedayoftoday.domain.exception.EmailCodeExpireException;
+import com.example.thedayoftoday.domain.exception.EmailCodeNotMatchException;
+import com.example.thedayoftoday.domain.exception.MailSendException;
 import jakarta.mail.MessagingException;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
@@ -42,7 +45,7 @@ public class MailSendService {
         ValueOperations<String, Object> valOperations = redisTemplate.opsForValue();
         Object code = valOperations.get(email);
         if(code == null){
-            throw new IllegalArgumentException("잘못된 인증번호입니다.");
+            throw new EmailCodeExpireException("인증번호가 만료되었습니다.");
         }
         return code.toString();
     }
@@ -92,7 +95,7 @@ public class MailSendService {
 
             body += "</body></html>";   messageHelper.setText(body, true);
         }catch (MessagingException e){
-            e.printStackTrace();
+            throw new MailSendException("이메일 전송 중 오류가 발생하였습니다");
         }
         return mimeMessage;
     }
