@@ -1,5 +1,8 @@
 package com.example.thedayoftoday.domain.service;
 
+import com.example.thedayoftoday.domain.dto.user.LoginRequestDto;
+import com.example.thedayoftoday.domain.dto.user.SendCodeRequestDto;
+import com.example.thedayoftoday.domain.dto.user.SignupRequestDto;
 import jakarta.mail.MessagingException;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
@@ -100,5 +103,12 @@ public class MailSendService {
         javaMailSender.send(mimeMessage);
         log.info("[Mail 전송 완료]");
         return number;
+    }
+
+    public String sendCode(SendCodeRequestDto sendCodeRequestDto) {
+        String email = sendCodeRequestDto.email();
+        String code = sendMail(email);
+        setCodeMaximumTimeFromRedis(email, code);
+        return code;
     }
 }
