@@ -1,7 +1,10 @@
 package com.example.thedayoftoday.domain.global;
 
+import com.example.thedayoftoday.domain.exception.EmailCodeExpireException;
+import com.example.thedayoftoday.domain.exception.EmailCodeNotMatchException;
 import com.example.thedayoftoday.domain.exception.EmailDuplicationException;
 import com.example.thedayoftoday.domain.exception.ErrorCodeMessage;
+import com.example.thedayoftoday.domain.exception.MailSendException;
 import com.example.thedayoftoday.domain.exception.PhoneNumberDuplicationExceptiono;
 import java.util.Objects;
 import org.springframework.http.HttpStatus;
@@ -46,5 +49,24 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(httpStatus).body(errorCodeMessage);
     }
 
+    @ExceptionHandler(EmailCodeNotMatchException.class)
+    public ResponseEntity<ErrorCodeMessage> handleEmailCodeNotMatch(EmailCodeNotMatchException e) {
+        HttpStatus httpStatus = HttpStatus.BAD_REQUEST;
+        ErrorCodeMessage errorCodeMessage = new ErrorCodeMessage(httpStatus.value(), e.getMessage());
+        return ResponseEntity.status(httpStatus).body(errorCodeMessage);
+    }
 
+    @ExceptionHandler(EmailCodeExpireException.class)
+    public ResponseEntity<ErrorCodeMessage> handleEmailCodeExpire(EmailCodeExpireException e) {
+        HttpStatus httpStatus = HttpStatus.NOT_FOUND;
+        ErrorCodeMessage errorCodeMessage = new ErrorCodeMessage(httpStatus.value(), e.getMessage());
+        return ResponseEntity.status(httpStatus).body(errorCodeMessage);
+    }
+
+    @ExceptionHandler(MailSendException.class)
+    public ResponseEntity<ErrorCodeMessage> handleMailSend(MailSendException e) {
+        HttpStatus httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
+        ErrorCodeMessage errorCodeMessage = new ErrorCodeMessage(httpStatus.value(), e.getMessage());
+        return ResponseEntity.status(httpStatus).body(errorCodeMessage);
+    }
 }

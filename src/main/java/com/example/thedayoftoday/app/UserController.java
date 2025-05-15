@@ -1,11 +1,16 @@
 package com.example.thedayoftoday.app;
 
+import com.example.thedayoftoday.domain.dto.ResetPasswordRequestDto;
+import com.example.thedayoftoday.domain.dto.user.EmailCondeValidationDto;
 import com.example.thedayoftoday.domain.dto.user.PasswordUpdateRequest;
+import com.example.thedayoftoday.domain.dto.user.SendCodeRequestDto;
 import com.example.thedayoftoday.domain.dto.user.SignupRequestDto;
 import com.example.thedayoftoday.domain.dto.setting.UserInfoDto;
 import com.example.thedayoftoday.domain.entity.User;
+import com.example.thedayoftoday.domain.exception.EmailCodeNotMatchException;
 import com.example.thedayoftoday.domain.repository.UserRepository;
 import com.example.thedayoftoday.domain.security.CustomUserDetails;
+import com.example.thedayoftoday.domain.service.MailSendService;
 import com.example.thedayoftoday.domain.service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -26,11 +31,14 @@ public class UserController {
     private final UserRepository userRepository;
     private final UserService userService;
     private final PasswordEncoder passwordEncoder;
+    private final MailSendService mailSendService;
 
-    public UserController(UserRepository userRepository, UserService userService, PasswordEncoder passwordEncoder) {
+    public UserController(UserRepository userRepository, UserService userService, PasswordEncoder passwordEncoder,
+                          MailSendService mailSendService) {
         this.userRepository = userRepository;
         this.userService = userService;
         this.passwordEncoder = passwordEncoder;
+        this.mailSendService = mailSendService;
     }
 
     @GetMapping("/info")
@@ -43,6 +51,31 @@ public class UserController {
         }
         UserInfoDto userInfoDto = new UserInfoDto(userId, user.getName(), user.getEmail(), user.getPhoneNumber());
         return ResponseEntity.ok(userInfoDto);
+    }
+
+    @GetMapping("/find-email")
+    public ResponseEntity<String> findEmail(String email) {
+        if(!userRepository.existsByEmail(email)){
+            throw new IllegalArgumentException("존재하지 않는 이메일입니다.");
+        }
+        return ResponseEntity.ok("이메일이 존재합니다.");
+    }
+
+    @PutMapping("/reset-password")
+    public ResponseEntity<String> resetPassword(@RequestBody ResetPasswordRequestDto restPasswordRequestDto) {
+
+        User user = userRepository.findByEmail(restPasswordRequestDto.email())
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 이메일입니다."));
+
+        if (passwordEncoder.matches(restPasswordRequestDto.newPassword(), user.getPassword())) {
+            throw new IllegalArgumentException("기존의 비밀번호와 동일합니다.");
+        }
+
+        String encodedPassword = passwordEncoder.encode(restPasswordRequestDto.newPassword());
+        user.setPassword(encodedPassword);
+        userRepository.save(user);
+
+        return ResponseEntity.ok("비밀변호 변경이 완료되었습니다.");
     }
 
     @PutMapping("/update-password")
@@ -61,13 +94,27 @@ public class UserController {
         user.setPassword(encodedPassword);
         userRepository.save(user);
 
-        return ResponseEntity.ok("비밀변호 변겅이 완료되었습니다.");
+        return ResponseEntity.ok("비밀변호 변경이 완료되었습니다.");
     }
 
     @PostMapping("/signup")
     public ResponseEntity<String> addUser(@Valid @RequestBody SignupRequestDto signupRequestDto) {
         userService.join(signupRequestDto);
         return ResponseEntity.ok("회원가입이 완료되었습니다.");
+    }
+
+    @PostMapping(value = "/send-code")
+    public ResponseEntity<String> sendCodeWithEmail(@RequestBody SendCodeRequestDto sendCodeRequestDto) {
+        return ResponseEntity.ok(mailSendService.sendCode(sendCodeRequestDto));
+    }
+
+    @PostMapping("/check-code")
+    public ResponseEntity<String> checkCode(@RequestBody EmailCondeValidationDto emailCondeValidationDto) {
+        String code = mailSendService.getCodeFromRedis(emailCondeValidationDto.email());
+        if (!code.equals(emailCondeValidationDto.code())) {
+            throw new EmailCodeNotMatchException("두 인증번호가 다릅니다");
+        }
+        return ResponseEntity.ok("정상적으로 인증되었습니다.");
     }
 
     @DeleteMapping("/delete")
