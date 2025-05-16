@@ -13,6 +13,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/book")
@@ -44,8 +46,12 @@ public class BookController {
                 .orElseThrow(() -> new IllegalArgumentException("유저를 찾을 수 없습니다."));
 
         Book book = user.getRecommendedBook();
-        if (book == null) {
-            return ResponseEntity.noContent().build();
+
+        boolean hasRecentDiary = diaryRepository.existsByUserAndCreateTimeAfter(user, LocalDate.now().minusDays(7));
+
+        if (book == null || !hasRecentDiary) {
+            RecommendedBookResponseDto emptyResponse = RecommendedBookResponseDto.empty();
+            return ResponseEntity.ok(emptyResponse);
         }
 
         return ResponseEntity.ok(RecommendedBookResponseDto.from(book));
