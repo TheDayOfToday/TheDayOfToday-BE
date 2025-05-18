@@ -16,4 +16,8 @@ public record RecommendedBookResponseDto(
                 book.getCoverImageUrl()
         );
     }
+
+    public static RecommendedBookResponseDto empty() {
+        return new RecommendedBookResponseDto(null, null, null, null);
+    }
 }
