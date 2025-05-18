@@ -61,7 +61,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/", "/error", "/login", "/user/signup", "/swagger-ui/**",
                                 "/v3/api-docs/**", "/reissue", "/diary/**", "/sentimental/**",
-                                "/weeklyAnalysis/**", "/calendar/**", "/swagger-auth/**")
+                                "/weeklyAnalysis/**", "/calendar/**", "/swagger-auth/**","/user/reset-password","user/find-email",
+                                "user/send-code","user/check-code")
                         .permitAll()
                         .anyRequest().authenticated())
                 .sessionManagement(session -> session
