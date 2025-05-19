@@ -9,8 +9,10 @@ import com.example.thedayoftoday.domain.repository.UserRepository;
 import com.example.thedayoftoday.domain.repository.WeeklyDataRepository;
 import com.example.thedayoftoday.domain.service.AiService;
 import com.example.thedayoftoday.domain.service.WeeklyAnalysisService;
+
 import java.time.LocalDate;
 import java.util.List;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
