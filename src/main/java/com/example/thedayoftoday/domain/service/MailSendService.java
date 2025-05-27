@@ -86,7 +86,6 @@ public class MailSendService {
             body += "<h1 style='padding-top: 40px; font-size: 30px; margin-bottom: 30px;'>이메일 주소 인증</h1>";
 
             body += "<p style='font-size: 18px; line-height: 32px; margin-bottom: 24px;'>안녕하세요? 오늘의 하루입니다.</p>";
-            body += "<p style='font-size: 18px; line-height: 32px; margin-bottom: 24px;'>비밀번호 변경을 위해 고객님께서 입력하신 이메일 주소의 인증이 필요합니다.</p>";
             body += "<p style='font-size: 18px; line-height: 32px; margin-bottom: 24px;'>하단의 인증 번호로 이메일 인증을 완료하시면, 정상적으로 오늘의 하루 서비스를 이용하실 수 있습니다.</p>";
             body += "<p style='font-size: 18px; line-height: 32px; margin-bottom: 24px;'>항상 최선의 노력을 다하는 오늘의 하루가 되겠습니다.</p>";
             body += "<p style='font-size: 18px; line-height: 32px;'>감사합니다.</p>";
