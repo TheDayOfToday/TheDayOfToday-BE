@@ -1,0 +1,62 @@
+package thedayoftoday.scheduler;
+
+import thedayoftoday.dto.weeklyAnalysis.WeeklyTitleFeedbackResponseDto;
+import thedayoftoday.entity.Diary;
+import thedayoftoday.entity.User;
+import thedayoftoday.entity.WeeklyData;
+import thedayoftoday.entity.enumType.Degree;
+import thedayoftoday.repository.UserRepository;
+import thedayoftoday.repository.WeeklyDataRepository;
+import thedayoftoday.service.AiService;
+import thedayoftoday.service.WeeklyAnalysisService;
+
+import java.time.LocalDate;
+import java.util.List;
+
+import lombok.RequiredArgsConstructor;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+@Service
+@RequiredArgsConstructor
+@Transactional
+public class WeeklySummaryScheduler {
+
+    private final WeeklyAnalysisService weeklyAnalysisService;
+    private final AiService aiService;
+    private final UserRepository userRepository;
+    private final WeeklyDataRepository weeklyDataRepository;
+
+    @Scheduled(cron = "59 59 23 * * SUN", zone = "Asia/Seoul")
+    public void summarizeWeeklyDiaries() {
+        List<User> allUsers = userRepository.findAll();
+
+        for (User user : allUsers) {
+            LocalDate now = LocalDate.now();
+            LocalDate[] weekRange = weeklyAnalysisService.calculateStartAndEndDate(now);
+            LocalDate startDate = weekRange[0];
+            LocalDate endDate = weekRange[1];
+
+            List<Diary> diaries = weeklyAnalysisService.extractedWeeklyDiaryData(user.getUserId(), weekRange);
+            String combined = weeklyAnalysisService.combineWeeklyDiary(diaries);
+            if (combined.isBlank()) {
+                continue;
+            }
+
+            WeeklyTitleFeedbackResponseDto feedbackDto = aiService.analyzeWeeklyDiaryWithTitle(combined);
+            Degree degree = aiService.analyzeDegree(combined);
+
+            WeeklyData weeklyData = WeeklyData.builder()
+                    .user(user)
+                    .title(feedbackDto.title())
+                    .feedback(feedbackDto.feedback())
+                    .degree(degree)
+                    .startDate(startDate)
+                    .endDate(endDate)
+                    .build();
+
+            weeklyDataRepository.save(weeklyData);
+        }
+    }
+}
