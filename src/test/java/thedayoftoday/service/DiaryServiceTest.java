@@ -1,4 +1,4 @@
-package thedayoftoday.domain.service;
+package thedayoftoday.service;
 
 import thedayoftoday.dto.diary.DiaryIdResponseDto;
 import thedayoftoday.dto.diary.moodmeter.MoodCategoryResponse;
@@ -12,7 +12,6 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import thedayoftoday.service.DiaryService;
 
 import java.util.*;
 

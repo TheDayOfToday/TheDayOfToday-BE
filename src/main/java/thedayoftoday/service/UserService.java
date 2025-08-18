@@ -1,56 +1,63 @@
 package thedayoftoday.service;
 
-import thedayoftoday.dto.user.SignupRequestDto;
+import thedayoftoday.dto.ResetPasswordRequestDto;
+import thedayoftoday.dto.setting.UserInfoDto;
+import thedayoftoday.dto.user.PasswordUpdateRequest;
 import thedayoftoday.entity.User;
-import thedayoftoday.entity.enumType.RoleType;
-import thedayoftoday.exception.PhoneNumberDuplicationExceptiono;
 import thedayoftoday.repository.UserRepository;
-import thedayoftoday.exception.EmailDuplicationException;
-import jakarta.validation.Valid;
-
 import java.util.Optional;
-
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@Transactional
+@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class UserService {
 
     private final UserRepository userRepository;
-    private final BCryptPasswordEncoder encoder;
-
-    public Long join(@Valid SignupRequestDto user) {
-        boolean validUser = userRepository.existsByEmail(user.email());
-        boolean validPhoneNumber = userRepository.existsByPhoneNumber(user.phoneNumber());
-
-        validateDuplicate(validUser, validPhoneNumber);
-
-        User newUser = User.builder()
-                .name(user.name())
-                .email(user.email())
-                .password(encoder.encode(user.password()))
-                .phoneNumber(user.phoneNumber())
-                .role(RoleType.USER)
-                .build();
-
-        User savedUser = userRepository.save(newUser);
-        return savedUser.getUserId();
-    }
-
-    private static void validateDuplicate(boolean validUser, boolean validPhoneNumber) {
-        if (validUser) {
-            throw new EmailDuplicationException("해당 Email은 이미 존재합니다.");
-        }
-        if (validPhoneNumber) {
-            throw new PhoneNumberDuplicationExceptiono("해당 전화번호는 이미 존재합니다.");
-        }
-    }
+    private final PasswordEncoder passwordEncoder;
 
     public Optional<User> findById(Long userId) {
         return userRepository.findById(userId);
+    }
+
+    public UserInfoDto getUserInfo(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
+
+        return new UserInfoDto(user.getUserId(), user.getName(), user.getEmail(), user.getPhoneNumber());
+    }
+
+    @Transactional
+    public void updatePassword(Long userId, PasswordUpdateRequest request) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
+
+        updatePasswordInternal(user, request.newPassword());
+    }
+
+    @Transactional
+    public void resetPassword(ResetPasswordRequestDto requestDto) {
+        User user = userRepository.findByEmail(requestDto.email())
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 이메일입니다."));
+
+        updatePasswordInternal(user, requestDto.newPassword());
+    }
+
+    private void updatePasswordInternal(User user, String newPassword) {
+        if (passwordEncoder.matches(newPassword, user.getPassword())) {
+            throw new IllegalArgumentException("기존의 비밀번호와 동일합니다.");
+        }
+        String encodedPassword = passwordEncoder.encode(newPassword);
+        user.setPassword(encodedPassword);
+    }
+
+    @Transactional
+    public void deleteUser(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 계정을 찾을 수 없습니다."));
+        userRepository.delete(user);
     }
 }

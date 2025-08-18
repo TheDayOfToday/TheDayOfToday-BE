@@ -1,4 +1,4 @@
-package thedayoftoday.domain.service;
+package thedayoftoday.service;
 
 import static org.mockito.ArgumentMatchers.any;
 

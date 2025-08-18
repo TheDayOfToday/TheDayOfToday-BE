@@ -1,4 +1,4 @@
-package thedayoftoday.domain.service;
+package thedayoftoday.service;
 
 import thedayoftoday.dto.weeklyAnalysis.WeeklyAnalysisResponseDto;
 import thedayoftoday.entity.WeeklyData;
@@ -14,7 +14,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import thedayoftoday.service.WeeklyAnalysisService;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;

@@ -1,4 +1,4 @@
-package thedayoftoday.domain;
+package thedayoftoday;
 
 import thedayoftoday.dto.diary.DiaryBasicResponseDto;
 import thedayoftoday.dto.diary.DiaryIdResponseDto;

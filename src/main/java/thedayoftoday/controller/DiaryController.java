@@ -1,6 +1,5 @@
 package thedayoftoday.controller;
 
-import com.example.thedayoftoday.domain.dto.diary.*;
 import thedayoftoday.dto.diary.*;
 import thedayoftoday.dto.diary.conversation.ConversationResponseDto;
 import thedayoftoday.dto.diary.moodmeter.MoodCategoryResponse;

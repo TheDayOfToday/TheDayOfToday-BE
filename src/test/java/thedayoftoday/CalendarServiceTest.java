@@ -1,4 +1,4 @@
-package thedayoftoday.domain;
+package thedayoftoday;
 
 import thedayoftoday.dto.calendar.MonthColorsResponseDto;
 import thedayoftoday.dto.diary.AIAnalysisContentDto;
