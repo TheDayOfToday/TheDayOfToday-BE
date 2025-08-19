@@ -39,7 +39,7 @@ public class AuthService {
         }
     }
 
-    public Long join(@Valid SignupRequestDto user) {
+    public Long join(SignupRequestDto user) {
         return userService.createUser(user);
     }
 }
