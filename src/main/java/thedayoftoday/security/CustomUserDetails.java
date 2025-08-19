@@ -1,6 +1,6 @@
 package thedayoftoday.security;
 
-import thedayoftoday.entity.User;
+import thedayoftoday.domain.user.entity.User;
 import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;

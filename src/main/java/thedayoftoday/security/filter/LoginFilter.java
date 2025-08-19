@@ -1,6 +1,6 @@
 package thedayoftoday.security.filter;
 
-import thedayoftoday.dto.user.LoginRequestDto;
+import thedayoftoday.domain.auth.login.LoginRequestDto;
 import thedayoftoday.security.CustomUserDetails;
 import thedayoftoday.security.entity.RefreshEntity;
 import thedayoftoday.security.repository.RefreshRepository;

@@ -1,7 +1,7 @@
 package thedayoftoday.security.service;
 
-import thedayoftoday.entity.User;
-import thedayoftoday.repository.UserRepository;
+import thedayoftoday.domain.user.entity.User;
+import thedayoftoday.domain.user.repository.UserRepository;
 import thedayoftoday.security.CustomUserDetails;
 
 import java.util.Optional;
