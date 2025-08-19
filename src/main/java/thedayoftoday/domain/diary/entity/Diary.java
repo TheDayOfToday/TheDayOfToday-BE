@@ -41,6 +41,10 @@ public class Diary {
     @JoinColumn(name = "user_Id", nullable = false)
     private User user;
 
+    public void setUser(User user) {
+        this.user = user;
+    }
+
     @OneToMany(mappedBy = "diary", cascade = CascadeType.REMOVE, orphanRemoval = true)
     @Builder.Default
     private List<Conversation> conversations = new ArrayList<>();

@@ -19,11 +19,11 @@ public class WeeklyAnalysisController {
     @GetMapping("/{year}/{month}/{day}")
     public ResponseEntity<WeeklyAnalysisResponseDto> getWeeklyAnalysis(
             @AuthenticationPrincipal CustomUserDetails userDetails,
-            @PathVariable int year, @PathVariable int month,
+            @PathVariable int year,
+            @PathVariable int month,
             @PathVariable int day) {
         Long userId = userDetails.getUserId();
-        WeeklyAnalysisResponseDto weeklyAnalysisResponseDto = weeklyAnalysisService.getWeeklyAnalysis(userId, year,
-                month, day);
+        WeeklyAnalysisResponseDto weeklyAnalysisResponseDto = weeklyAnalysisService.getWeeklyAnalysis(userId, year, month, day);
 
         return ResponseEntity.ok(weeklyAnalysisResponseDto);
     }

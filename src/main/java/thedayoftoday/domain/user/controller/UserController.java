@@ -1,5 +1,6 @@
 package thedayoftoday.domain.user.controller;
 
+import lombok.RequiredArgsConstructor;
 import thedayoftoday.domain.user.service.UserService;
 import thedayoftoday.domain.user.dto.PasswordUpdateRequest;
 import thedayoftoday.domain.user.dto.ResetPasswordRequestDto;
@@ -16,13 +17,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/user")
+@RequiredArgsConstructor
 public class UserController {
 
     private final UserService userService;
-
-    public UserController(UserService userService) {
-        this.userService = userService;
-    }
 
     @GetMapping("/info")
     public ResponseEntity<UserInfoDto> getSetting(@AuthenticationPrincipal CustomUserDetails userDetails) {

@@ -1,5 +1,7 @@
 package thedayoftoday.domain.user.entity;
 
+import org.springframework.security.crypto.password.PasswordEncoder;
+import thedayoftoday.domain.auth.dto.SignupRequestDto;
 import thedayoftoday.domain.book.entity.Book;
 import thedayoftoday.domain.diary.entity.Diary;
 import thedayoftoday.domain.notice.entity.Notice;
@@ -12,7 +14,6 @@ import java.util.List;
 
 @Entity
 @Getter
-@Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
@@ -45,8 +46,19 @@ public class User {
     @Builder.Default
     private List<WeeklyData> weeklyDataList = new ArrayList<>();
 
+    public static User createUser(SignupRequestDto request, PasswordEncoder passwordEncoder) {
+        return User.builder()
+                .name(request.name())
+                .email(request.email())
+                .password(passwordEncoder.encode(request.password()))
+                .phoneNumber(request.phoneNumber())
+                .role(RoleType.USER)
+                .build();
+    }
+
     public void addDiary(Diary diary) {
-        diaries.add(diary);
+        this.diaries.add(diary);
+        diary.setUser(this);
     }
 
     public void addNotice(Notice notice) {
@@ -57,8 +69,11 @@ public class User {
         weeklyDataList.add(weeklyData);
     }
 
-    public void changePassword(String password) {
-        this.password = password;
+    public void updatePassword(String newPassword, PasswordEncoder passwordEncoder) {
+        if (passwordEncoder.matches(newPassword, this.password)) {
+            throw new IllegalArgumentException("기존의 비밀번호와 동일합니다.");
+        }
+        this.password = passwordEncoder.encode(newPassword);
     }
 
     public void changeRecommendedBook(Book book) {
