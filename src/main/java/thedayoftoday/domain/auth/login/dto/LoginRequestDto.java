@@ -1,4 +1,4 @@
-package thedayoftoday.domain.auth.login;
+package thedayoftoday.domain.auth.login.dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
