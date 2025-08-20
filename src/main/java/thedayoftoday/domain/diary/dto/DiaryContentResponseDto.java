@@ -1,4 +1,5 @@
 package thedayoftoday.domain.diary.dto;
 
-public record DiaryBasicResponseDto(String title, String content) {
+public record DiaryContentResponseDto(String title, String content) {
 }
+

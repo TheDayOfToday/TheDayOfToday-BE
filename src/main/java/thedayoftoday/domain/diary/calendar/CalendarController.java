@@ -1,13 +1,13 @@
 package thedayoftoday.domain.diary.calendar;
 
 import thedayoftoday.domain.diary.dto.AIAnalysisContentDto;
-import thedayoftoday.domain.diary.dto.DiaryContentResponseDto;
 import thedayoftoday.domain.auth.security.CustomUserDetails;
 
 import java.time.LocalDate;
 
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import thedayoftoday.domain.diary.dto.DiaryContentResponseDto;
 
 @RestController
 @RequestMapping("/calendar")

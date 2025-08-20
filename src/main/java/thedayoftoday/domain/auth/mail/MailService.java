@@ -34,26 +34,8 @@ public class MailService {
     @Value("${spring.mail.username}")
     private String senderEmail;
 
-    public void checkEmailExists(String email) {
-        checkEmailExists(email);
-    }
-
     public void sendVerificationCode(SendCodeRequestDto sendCodeRequestDto) {
         sendCode(sendCodeRequestDto);
-    }
-
-    public void verifyCode(EmailCondeValidationDto emailCondeValidationDto) {
-        String code = getCodeFromRedis(emailCondeValidationDto.email());
-        if (!code.equals(emailCondeValidationDto.code())) {
-            throw new EmailCodeNotMatchException("인증번호가 일치하지 않습니다.");
-        }
-    }
-
-    //email을 key값 code를 value로 하여 3분동안 저장한다.
-    public void setCodeMaximumTimeFromRedis(String email,String code){
-        ValueOperations<String, Object> valOperations = redisTemplate.opsForValue();
-        //만료기간 3분
-        valOperations.set(email,code,180, TimeUnit.SECONDS);
     }
 
     public void sendCode(SendCodeRequestDto sendCodeRequestDto) {
@@ -61,28 +43,6 @@ public class MailService {
         String code = createVerificationCode();
         sendMail(email, code);
         setCodeMaximumTimeFromRedis(email, code);
-    }
-
-    private void sendMail(String email, String code) {
-        MimeMessage mimeMessage = createVerificationMessage(email, code);
-        try {
-            log.info("[Mail 전송 시작] To: {}", email);
-            javaMailSender.send(mimeMessage);
-            log.info("[Mail 전송 완료]");
-        } catch (Exception e) {
-            log.error("메일 전송 실패: {}", e.getMessage());
-            throw new MailSendException("이메일 전송 중 오류가 발생했습니다.");
-        }
-    }
-
-    //key값인 email에 있는 value를 가져온다.
-    public String getCodeFromRedis(String email){
-        ValueOperations<String, Object> valOperations = redisTemplate.opsForValue();
-        Object code = valOperations.get(email);
-        if(code == null){
-            throw new EmailCodeExpireException("인증번호가 만료되었습니다.");
-        }
-        return code.toString();
     }
 
     private String createVerificationCode(){
@@ -98,6 +58,42 @@ public class MailService {
             }
         }
         return key.toString();
+    }
+
+    public void verifyCode(EmailCondeValidationDto emailCondeValidationDto) {
+        String code = getCodeFromRedis(emailCondeValidationDto.email());
+        if (!code.equals(emailCondeValidationDto.code())) {
+            throw new EmailCodeNotMatchException("인증번호가 일치하지 않습니다.");
+        }
+    }
+
+    //key값인 email에 있는 value를 가져온다.
+    public String getCodeFromRedis(String email){
+        ValueOperations<String, Object> valOperations = redisTemplate.opsForValue();
+        Object code = valOperations.get(email);
+        if(code == null){
+            throw new EmailCodeExpireException("인증번호가 만료되었습니다.");
+        }
+        return code.toString();
+    }
+
+    //email을 key값 code를 value로 하여 3분동안 저장한다.
+    public void setCodeMaximumTimeFromRedis(String email,String code){
+        ValueOperations<String, Object> valOperations = redisTemplate.opsForValue();
+        //만료기간 3분
+        valOperations.set(email,code,180, TimeUnit.SECONDS);
+    }
+
+    private void sendMail(String email, String code) {
+        MimeMessage mimeMessage = createVerificationMessage(email, code);
+        try {
+            log.info("[Mail 전송 시작] To: {}", email);
+            javaMailSender.send(mimeMessage);
+            log.info("[Mail 전송 완료]");
+        } catch (Exception e) {
+            log.error("메일 전송 실패: {}", e.getMessage());
+            throw new MailSendException("이메일 전송 중 오류가 발생했습니다.");
+        }
     }
 
     private MimeMessage createVerificationMessage(String email, String code){

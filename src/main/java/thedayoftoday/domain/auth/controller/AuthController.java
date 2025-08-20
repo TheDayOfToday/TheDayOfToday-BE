@@ -7,7 +7,6 @@ import org.springframework.web.bind.annotation.*;
 import thedayoftoday.domain.auth.dto.LoginRequestDto;
 import thedayoftoday.domain.auth.dto.SignupRequestDto;
 import thedayoftoday.domain.auth.service.AuthService;
-import thedayoftoday.domain.auth.service.LoginService;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -18,7 +17,6 @@ import java.util.Map;
 public class AuthController {
 
     private final AuthService authService;
-    private final LoginService loginService;
 
     @PostMapping("/user/signup")
     public ResponseEntity<String> signup(@Valid @RequestBody SignupRequestDto signupRequestDto) {
@@ -28,7 +26,7 @@ public class AuthController {
 
     @PostMapping("/swagger-auth/login")
     public ResponseEntity<Map<String, String>> login(@RequestBody LoginRequestDto loginDto) {
-        String accessToken = loginService.login(loginDto);
+        String accessToken = authService.login(loginDto);
 
         Map<String, String> response = new HashMap<>();
         response.put("accessToken", accessToken);

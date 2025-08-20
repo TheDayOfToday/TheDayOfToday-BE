@@ -32,7 +32,6 @@ public class AuthService {
 
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
 
-        return jwtUtil.createAccessToken("access", userDetails.getUsername(), userDetails.getRole(),
-                userDetails.getUserId());
+        return jwtUtil.createAccessToken("access", userDetails.getUsername(), userDetails.getRole(), userDetails.getUserId());
     }
 }

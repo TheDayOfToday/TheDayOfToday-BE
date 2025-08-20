@@ -11,12 +11,6 @@ public class MailController {
 
     private final MailService mailService;
 
-    @GetMapping("/find-email")
-    public ResponseEntity<String> checkEmail(String email) {
-        mailService.checkEmailExists(email);
-        return ResponseEntity.ok("사용 가능한 이메일입니다.");
-    }
-
     @PostMapping("/send-code")
     public ResponseEntity<String> sendCode(@RequestBody SendCodeRequestDto sendCodeRequestDto) {
         mailService.sendVerificationCode(sendCodeRequestDto);

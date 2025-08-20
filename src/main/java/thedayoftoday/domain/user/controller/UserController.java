@@ -28,6 +28,12 @@ public class UserController {
         return ResponseEntity.ok(userInfo);
     }
 
+    @GetMapping("/find-email")
+    public ResponseEntity<String> findEmail(String email) {
+        userService.checkEmailExists(email);
+        return ResponseEntity.ok("이메일이 존재합니다.");
+    }
+
     @PutMapping("/reset-password")
     public ResponseEntity<String> resetPassword(@RequestBody ResetPasswordRequestDto requestDto) {
         userService.resetPassword(requestDto);

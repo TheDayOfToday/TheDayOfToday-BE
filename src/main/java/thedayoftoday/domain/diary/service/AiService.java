@@ -1,5 +1,6 @@
-package thedayoftoday.domain.diary.dto;
+package thedayoftoday.domain.diary.service;
 
+import thedayoftoday.domain.diary.dto.DiaryContentResponseDto;
 import thedayoftoday.domain.diary.entity.Diary;
 import thedayoftoday.domain.diary.repository.DiaryRepository;
 import thedayoftoday.domain.diary.moodmeter.DiaryMood;

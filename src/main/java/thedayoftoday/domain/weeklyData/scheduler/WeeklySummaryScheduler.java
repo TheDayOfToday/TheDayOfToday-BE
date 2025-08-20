@@ -7,7 +7,7 @@ import thedayoftoday.domain.weeklyData.entity.WeeklyData;
 import thedayoftoday.domain.weeklyData.entity.Degree;
 import thedayoftoday.domain.user.repository.UserRepository;
 import thedayoftoday.domain.weeklyData.repository.WeeklyDataRepository;
-import thedayoftoday.domain.diary.dto.AiService;
+import thedayoftoday.domain.diary.service.AiService;
 import thedayoftoday.domain.weeklyData.service.WeeklyAnalysisService;
 
 import java.time.LocalDate;
