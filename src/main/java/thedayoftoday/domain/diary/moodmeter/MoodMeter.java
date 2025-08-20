@@ -1,6 +1,7 @@
 package thedayoftoday.domain.diary.moodmeter;
 
-import java.util.Arrays;
+import java.util.*;
+
 import lombok.Getter;
 import thedayoftoday.domain.weeklyData.entity.Degree;
 
@@ -83,5 +84,28 @@ public enum MoodMeter {
                 .filter(mood -> mood.color.equalsIgnoreCase(color))
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("해당 색상을 찾을 수 없습니다: " + color));
+    }
+
+    public static List<MoodCategoryResponse> getAllMoodCategories() {
+        Map<Degree, List<MoodDetailsDto>> moodGroup = new LinkedHashMap<>();
+        for (Degree degree : Degree.values()) {
+            moodGroup.put(degree, new ArrayList<>());
+        }
+
+        for (MoodMeter mood : MoodMeter.values()) {
+            Degree degree = mood.getDegree();
+            if (degree != null && moodGroup.containsKey(degree)) {
+                MoodDetailsDto dto = new MoodDetailsDto(mood.getMoodName(), mood.getColor());
+                moodGroup.get(degree).add(dto);
+            }
+        }
+
+        List<MoodCategoryResponse> moodCategories = new ArrayList<>();
+        for (Map.Entry<Degree, List<MoodDetailsDto>> entry : moodGroup.entrySet()) {
+            moodCategories.add(
+                    new MoodMeterCategoryDto(entry.getKey().getDegreeName(), entry.getValue())
+            );
+        }
+        return moodCategories;
     }
 }

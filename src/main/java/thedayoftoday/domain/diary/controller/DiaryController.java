@@ -1,13 +1,11 @@
 package thedayoftoday.domain.diary.controller;
 
+import lombok.RequiredArgsConstructor;
 import thedayoftoday.domain.diary.dto.*;
 import thedayoftoday.domain.diary.entity.Diary;
 import thedayoftoday.domain.diary.moodmeter.DiaryMood;
 import thedayoftoday.domain.diary.moodmeter.RecommendedMoodResponseDto;
 import thedayoftoday.domain.diary.conversation.dto.ConversationResponseDto;
-import thedayoftoday.domain.diary.moodmeter.MoodCategoryResponse;
-import thedayoftoday.domain.diary.repository.DiaryRepository;
-import thedayoftoday.domain.diary.service.AiService;
 import thedayoftoday.domain.diary.service.DiaryService;
 import thedayoftoday.domain.auth.security.CustomUserDetails;
 
@@ -15,68 +13,66 @@ import java.io.IOException;
 
 import thedayoftoday.domain.diary.conversation.service.ConversationService;
 
-import java.time.LocalDate;
-import java.util.List;
-import java.util.Objects;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.transaction.annotation.Transactional;
+
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/diary")
+@RequiredArgsConstructor
 public class DiaryController {
 
-    private final AiService openAiService;
     private final ConversationService conversationService;
     private final DiaryService diaryService;
-    private final DiaryRepository diaryRepository;
-
-    public DiaryController(AiService openAiService, ConversationService conversationService,
-                           DiaryService diaryService, DiaryRepository diaryRepository) {
-        this.openAiService = openAiService;
-        this.conversationService = conversationService;
-        this.diaryService = diaryService;
-        this.diaryRepository = diaryRepository;
-    }
 
     @PostMapping(value = "/monologue", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<DiaryIdResponseDto> createDiaryWithMood(@RequestParam("file") MultipartFile file,
-                                                                  @AuthenticationPrincipal CustomUserDetails userDetails)
-            throws IOException {
+                                                                  @AuthenticationPrincipal CustomUserDetails userDetails) throws IOException {
+        DiaryIdResponseDto responseDto = diaryService.createDiaryFromAudio(userDetails.getUserId(), file);
+        return ResponseEntity.status(HttpStatus.CREATED).body(responseDto);
+    }
+
+    //대화모드 시작 버튼
+    @PostMapping("/conversation-mode/start")
+    public ResponseEntity<DiaryIdResponseDto> startConversation(
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
         Long userId = userDetails.getUserId();
+        DiaryIdResponseDto responseDto = diaryService.createEmptyDiary(userId);
+        return ResponseEntity.status(HttpStatus.CREATED).body(responseDto);
+    }
 
-        String transcribedText = openAiService.transcribeAudio(file);
-        DiaryContentResponseDto diary = openAiService.convertToDiary(transcribedText);
-        DiaryMood mood = openAiService.recommendMood(diary.content());
-        DiaryIdResponseDto savedDiary = diaryService.createDiary(userId, diary.title(), diary.content(), mood);
+    //대화모드 다음 버튼 누르면 음성 파일을 받아서 텍스트로 바꾸고 Conversation에 저장하고 텍스트 분석한 걸 바탕으로 질문 생성해서 던져줌
+    @PostMapping(value = "/conversation-mode/next-question", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ConversationResponseDto continueConversation(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @RequestParam("question") String question,
+            @RequestParam("file") MultipartFile file,
+            @RequestParam("diaryId") Long diaryId) throws IOException {
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(savedDiary);
+        Diary diary = diaryService.findAuthorizedDiaryById(diaryId, userDetails.getUserId());
+
+        return conversationService.proccessAndGenerateNextQuestion(question, file, diary);
+    }
+
+    //대화모드 끝
+    @PostMapping("/conversation-mode/complete")
+    public ResponseEntity<DiaryIdResponseDto> completeDiary(@AuthenticationPrincipal CustomUserDetails userDetails,
+                                                            @RequestParam("question") String question,
+                                                            @RequestParam(value = "file", required = false) MultipartFile file,
+                                                            @RequestParam("diaryId") Long diaryId) throws IOException {
+        diaryService.completeDiaryFromConversation(userDetails.getUserId(), diaryId, question, file);
+        return ResponseEntity.ok(new DiaryIdResponseDto(diaryId));
     }
 
     @GetMapping("/moodmeter")
     public RecommendedMoodResponseDto showDiaryMood(@AuthenticationPrincipal CustomUserDetails userDetails,
                                                     @RequestParam(value = "diaryId") Long diaryId) {
-        long userId = userDetails.getUserId();
-
-        Diary diary = diaryRepository.findById(diaryId).orElseThrow(() -> new IllegalArgumentException("해당 일기가 없습니다."));
-
-        if (!Objects.equals(diary.getUser().getUserId(), userId)) {
-            throw new AccessDeniedException("자신의 일기만 조회할 수 있습니다.");
-        }
-
-        String transcribedText = diary.getContent();
-        DiaryMood mood = openAiService.recommendMood(transcribedText);
-
-        List<MoodCategoryResponse> moodCategories = diaryService.getAllMoodListResponseDto();
-
-        return new RecommendedMoodResponseDto(mood, moodCategories);
+        return diaryService.getRecommendedMood(userDetails.getUserId(), diaryId);
     }
 
     //사용자가 감정 선택
@@ -93,8 +89,7 @@ public class DiaryController {
     @GetMapping("/show")
     public DiaryContentResponseDto showDiary(@AuthenticationPrincipal CustomUserDetails userDetails,
                                              @RequestParam(value = "diaryId") Long diaryId) {
-        Diary diary = diaryRepository.findById(diaryId).orElseThrow(() -> new IllegalArgumentException("해당 일기가 없습니다."));
-        return new DiaryContentResponseDto(diary.getTitle(), diary.getContent());
+        return diaryService.getDiaryContent(userDetails.getUserId(), diaryId);
     }
 
     //사용자가 일기 수정
@@ -102,8 +97,7 @@ public class DiaryController {
     public ResponseEntity<String> updateDiaryContent(@AuthenticationPrincipal CustomUserDetails userDetails,
                                                      @RequestBody UpdateDiaryContentRequestDto updateDiaryContentRequestDto) {
         Long userId = userDetails.getUserId();
-        diaryService.updateDiaryContent(userId, updateDiaryContentRequestDto.diaryId(), updateDiaryContentRequestDto.title(),
-                updateDiaryContentRequestDto.content());
+        diaryService.updateDiaryContent(userId, updateDiaryContentRequestDto.diaryId(), updateDiaryContentRequestDto.title(), updateDiaryContentRequestDto.content());
         return ResponseEntity.ok("일기 수정 완료");
     }
 
@@ -111,77 +105,16 @@ public class DiaryController {
     @PostMapping("/analyze")
     public ResponseEntity<AIAnalysisContentDto> analyzeDiary(@AuthenticationPrincipal CustomUserDetails userDetails,
                                                              @RequestParam(value = "diaryId") Long diaryId) {
-
-        Long userId = userDetails.getUserId();
-
-        DiaryMood mood = diaryService.getMoodByDiaryId(diaryId);
-
-        String analysis = openAiService.analyzeDiary(diaryId, mood);
-
-        AIAnalysisContentDto aiAnalysisContentDto = new AIAnalysisContentDto(analysis);
-        diaryService.updateAnalysisContent(userId, diaryId, analysis);
-        return ResponseEntity.ok(aiAnalysisContentDto);
-    }
-
-    //대화모드 시작 버튼
-    @PostMapping("/conversation-mode/start")
-    public ResponseEntity<DiaryIdResponseDto> startConversation(
-            @AuthenticationPrincipal CustomUserDetails userDetails) {
-        Long userId = userDetails.getUserId();
-        DiaryIdResponseDto responseDto = diaryService.createEmptyDiary(userId);
-        return ResponseEntity.status(HttpStatus.CREATED).body(responseDto);
-    }
-
-    //대화모드 다음 버튼 누르면 음성 파일을 받아서 텍스트로 바꾸고 Conversation에 저장하고 텍스트 분석한 걸 바탕으로 질문 생성해서 던져줌
-    @PostMapping(value = "/conversation-mode/next-question", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ConversationResponseDto continueConversation(
-            @RequestParam("question") String question,
-            @RequestParam("file") MultipartFile file,
-            @RequestParam("diaryId") Long diaryId) throws IOException {
-
-        String answer = openAiService.transcribeAudio(file);
-        // Conversation 저장
-        conversationService.save(question, answer, diaryId);
-        // 텍스트 바탕으로 다음 질문 생성
-        String nextQuestion = openAiService.generateNextQuestion(conversationService.mergeConversationText(diaryId));
-
-        return new ConversationResponseDto(nextQuestion);
-    }
-
-    //대화모드 끝
-    @PostMapping("/conversation-mode/complete")
-    public ResponseEntity<DiaryIdResponseDto> completeDiary(@AuthenticationPrincipal CustomUserDetails userDetails,
-                                                            @RequestParam("question") String question,
-                                                            @RequestParam(value = "file", required = false) MultipartFile file,
-                                                            @RequestParam("diaryId") Long diaryId) throws IOException {
-        Long userId = userDetails.getUserId();
-
-        if (file != null) {
-            String answer = openAiService.transcribeAudio(file);
-            conversationService.save(question, answer, diaryId);
-        }
-
-        String mergedText = conversationService.mergeConversationText(diaryId);
-        DiaryContentResponseDto diary = openAiService.convertToDiary(mergedText);
-
-        diaryService.updateDiaryContent(userId, diaryId, diary.title(), diary.content());
-
-        return ResponseEntity.ok(new DiaryIdResponseDto(diaryId));
+        AIAnalysisContentDto responseDto = diaryService.analyzeAndSaveDiary(userDetails.getUserId(), diaryId);
+        return ResponseEntity.ok(responseDto);
     }
 
     @DeleteMapping("/delete/{year}/{month}/{day}")
-    @Transactional
-    public ResponseEntity<Void> deleteDiary(
-            @AuthenticationPrincipal CustomUserDetails userDetails,
-            @PathVariable int year,
-            @PathVariable int month,
-            @PathVariable int day) {
-
-        Long userId = userDetails.getUserId();
-
-        LocalDate date = LocalDate.of(year, month, day);
-
-        diaryRepository.deleteByUser_UserIdAndCreateTimeBetween(userId, date, date);
+    public ResponseEntity<Void> deleteDiary(@AuthenticationPrincipal CustomUserDetails userDetails,
+                                            @PathVariable int year,
+                                            @PathVariable int month,
+                                            @PathVariable int day) {
+        diaryService.deleteDiaryByDate(userDetails.getUserId(), year, month, day);
         return ResponseEntity.noContent().build();
     }
 }
