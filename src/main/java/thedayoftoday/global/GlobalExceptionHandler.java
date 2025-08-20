@@ -1,34 +1,33 @@
 package thedayoftoday.global;
 
-import thedayoftoday.domain.auth.exception.EmailCodeExpireException;
-import thedayoftoday.domain.auth.exception.EmailCodeNotMatchException;
-import thedayoftoday.domain.auth.exception.EmailDuplicationException;
-import thedayoftoday.domain.auth.exception.ErrorCodeMessage;
-import thedayoftoday.domain.auth.exception.MailSendException;
-import thedayoftoday.domain.auth.exception.PhoneNumberDuplicationExceptiono;
-import java.util.Objects;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import thedayoftoday.domain.auth.exception.PhoneNumberDuplicationExceptiono;
+import thedayoftoday.domain.auth.mail.exception.EmailCodeExpireException;
+import thedayoftoday.domain.auth.mail.exception.EmailCodeNotMatchException;
+import thedayoftoday.domain.auth.mail.exception.EmailDuplicationException;
+import thedayoftoday.domain.auth.mail.exception.MailSendException;
+import thedayoftoday.domain.diary.exception.DiaryAccessDeniedException;
+import thedayoftoday.domain.diary.exception.DiaryNotFoundException;
+import thedayoftoday.domain.diary.exception.MoodNotSelectedException;
+
+import java.util.Objects;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(EmailDuplicationException.class)
     public ResponseEntity<ErrorCodeMessage> handleEmailDuplicate(EmailDuplicationException e) {
-        HttpStatus httpStatus = HttpStatus.CONFLICT;
-        ErrorCodeMessage errorCodeMessage = new ErrorCodeMessage(httpStatus.value(), e.getMessage());
-        return ResponseEntity.status(httpStatus).body(errorCodeMessage);
+        return createErrorResponse(HttpStatus.CONFLICT, e.getMessage());
     }
 
     @ExceptionHandler(PhoneNumberDuplicationExceptiono.class)
     public ResponseEntity<ErrorCodeMessage> handlePhoneNumberDuplicate(PhoneNumberDuplicationExceptiono e) {
-        HttpStatus httpStatus = HttpStatus.CONFLICT;
-        ErrorCodeMessage errorCodeMessage = new ErrorCodeMessage(httpStatus.value(), e.getMessage());
-        return ResponseEntity.status(httpStatus).body(errorCodeMessage);
+        return createErrorResponse(HttpStatus.CONFLICT, e.getMessage());
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -37,36 +36,46 @@ public class GlobalExceptionHandler {
                 .map(ObjectError::getDefaultMessage)
                 .filter(Objects::nonNull)
                 .findFirst().orElse("잘못된 요청입니다");
-        HttpStatus httpStatus = HttpStatus.BAD_REQUEST;
-        ErrorCodeMessage errorCodeMessage = new ErrorCodeMessage(httpStatus.value(), message);
-        return ResponseEntity.status(httpStatus).body(errorCodeMessage);
+        return createErrorResponse(HttpStatus.BAD_REQUEST, message);
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ErrorCodeMessage> handleIllegalArgument(IllegalArgumentException e) {
-        HttpStatus httpStatus = HttpStatus.NOT_FOUND;
-        ErrorCodeMessage errorCodeMessage = new ErrorCodeMessage(httpStatus.value(), e.getMessage());
-        return ResponseEntity.status(httpStatus).body(errorCodeMessage);
+        return createErrorResponse(HttpStatus.NOT_FOUND, e.getMessage());
     }
 
     @ExceptionHandler(EmailCodeNotMatchException.class)
     public ResponseEntity<ErrorCodeMessage> handleEmailCodeNotMatch(EmailCodeNotMatchException e) {
-        HttpStatus httpStatus = HttpStatus.BAD_REQUEST;
-        ErrorCodeMessage errorCodeMessage = new ErrorCodeMessage(httpStatus.value(), e.getMessage());
-        return ResponseEntity.status(httpStatus).body(errorCodeMessage);
+        return createErrorResponse(HttpStatus.BAD_REQUEST, e.getMessage());
     }
 
     @ExceptionHandler(EmailCodeExpireException.class)
     public ResponseEntity<ErrorCodeMessage> handleEmailCodeExpire(EmailCodeExpireException e) {
-        HttpStatus httpStatus = HttpStatus.NOT_FOUND;
-        ErrorCodeMessage errorCodeMessage = new ErrorCodeMessage(httpStatus.value(), e.getMessage());
-        return ResponseEntity.status(httpStatus).body(errorCodeMessage);
+        return createErrorResponse(HttpStatus.NOT_FOUND, e.getMessage());
     }
 
     @ExceptionHandler(MailSendException.class)
     public ResponseEntity<ErrorCodeMessage> handleMailSend(MailSendException e) {
-        HttpStatus httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
-        ErrorCodeMessage errorCodeMessage = new ErrorCodeMessage(httpStatus.value(), e.getMessage());
-        return ResponseEntity.status(httpStatus).body(errorCodeMessage);
+        return createErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+    }
+
+    @ExceptionHandler(DiaryNotFoundException.class)
+    public ResponseEntity<ErrorCodeMessage> handleDiaryNotFound(DiaryNotFoundException e) {
+        return createErrorResponse(HttpStatus.NOT_FOUND, e.getMessage());
+    }
+
+    @ExceptionHandler(DiaryAccessDeniedException.class)
+    public ResponseEntity<ErrorCodeMessage> handleDiaryAccessDenied(DiaryAccessDeniedException e) {
+        return createErrorResponse(HttpStatus.FORBIDDEN, e.getMessage());
+    }
+
+    @ExceptionHandler(MoodNotSelectedException.class)
+    public ResponseEntity<ErrorCodeMessage> handleMoodNotSelected(MoodNotSelectedException e) {
+        return createErrorResponse(HttpStatus.CONFLICT, e.getMessage());
+    }
+
+    private ResponseEntity<ErrorCodeMessage> createErrorResponse(HttpStatus status, String message) {
+        ErrorCodeMessage errorCodeMessage = new ErrorCodeMessage(status.value(), message);
+        return ResponseEntity.status(status).body(errorCodeMessage);
     }
 }

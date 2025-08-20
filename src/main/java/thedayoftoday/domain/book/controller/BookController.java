@@ -7,7 +7,7 @@ import thedayoftoday.domain.diary.entity.Diary;
 import thedayoftoday.domain.user.entity.User;
 import thedayoftoday.domain.diary.repository.DiaryRepository;
 import thedayoftoday.domain.user.repository.UserRepository;
-import thedayoftoday.security.CustomUserDetails;
+import thedayoftoday.domain.auth.security.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;

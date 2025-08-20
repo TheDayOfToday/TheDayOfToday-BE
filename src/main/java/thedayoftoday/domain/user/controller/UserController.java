@@ -5,7 +5,7 @@ import thedayoftoday.domain.user.service.UserService;
 import thedayoftoday.domain.user.dto.PasswordUpdateRequest;
 import thedayoftoday.domain.user.dto.ResetPasswordRequestDto;
 import thedayoftoday.domain.user.dto.UserInfoDto;
-import thedayoftoday.security.CustomUserDetails;
+import thedayoftoday.domain.auth.security.CustomUserDetails;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -26,6 +26,12 @@ public class UserController {
     public ResponseEntity<UserInfoDto> getSetting(@AuthenticationPrincipal CustomUserDetails userDetails) {
         UserInfoDto userInfo = userService.getUserInfo(userDetails.getUserId());
         return ResponseEntity.ok(userInfo);
+    }
+
+    @GetMapping("/find-email")
+    public ResponseEntity<String> findEmail(String email) {
+        userService.checkEmailExists(email);
+        return ResponseEntity.ok("이메일이 존재합니다.");
     }
 
     @PutMapping("/reset-password")
