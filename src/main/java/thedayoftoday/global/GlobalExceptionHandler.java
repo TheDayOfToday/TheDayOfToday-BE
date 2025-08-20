@@ -1,11 +1,11 @@
 package thedayoftoday.global;
 
-import thedayoftoday.exception.EmailCodeExpireException;
-import thedayoftoday.exception.EmailCodeNotMatchException;
-import thedayoftoday.exception.EmailDuplicationException;
-import thedayoftoday.exception.ErrorCodeMessage;
-import thedayoftoday.exception.MailSendException;
-import thedayoftoday.exception.PhoneNumberDuplicationExceptiono;
+import thedayoftoday.domain.auth.exception.EmailCodeExpireException;
+import thedayoftoday.domain.auth.exception.EmailCodeNotMatchException;
+import thedayoftoday.domain.auth.exception.EmailDuplicationException;
+import thedayoftoday.domain.auth.exception.ErrorCodeMessage;
+import thedayoftoday.domain.auth.exception.MailSendException;
+import thedayoftoday.domain.auth.exception.PhoneNumberDuplicationExceptiono;
 import java.util.Objects;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
