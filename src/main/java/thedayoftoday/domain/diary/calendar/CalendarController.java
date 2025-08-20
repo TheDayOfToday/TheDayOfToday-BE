@@ -2,7 +2,7 @@ package thedayoftoday.domain.diary.calendar;
 
 import thedayoftoday.domain.diary.dto.AIAnalysisContentDto;
 import thedayoftoday.domain.diary.dto.DiaryContentResponseDto;
-import thedayoftoday.security.CustomUserDetails;
+import thedayoftoday.domain.auth.security.CustomUserDetails;
 
 import java.time.LocalDate;
 

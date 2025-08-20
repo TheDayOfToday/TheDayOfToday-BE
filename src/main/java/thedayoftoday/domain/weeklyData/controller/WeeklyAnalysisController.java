@@ -2,7 +2,7 @@ package thedayoftoday.domain.weeklyData.controller;
 
 import thedayoftoday.domain.weeklyData.service.WeeklyAnalysisService;
 import thedayoftoday.domain.weeklyData.dto.WeeklyAnalysisResponseDto;
-import thedayoftoday.security.CustomUserDetails;
+import thedayoftoday.domain.auth.security.CustomUserDetails;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;

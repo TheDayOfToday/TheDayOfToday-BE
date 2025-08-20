@@ -8,7 +8,7 @@ import thedayoftoday.domain.diary.conversation.dto.ConversationResponseDto;
 import thedayoftoday.domain.diary.moodmeter.MoodCategoryResponse;
 import thedayoftoday.domain.diary.repository.DiaryRepository;
 import thedayoftoday.domain.diary.service.DiaryService;
-import thedayoftoday.security.CustomUserDetails;
+import thedayoftoday.domain.auth.security.CustomUserDetails;
 
 import java.io.IOException;
 
