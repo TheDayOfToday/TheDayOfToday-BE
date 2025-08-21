@@ -1,5 +1,6 @@
 package thedayoftoday.domain.weeklyData.entity;
 
+import thedayoftoday.domain.common.BaseEntity;
 import thedayoftoday.domain.user.entity.User;
 import jakarta.persistence.*;
 
@@ -13,7 +14,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class WeeklyData {
+public class WeeklyData extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

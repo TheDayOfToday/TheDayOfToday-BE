@@ -3,6 +3,7 @@ package thedayoftoday.domain.user.entity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import thedayoftoday.domain.auth.dto.SignupRequestDto;
 import thedayoftoday.domain.book.entity.Book;
+import thedayoftoday.domain.common.BaseEntity;
 import thedayoftoday.domain.diary.entity.Diary;
 import thedayoftoday.domain.notice.entity.Notice;
 import thedayoftoday.domain.weeklyData.entity.WeeklyData;
@@ -17,7 +18,7 @@ import java.util.List;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
-public class User {
+public class User extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

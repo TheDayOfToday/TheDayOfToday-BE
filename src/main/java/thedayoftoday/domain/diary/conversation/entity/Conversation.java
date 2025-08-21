@@ -2,6 +2,7 @@ package thedayoftoday.domain.diary.conversation.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import thedayoftoday.domain.common.BaseEntity;
 import thedayoftoday.domain.diary.entity.Diary;
 
 @Entity
@@ -9,7 +10,7 @@ import thedayoftoday.domain.diary.entity.Diary;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
-public class Conversation {
+public class Conversation extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

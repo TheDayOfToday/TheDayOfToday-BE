@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import lombok.*;
+import thedayoftoday.domain.common.BaseEntity;
 import thedayoftoday.domain.diary.exception.MoodNotSelectedException;
 import thedayoftoday.domain.diary.moodmeter.DiaryMood;
 import thedayoftoday.domain.user.entity.User;
@@ -17,7 +18,7 @@ import thedayoftoday.domain.diary.conversation.entity.Conversation;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder(toBuilder = true)
-public class Diary {
+public class Diary extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -29,7 +30,7 @@ public class Diary {
     @Column(nullable = false, columnDefinition = "TEXT")
     private String content;
 
-    private LocalDate createTime;
+    private LocalDate createTime; // 곧 지울 예정
 
     @Embedded
     DiaryMood diaryMood;
