@@ -1,7 +1,8 @@
 # TheDayOfToday-BE (오늘의 하루 - 백엔드)
 
 ## 구성도
-<img width="1074" height="572" alt="image" src="https://github.com/user-attachments/assets/0e734c02-d11d-40a0-be24-3dfbe0a75841" />
+<img width="613" height="486" alt="image" src="https://github.com/user-attachments/assets/7d4cd953-f4fb-4061-a270-3a6dbb0548fa" />
+
 
 <br>
 
@@ -31,3 +32,4 @@
 
 ## 결과 화면
 <img width="1271" height="526" alt="순번3_음성으로+기록하는+AI기반+감정일기+애플리케이션+오늘의+하루+캡쳐사진" src="https://github.com/user-attachments/assets/80bc99b9-a0e4-4ba5-92ea-e7976eb62874" />
+
