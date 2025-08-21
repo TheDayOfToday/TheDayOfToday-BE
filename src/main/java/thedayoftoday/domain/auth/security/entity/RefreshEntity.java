@@ -6,11 +6,12 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import lombok.Getter;
 import lombok.Setter;
+import thedayoftoday.domain.common.BaseEntity;
 
 @Entity
 @Getter
 @Setter
-public class RefreshEntity {
+public class RefreshEntity extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
