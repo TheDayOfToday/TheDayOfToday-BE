@@ -2,6 +2,7 @@ package thedayoftoday.domain.diary.calendar;
 
 import lombok.RequiredArgsConstructor;
 import thedayoftoday.domain.diary.dto.AIAnalysisContentDto;
+import thedayoftoday.domain.diary.dto.DailyMoodColorDto;
 import thedayoftoday.domain.diary.dto.DiaryContentResponseDto;
 import thedayoftoday.domain.diary.entity.Diary;
 import thedayoftoday.domain.diary.exception.DiaryNotFoundException;
@@ -27,13 +28,13 @@ public class CalendarService {
     private final DiaryService diaryService;
 
     public MonthColorsResponseDto getMonthColors(Long userId, LocalDate startDate, LocalDate endDate) {
-        List<Diary> diaries = diaryService.findDiariesByUserAndDateRange(userId, startDate, endDate);
+        List<DailyMoodColorDto> dailyMoods = diaryService.findMoodColorsByUserAndDateRange(userId, startDate, endDate);
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
-        Map<String, String> colors = diaries.stream()
+        Map<String, String> colors = dailyMoods.stream()
                 .collect(Collectors.toMap(
-                        diary -> diary.getCreateTime().format(formatter),
-                        Diary::getCalendarMoodColor
+                        dto -> dto.createTime().format(formatter),
+                        DailyMoodColorDto::moodColor
                 ));
 
         return new MonthColorsResponseDto(colors);

@@ -6,10 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import thedayoftoday.domain.diary.conversation.service.ConversationService;
-import thedayoftoday.domain.diary.dto.AIAnalysisContentDto;
-import thedayoftoday.domain.diary.dto.DiaryContentResponseDto;
-import thedayoftoday.domain.diary.dto.DiaryIdResponseDto;
-import thedayoftoday.domain.diary.dto.DiaryInfoResponseDto;
+import thedayoftoday.domain.diary.dto.*;
 import thedayoftoday.domain.diary.entity.Diary;
 import thedayoftoday.domain.diary.exception.DiaryAccessDeniedException;
 import thedayoftoday.domain.diary.exception.DiaryNotFoundException;
@@ -167,5 +164,9 @@ public class DiaryService {
 
     public Optional<Diary> findDiaryByDate(Long userId, LocalDate date) {
         return findDiariesByUserAndDateRange(userId, date, date).stream().findFirst();
+    }
+
+    public List<DailyMoodColorDto> findMoodColorsByUserAndDateRange(Long userId, LocalDate startDate, LocalDate endDate) {
+        return diaryRepository.findMoodColorsByUserAndDateRange(userId, startDate, endDate);
     }
 }
