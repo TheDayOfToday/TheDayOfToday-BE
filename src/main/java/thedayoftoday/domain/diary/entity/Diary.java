@@ -30,7 +30,7 @@ public class Diary extends BaseEntity {
     @Column(nullable = false, columnDefinition = "TEXT")
     private String content;
 
-    private LocalDate createTime;
+    private LocalDate createTime; // 곧 지울 예정
 
     @Embedded
     DiaryMood diaryMood;
