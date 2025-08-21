@@ -2,6 +2,7 @@ package thedayoftoday.domain.diary.repository;
 
 import java.time.LocalDate;
 
+import thedayoftoday.domain.diary.dto.DailyMoodColorDto;
 import thedayoftoday.domain.diary.entity.Diary;
 import thedayoftoday.domain.user.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -39,8 +40,24 @@ public interface DiaryRepository extends JpaRepository<Diary, Long> {
 
     Optional<Diary> findByDiaryId(Long diaryId);
 
+    @Query("SELECT d FROM Diary d JOIN FETCH d.conversations WHERE d.diaryId = :diaryId")
+    Optional<Diary> findByIdWithConversations(@Param("diaryId") Long diaryId);
+
     @Query("SELECT d FROM Diary d JOIN FETCH d.user WHERE d.user.userId = :userId AND d.title LIKE %:title%")
     List<Diary> findByUserIdAndTitleWithUser(@Param("userId") Long userId, @Param("title") String title);
 
     boolean existsByUserAndCreateTimeAfter(User user, LocalDate date);
+
+    @Query("""
+        SELECT new thedayoftoday.domain.diary.dto.DailyMoodColorDto(d.createTime, d.diaryMood.moodColor)
+        FROM Diary d
+        WHERE d.user.userId = :userId
+        AND d.createTime BETWEEN :startDate AND :endDate
+        AND d.diaryMood IS NOT NULL
+    """)
+    List<DailyMoodColorDto> findMoodColorsByUserAndDateRange(
+            @Param("userId") Long userId,
+            @Param("startDate") LocalDate startDate,
+            @Param("endDate") LocalDate endDate
+    );
 }

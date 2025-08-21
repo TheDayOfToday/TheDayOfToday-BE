@@ -54,7 +54,7 @@ public class DiaryController {
             @RequestParam("file") MultipartFile file,
             @RequestParam("diaryId") Long diaryId) throws IOException {
 
-        Diary diary = diaryService.findAuthorizedDiaryById(diaryId, userDetails.getUserId());
+        Diary diary = diaryService.findAuthorizedDiaryByIdWithConversations(diaryId, userDetails.getUserId());;
 
         return conversationService.proccessAndGenerateNextQuestion(question, file, diary);
     }

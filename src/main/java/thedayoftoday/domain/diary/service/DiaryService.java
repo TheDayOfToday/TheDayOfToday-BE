@@ -6,10 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import thedayoftoday.domain.diary.conversation.service.ConversationService;
-import thedayoftoday.domain.diary.dto.AIAnalysisContentDto;
-import thedayoftoday.domain.diary.dto.DiaryContentResponseDto;
-import thedayoftoday.domain.diary.dto.DiaryIdResponseDto;
-import thedayoftoday.domain.diary.dto.DiaryInfoResponseDto;
+import thedayoftoday.domain.diary.dto.*;
 import thedayoftoday.domain.diary.entity.Diary;
 import thedayoftoday.domain.diary.exception.DiaryAccessDeniedException;
 import thedayoftoday.domain.diary.exception.DiaryNotFoundException;
@@ -47,16 +44,21 @@ public class DiaryService {
 
     @Transactional
     public void completeDiaryFromConversation(Long userId, Long diaryId, String lastQuestion, MultipartFile lastAudioFile) throws IOException {
-        Diary diary = getDiaryByIdAndAuthorize(diaryId, userId);
+        Diary diaryWithConversations = diaryRepository.findByIdWithConversations(diaryId)
+                .orElseThrow(() -> new DiaryNotFoundException(diaryId));
+
+        if (!Objects.equals(diaryWithConversations.getUser().getUserId(), userId)) {
+            throw new DiaryAccessDeniedException();
+        }
 
         if (lastAudioFile != null && !lastAudioFile.isEmpty()) {
             String lastAnswer = aiService.transcribeAudio(lastAudioFile);
-            conversationService.save(lastQuestion, lastAnswer, diary);
+            conversationService.save(lastQuestion, lastAnswer, diaryWithConversations);
         }
 
-        String mergedText = conversationService.mergeConversationText(diary);
+        String mergedText = conversationService.mergeConversationText(diaryWithConversations);
         DiaryContentResponseDto diaryDto = aiService.convertToDiary(mergedText);
-        diary.updateDiary(diaryDto.title(), diaryDto.content());
+        diaryWithConversations.updateDiary(diaryDto.title(), diaryDto.content());
     }
 
     @Transactional
@@ -146,7 +148,25 @@ public class DiaryService {
         return diary;
     }
 
-    public Diary findAuthorizedDiaryById(Long diaryId, Long userId) {
-        return getDiaryByIdAndAuthorize(diaryId, userId);
+    public Diary findAuthorizedDiaryByIdWithConversations(Long diaryId, Long userId) {
+        Diary diary = diaryRepository.findByIdWithConversations(diaryId)
+                .orElseThrow(() -> new DiaryNotFoundException(diaryId));
+
+        if (!Objects.equals(diary.getUser().getUserId(), userId)) {
+            throw new DiaryAccessDeniedException();
+        }
+        return diary;
+    }
+
+    public List<Diary> findDiariesByUserAndDateRange(Long userId, LocalDate startDate, LocalDate endDate) {
+        return diaryRepository.findByUser_UserIdAndCreateTimeBetween(userId, startDate, endDate);
+    }
+
+    public Optional<Diary> findDiaryByDate(Long userId, LocalDate date) {
+        return findDiariesByUserAndDateRange(userId, date, date).stream().findFirst();
+    }
+
+    public List<DailyMoodColorDto> findMoodColorsByUserAndDateRange(Long userId, LocalDate startDate, LocalDate endDate) {
+        return diaryRepository.findMoodColorsByUserAndDateRange(userId, startDate, endDate);
     }
 }

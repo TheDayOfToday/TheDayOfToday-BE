@@ -108,4 +108,11 @@ public class Diary {
         }
         return this.diaryMood;
     }
+
+    public String getCalendarMoodColor() {
+        if (this.diaryMood != null && !this.isEmpty()) {
+            return this.diaryMood.getMoodColor();
+        }
+        return "미분석";
+    }
 }
