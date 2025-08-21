@@ -149,4 +149,12 @@ public class DiaryService {
     public Diary findAuthorizedDiaryById(Long diaryId, Long userId) {
         return getDiaryByIdAndAuthorize(diaryId, userId);
     }
+
+    public List<Diary> findDiariesByUserAndDateRange(Long userId, LocalDate startDate, LocalDate endDate) {
+        return diaryRepository.findByUser_UserIdAndCreateTimeBetween(userId, startDate, endDate);
+    }
+
+    public Optional<Diary> findDiaryByDate(Long userId, LocalDate date) {
+        return findDiariesByUserAndDateRange(userId, date, date).stream().findFirst();
+    }
 }

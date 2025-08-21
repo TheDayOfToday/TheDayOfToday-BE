@@ -1,8 +1,10 @@
 package thedayoftoday.domain.diary.calendar;
 
+import lombok.RequiredArgsConstructor;
 import thedayoftoday.domain.diary.dto.AIAnalysisContentDto;
 import thedayoftoday.domain.diary.dto.DiaryContentResponseDto;
 import thedayoftoday.domain.diary.entity.Diary;
+import thedayoftoday.domain.diary.exception.DiaryNotFoundException;
 import thedayoftoday.domain.diary.repository.DiaryRepository;
 
 import java.time.LocalDate;
@@ -13,57 +15,41 @@ import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.transaction.annotation.Transactional;
+import thedayoftoday.domain.diary.service.DiaryService;
 
 @Service
 @Transactional(readOnly = true)
+@RequiredArgsConstructor
 public class CalendarService {
-    private final DiaryRepository diaryRepository;
-
-    public CalendarService(DiaryRepository diaryRepository) {
-        this.diaryRepository = diaryRepository;
-    }
+    private final DiaryService diaryService;
 
     public MonthColorsResponseDto getMonthColors(Long userId, LocalDate startDate, LocalDate endDate) {
-        List<Diary> diaries = diaryRepository.findByUser_UserIdAndCreateTimeBetween(userId, startDate, endDate);
-
+        List<Diary> diaries = diaryService.findDiariesByUserAndDateRange(userId, startDate, endDate);
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        Map<String, String> colors = new HashMap<>();
 
-        for (Diary diary : diaries) {
-            String dateKey = diary.getCreateTime().format(formatter);
-            String moodColor = "미분석";
-
-            if (diary.getDiaryMood() != null && !diary.isEmpty()) {
-                moodColor = diary.getDiaryMood().getMoodColor();
-            }
-
-            colors.put(dateKey, moodColor);
-        }
+        Map<String, String> colors = diaries.stream()
+                .collect(Collectors.toMap(
+                        diary -> diary.getCreateTime().format(formatter),
+                        Diary::getCalendarMoodColor
+                ));
 
         return new MonthColorsResponseDto(colors);
     }
 
     public DiaryContentResponseDto getDiaryEntry(Long userId, LocalDate date) {
-
-        return diaryRepository.findByUser_UserIdAndCreateTimeBetween(userId, date, date).stream()
-                .filter(diary -> !diary.isEmpty())
-                .findFirst()
+        return diaryService.findDiaryByDate(userId, date)
                 .map(diary -> new DiaryContentResponseDto(diary.getTitle(), diary.getContent()))
-                .orElse(null);
+                .orElseThrow(() -> new DiaryNotFoundException("해당 날짜에 작성된 일기가 없습니다."));
     }
 
     public AIAnalysisContentDto getSentimentalAnalysis(Long userId, LocalDate date) {
+        String analysisContent = diaryService.findDiaryByDate(userId, date)
+                .map(Diary::getAnalysisContentOrDefault)
+                .orElse("해당 날짜의 감정 분석 데이터가 없습니다.");
 
-        List<Diary> diaries = diaryRepository.findByUser_UserIdAndCreateTimeBetween(userId, date, date);
-        String analysisContent = "해당 날짜의 감정 분석 데이터가 없습니다.";
-
-        for (Diary diary : diaries) {
-            if (!diary.isEmpty()) {
-                analysisContent = diary.getAnalysisContent();
-            }
-        }
         return new AIAnalysisContentDto(analysisContent);
     }
 }

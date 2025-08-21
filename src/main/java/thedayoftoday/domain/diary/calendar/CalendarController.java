@@ -1,5 +1,6 @@
 package thedayoftoday.domain.diary.calendar;
 
+import lombok.RequiredArgsConstructor;
 import thedayoftoday.domain.diary.dto.AIAnalysisContentDto;
 import thedayoftoday.domain.auth.security.CustomUserDetails;
 
@@ -11,13 +12,10 @@ import thedayoftoday.domain.diary.dto.DiaryContentResponseDto;
 
 @RestController
 @RequestMapping("/calendar")
+@RequiredArgsConstructor
 public class CalendarController {
 
     private final CalendarService calendarService;
-
-    public CalendarController(CalendarService calendarService) {
-        this.calendarService = calendarService;
-    }
 
     @GetMapping("/{year}/{month}")
     public MonthColorsResponseDto getMonthColors(@AuthenticationPrincipal CustomUserDetails userDetails,
