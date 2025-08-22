@@ -166,6 +166,14 @@ public class DiaryService {
         return findDiariesByUserAndDateRange(userId, date, date).stream().findFirst();
     }
 
+    public Optional<DiaryContentResponseDto> findDiaryContentByDate(Long userId, LocalDate date) {
+        return diaryRepository.findByUser_UserIdAndCreateTimeBetween(userId, date, date)
+                .stream()
+                .filter(diary -> !diary.isEmpty())
+                .findFirst()
+                .map(diary -> new DiaryContentResponseDto(diary.getTitle(), diary.getContent()));
+    }
+
     public List<DailyMoodColorDto> findMoodColorsByUserAndDateRange(Long userId, LocalDate startDate, LocalDate endDate) {
         return diaryRepository.findMoodColorsByUserAndDateRange(userId, startDate, endDate);
     }
