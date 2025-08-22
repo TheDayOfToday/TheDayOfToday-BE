@@ -65,8 +65,8 @@ public class UserService {
     }
 
     public void checkEmailExists(String email) {
-        if (userRepository.existsByEmail(email)) {
-            throw new EmailDuplicationException("이미 사용 중인 이메일입니다.");
+        if(!userRepository.existsByEmail(email)){
+            throw new IllegalArgumentException("존재하지 않는 이메일입니다.");
         }
     }
 
