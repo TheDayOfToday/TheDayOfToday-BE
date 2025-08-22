@@ -40,7 +40,7 @@ public interface DiaryRepository extends JpaRepository<Diary, Long> {
 
     Optional<Diary> findByDiaryId(Long diaryId);
 
-    @Query("SELECT d FROM Diary d JOIN FETCH d.conversations WHERE d.diaryId = :diaryId")
+    @Query("SELECT d FROM Diary d LEFT JOIN FETCH d.conversations WHERE d.diaryId = :diaryId")
     Optional<Diary> findByIdWithConversations(@Param("diaryId") Long diaryId);
 
     @Query("SELECT d FROM Diary d JOIN FETCH d.user WHERE d.user.userId = :userId AND d.title LIKE %:title%")
