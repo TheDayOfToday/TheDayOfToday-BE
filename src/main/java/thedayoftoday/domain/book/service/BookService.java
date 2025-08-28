@@ -1,8 +1,5 @@
 package thedayoftoday.domain.book.service;
 
-import thedayoftoday.domain.book.entity.Book;
-import thedayoftoday.domain.user.entity.User;
-import thedayoftoday.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -10,12 +7,19 @@ import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
+import org.xml.sax.helpers.DefaultHandler;
+import thedayoftoday.domain.book.dto.RecommendedBookResponseDto;
+import thedayoftoday.domain.book.entity.Book;
+import thedayoftoday.domain.book.repository.BookRepository;
+import thedayoftoday.domain.diary.entity.Diary;
+import thedayoftoday.domain.diary.service.DiaryService;
 
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
 import java.util.*;
 
 @Slf4j
@@ -24,7 +28,8 @@ import java.util.*;
 @Transactional
 public class BookService {
 
-    private final UserRepository userRepository;
+    private final DiaryService diaryService;
+    private final BookRepository bookRepository;
 
     @Value("${openai.api.key}")
     private String openAiApiKey;
@@ -42,17 +47,18 @@ public class BookService {
             "참을 수 없는 존재의 가벼움", "호밀밭의 파수꾼", "월든", "데미안", "멋진 신세계"
     );
 
-    public void recommendBook(Long userId, String diaryContent, String analysisContent) {
-        log.info("책 추천 시작 - userId: {}", userId);
+    public void recommendBookToDiary(Long diaryId) {
+        log.info("책 추천 시작 - diaryId: {}", diaryId);
+        Diary diary = diaryService.findDiaryById(diaryId);
 
         for (int i = 1; i <= 5; i++) {
             try {
                 log.info("GPT 추천 시도 {}회차", i);
-                String title = extractTitleFromGpt(diaryContent, analysisContent);
+                String title = extractTitleFromGpt(diary.getContent(), diary.getAnalysisContent());
                 log.info("GPT 응답 책 제목: {}", title);
 
                 Book book = searchBookFromAladin(title);
-                saveBookToUser(userId, book);
+                diary.setBook(book);
                 return;
 
             } catch (Exception e) {
@@ -64,11 +70,31 @@ public class BookService {
         String backupTitle = BESTSELLER_TITLES.get(new Random().nextInt(BESTSELLER_TITLES.size()));
         try {
             Book book = searchBookFromAladin(backupTitle);
-            saveBookToUser(userId, book);
+            diary.setBook(book);
         } catch (Exception e) {
             log.error("백업 추천 도서 조회 실패 - {}", e.getMessage());
             throw new RuntimeException("도서 추천에 실패했습니다.");
         }
+    }
+
+    @Transactional(readOnly = true)
+    public RecommendedBookResponseDto getRecommendedBookForUser(Long userId) {
+        Optional<Diary> recentDiaryOpt = diaryService.findMostRecentDiary(userId);
+
+        if (recentDiaryOpt.isEmpty()) {
+            return RecommendedBookResponseDto.empty();
+        }
+
+        Diary recentDiary = recentDiaryOpt.get();
+        Book book = recentDiary.getBook();
+
+        boolean isRecent = !recentDiary.getCreatedAt().toLocalDate().isBefore(LocalDate.now().minusDays(7));
+
+        if (book == null || !isRecent) {
+            return RecommendedBookResponseDto.empty();
+        }
+
+        return RecommendedBookResponseDto.from(book);
     }
 
     private Book searchBookFromAladin(String rawTitle) throws Exception {
@@ -98,7 +124,7 @@ public class BookService {
 
         List<Map<String, String>> items = handler.getItems();
         if (items.isEmpty()) {
-            throw new RuntimeException("알라딘에서 책을 찾을 수 없습니다.");
+            throw new RuntimeException("알라딘에서 책을 찾을 수 없습니다: " + cleanedTitle);
         }
 
         Map<String, String> first = items.get(0);
@@ -108,14 +134,6 @@ public class BookService {
                 first.getOrDefault("description", "설명 없음"),
                 first.getOrDefault("cover", null)
         );
-    }
-
-    private void saveBookToUser(Long userId, Book book) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("유저를 찾을 수 없습니다."));
-        user.changeRecommendedBook(book);
-        userRepository.save(user);
-        log.info("사용자에게 추천 도서 저장 완료 - userId: {}", userId);
     }
 
     private String extractTitleFromGpt(String diary, String analysis) {

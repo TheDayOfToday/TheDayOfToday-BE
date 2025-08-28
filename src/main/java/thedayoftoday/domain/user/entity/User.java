@@ -32,9 +32,6 @@ public class User extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private RoleType role;
 
-    @Embedded
-    private Book recommendedBook;
-
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @Builder.Default
     private List<Diary> diaries = new ArrayList<>();
@@ -75,9 +72,5 @@ public class User extends BaseEntity {
             throw new IllegalArgumentException("기존의 비밀번호와 동일합니다.");
         }
         this.password = passwordEncoder.encode(newPassword);
-    }
-
-    public void changeRecommendedBook(Book book) {
-        this.recommendedBook = book;
     }
 }

@@ -29,10 +29,7 @@ public class BookController {
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @RequestParam("diaryId") Long diaryId
     ) {
-        Diary diary = diaryRepository.findById(diaryId)
-                .orElseThrow(() -> new IllegalArgumentException("일기를 찾을 수 없습니다."));
-
-        bookService.recommendBook(userDetails.getUserId(), diary.getContent(), diary.getAnalysisContent());
+        bookService.recommendBookToDiary(diaryId);
         return ResponseEntity.ok().build();
     }
 
@@ -40,20 +37,7 @@ public class BookController {
     public ResponseEntity<RecommendedBookResponseDto> getRecommendedBook(
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
-        Long userId = userDetails.getUserId();
-
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("유저를 찾을 수 없습니다."));
-
-        Book book = user.getRecommendedBook();
-
-        boolean hasRecentDiary = diaryRepository.existsByUserAndCreateTimeAfter(user, LocalDate.now().minusDays(7));
-
-        if (book == null || !hasRecentDiary) {
-            RecommendedBookResponseDto emptyResponse = RecommendedBookResponseDto.empty();
-            return ResponseEntity.ok(emptyResponse);
-        }
-
-        return ResponseEntity.ok(RecommendedBookResponseDto.from(book));
+        RecommendedBookResponseDto responseDto = bookService.getRecommendedBookForUser(userDetails.getUserId());
+        return ResponseEntity.ok(responseDto);
     }
 }
