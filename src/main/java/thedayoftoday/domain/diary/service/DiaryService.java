@@ -35,7 +35,7 @@ public class DiaryService {
     private final ConversationService conversationService;
 
     public boolean checkDiaryExistsByDate(Long userId, LocalDate date) {
-        return diaryRepository.existsByUser_IdAndDiaryDate(userId, date);
+        return diaryRepository.existsByUser_UserIdAndCreateTime(userId, date);
     }
 
     @Transactional
@@ -120,6 +120,15 @@ public class DiaryService {
                 diary.getMoodOrDefault(),
                 diary.getAnalysisContentOrDefault()
         );
+    }
+
+    public Diary findDiaryById(Long diaryId) {
+        return diaryRepository.findById(diaryId)
+                .orElseThrow(() -> new IllegalArgumentException("일기를 찾을 수 없습니다. ID: " + diaryId));
+    }
+
+    public Optional<Diary> findMostRecentDiary(Long userId) {
+        return diaryRepository.findTopByUser_UserIdOrderByCreatedAtDesc(userId);
     }
 
     @Transactional

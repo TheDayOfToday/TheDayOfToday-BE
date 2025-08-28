@@ -15,7 +15,7 @@ import org.springframework.data.repository.query.Param;
 
 public interface DiaryRepository extends JpaRepository<Diary, Long> {
 
-    boolean existsByUser_IdAndDiaryDate(Long userId, LocalDate diaryDate);
+    boolean existsByUser_UserIdAndCreateTime(Long userId, LocalDate date);
 
     // 특정 유저 ID로 모든 Diary 조회
     List<Diary> findByUser_UserId(Long userId);
@@ -62,4 +62,6 @@ public interface DiaryRepository extends JpaRepository<Diary, Long> {
             @Param("startDate") LocalDate startDate,
             @Param("endDate") LocalDate endDate
     );
+
+    Optional<Diary> findTopByUser_UserIdOrderByCreatedAtDesc(Long userId);
 }

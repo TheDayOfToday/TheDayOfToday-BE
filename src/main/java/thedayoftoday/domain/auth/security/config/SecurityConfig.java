@@ -59,10 +59,13 @@ public class SecurityConfig {
                 .httpBasic(httpBasic -> httpBasic.disable())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        .requestMatchers("/", "/error", "/login", "/user/signup", "/swagger-ui/**",
-                                "/v3/api-docs/**", "/reissue", "/diary/**", "/sentimental/**",
-                                "/weeklyAnalysis/**", "/calendar/**", "/swagger-auth/**","/user/reset-password","user/find-email",
-                                "user/send-code","user/check-code")
+                        .requestMatchers(
+                                "/auth/**",
+                                "/user/**",
+                                "/", "/error", "/swagger-ui/**", "/v3/api-docs/**",
+                                "/reissue", "/diary/**", "/sentimental/**",
+                                "/weeklyAnalysis/**", "/calendar/**"
+                        )
                         .permitAll()
                         .anyRequest().authenticated())
                 .sessionManagement(session -> session
