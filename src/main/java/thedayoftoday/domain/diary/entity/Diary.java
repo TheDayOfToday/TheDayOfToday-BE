@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import lombok.*;
+import thedayoftoday.domain.book.entity.Book;
 import thedayoftoday.domain.common.BaseEntity;
 import thedayoftoday.domain.diary.exception.MoodNotSelectedException;
 import thedayoftoday.domain.diary.moodmeter.DiaryMood;
@@ -50,6 +51,17 @@ public class Diary extends BaseEntity {
     @OneToMany(mappedBy = "diary", cascade = CascadeType.REMOVE, orphanRemoval = true)
     @Builder.Default
     private List<Conversation> conversations = new ArrayList<>();
+
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "book_id") // 외래 키(FK)를 지정
+    private Book book;
+
+    public void setBook(Book book) {
+        this.book = book;
+        if (book != null) {
+            book.setDiary(this);
+        }
+    }
 
     public void addAnalysisContent(String analysisContent) {
         this.analysisContent = analysisContent;

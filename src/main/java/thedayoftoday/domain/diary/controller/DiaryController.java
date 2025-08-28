@@ -1,6 +1,7 @@
 package thedayoftoday.domain.diary.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 import thedayoftoday.domain.diary.dto.*;
 import thedayoftoday.domain.diary.entity.Diary;
 import thedayoftoday.domain.diary.moodmeter.DiaryMood;
@@ -10,6 +11,9 @@ import thedayoftoday.domain.diary.service.DiaryService;
 import thedayoftoday.domain.auth.security.CustomUserDetails;
 
 import java.io.IOException;
+import java.time.LocalDate;
+import java.util.Collections;
+import java.util.Map;
 
 import thedayoftoday.domain.diary.conversation.service.ConversationService;
 
@@ -29,6 +33,16 @@ public class DiaryController {
 
     private final ConversationService conversationService;
     private final DiaryService diaryService;
+
+    @GetMapping("/{date}/existence")
+    public ResponseEntity<Map<String, Boolean>> checkDiaryExistence(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+
+        boolean exists = diaryService.checkDiaryExistsByDate(userDetails.getUserId(), date);
+        Map<String, Boolean> response = Collections.singletonMap("exists", exists);
+        return ResponseEntity.ok(response);
+    }
 
     @PostMapping(value = "/monologue", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<DiaryIdResponseDto> createDiaryWithMood(@RequestParam("file") MultipartFile file,
