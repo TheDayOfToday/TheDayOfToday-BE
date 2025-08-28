@@ -34,6 +34,10 @@ public class DiaryService {
     private final AiService aiService;
     private final ConversationService conversationService;
 
+    public boolean checkDiaryExistsByDate(Long userId, LocalDate date) {
+        return diaryRepository.existsByUser_IdAndDiaryDate(userId, date);
+    }
+
     @Transactional
     public DiaryIdResponseDto createDiaryFromAudio(Long userId, MultipartFile audioFile) throws IOException {
         String transcribedText = aiService.transcribeAudio(audioFile);

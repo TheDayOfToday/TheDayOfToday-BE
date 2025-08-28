@@ -40,16 +40,23 @@ public class CalendarService {
         return new MonthColorsResponseDto(colors);
     }
 
-    public DiaryContentResponseDto getDiaryEntry(Long userId, LocalDate date) {
+    public DiaryContentResponseDto pastGetDiaryEntry(Long userId, LocalDate date) {
 
         /**
          * return diaryService.findDiaryByDate(userId, date) // 얘외처리는 프론트 코드랑 함께 손봐야 함 아마 diary에서 일기 존재 유무를 확인해주는 메서드 만들듯
          *                 .map(diary -> new DiaryContentResponseDto(diary.getTitle(), diary.getContent()))
          *                 .orElseThrow(() -> new DiaryNotFoundException("해당 날짜에 작성된 일기가 없습니다."));
-        * */
+         * */
 
         return diaryService.findDiaryContentByDate(userId, date)
                 .orElse(null);
+    }
+
+    public DiaryContentResponseDto getDiaryEntry(Long userId, LocalDate date) {
+
+        return diaryService.findDiaryByDate(userId, date)
+                .map(diary -> new DiaryContentResponseDto(diary.getTitle(), diary.getContent()))
+                .orElseThrow(() -> new DiaryNotFoundException("해당 날짜에 작성된 일기가 없습니다."));
     }
 
     public AIAnalysisContentDto getSentimentalAnalysis(Long userId, LocalDate date) {

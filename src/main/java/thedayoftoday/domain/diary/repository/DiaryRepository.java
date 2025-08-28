@@ -15,6 +15,8 @@ import org.springframework.data.repository.query.Param;
 
 public interface DiaryRepository extends JpaRepository<Diary, Long> {
 
+    boolean existsByUser_IdAndDiaryDate(Long userId, LocalDate diaryDate);
+
     // 특정 유저 ID로 모든 Diary 조회
     List<Diary> findByUser_UserId(Long userId);
 
