@@ -61,7 +61,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers(
                                 "/auth/**",
-                                "/user/**",
+                                "/user/**", "/swagger-auth/**",
                                 "/", "/error", "/swagger-ui/**", "/v3/api-docs/**",
                                 "/reissue", "/diary/**", "/sentimental/**",
                                 "/weeklyAnalysis/**", "/calendar/**"
