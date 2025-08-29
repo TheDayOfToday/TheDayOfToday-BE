@@ -20,4 +20,8 @@ public record RecommendedBookResponseDto(
     public static RecommendedBookResponseDto empty() {
         return new RecommendedBookResponseDto(null, null, null, null);
     }
+
+    public boolean isEmpty() {
+        return this.title == null;
+    }
 }
