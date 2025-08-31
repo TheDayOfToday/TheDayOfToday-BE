@@ -60,11 +60,13 @@ public class User extends BaseEntity {
     }
 
     public void addNotice(Notice notice) {
-        notices.add(notice);
+        this.notices.add(notice);
+        notice.setUser(this);
     }
 
     public void addWeeklyData(WeeklyData weeklyData) {
-        weeklyDataList.add(weeklyData);
+        this.weeklyDataList.add(weeklyData);
+        weeklyData.setUser(this);
     }
 
     public void updatePassword(String newPassword, PasswordEncoder passwordEncoder) {

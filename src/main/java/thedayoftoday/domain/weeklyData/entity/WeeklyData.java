@@ -30,7 +30,6 @@ public class WeeklyData extends BaseEntity {
     private String feedback;
 
     private LocalDate startDate;
-
     private LocalDate endDate;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -44,11 +43,25 @@ public class WeeklyData extends BaseEntity {
                       LocalDate startDate,
                       LocalDate endDate,
                       User user) {
-        this.degree = degree;
         this.title = title;
+        this.degree = degree;
         this.feedback = feedback;
         this.startDate = startDate;
         this.endDate = endDate;
+        setUser(user);
+    }
+
+    public void setUser(User user) {
+        if (this.user == user) return;
+
+        if (this.user != null) {
+            this.user.getWeeklyDataList().remove(this);
+        }
+
         this.user = user;
+
+        if (user != null && !user.getWeeklyDataList().contains(this)) {
+            user.getWeeklyDataList().add(this);
+        }
     }
 }
