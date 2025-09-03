@@ -14,6 +14,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Table(name = "weekly_data")
 public class WeeklyData extends BaseEntity {
 
     @Id
