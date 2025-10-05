@@ -67,37 +67,3 @@ public class WeeklySummaryScheduler {
         }
     }
 }
-
-
-/*
- public void summarizeWeeklyDiaries() {
-        List<User> allUsers = userRepository.findAll();
-
-        for (User user : allUsers) {
-            LocalDate now = LocalDate.now();
-            LocalDate[] weekRange = weeklyAnalysisService.calculateStartAndEndDate(now);
-            LocalDate startDate = weekRange[0];
-            LocalDate endDate = weekRange[1];
-
-            List<Diary> diaries = weeklyAnalysisService.extractedWeeklyDiaryData(user.getUserId(), weekRange);
-            String combined = weeklyAnalysisService.combineWeeklyDiary(diaries);
-            if (combined.isBlank()) {
-                continue;
-            }
-
-            WeeklyTitleFeedbackResponseDto feedbackDto = aiService.analyzeWeeklyDiaryWithTitle(combined);
-            Degree degree = aiService.analyzeDegree(combined);
-
-            WeeklyData weeklyData = WeeklyData.builder()
-                    .user(user)
-                    .title(feedbackDto.title())
-                    .feedback(feedbackDto.feedback())
-                    .degree(degree)
-                    .startDate(startDate)
-                    .endDate(endDate)
-                    .build();
-
-            weeklyDataRepository.save(weeklyData);
-        }
-    }
- */
