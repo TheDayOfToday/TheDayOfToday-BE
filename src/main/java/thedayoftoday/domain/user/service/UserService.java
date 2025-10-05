@@ -50,11 +50,23 @@ public class UserService {
 
     @Transactional
     public Long createUser(SignupRequestDto requestDto) {
-        checkEmailExists(requestDto.email());
-        checkPhoneNumberExists(requestDto.phoneNumber());
+        checkEmailNotDuplicated(requestDto.email());
+        checkPhoneNumberNotDuplicated(requestDto.phoneNumber());
 
         User newUser = User.createUser(requestDto, passwordEncoder);
         return userRepository.save(newUser).getUserId();
+    }
+
+    private void checkEmailNotDuplicated(String email) {
+        if (userRepository.existsByEmail(email)) {
+            throw new EmailDuplicationException("해당 이메일은 이미 존재합니다.");
+        }
+    }
+
+    private void checkPhoneNumberNotDuplicated(String phoneNumber) {
+        if (userRepository.existsByPhoneNumber(phoneNumber)) {
+            throw new PhoneNumberDuplicationExceptiono("해당 전화번호는 이미 존재합니다.");
+        }
     }
 
     @Transactional
@@ -65,14 +77,8 @@ public class UserService {
     }
 
     public void checkEmailExists(String email) {
-        if(!userRepository.existsByEmail(email)){
-            throw new IllegalArgumentException("존재하지 않는 이메일입니다.");
-        }
-    }
-
-    private void checkPhoneNumberExists(String phoneNumber) {
-        if (userRepository.existsByPhoneNumber(phoneNumber)) {
-            throw new PhoneNumberDuplicationExceptiono("해당 전화번호는 이미 존재합니다.");
+        if(userRepository.existsByEmail(email)){
+            throw new EmailDuplicationException("해당 이메일은 이미 존재합니다.");
         }
     }
 }
