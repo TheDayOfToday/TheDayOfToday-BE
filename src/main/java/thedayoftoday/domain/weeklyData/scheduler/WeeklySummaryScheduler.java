@@ -30,9 +30,9 @@ public class WeeklySummaryScheduler {
     private final UserRepository userRepository;
     private final WeeklyDataRepository weeklyDataRepository;
 
-    @Scheduled(cron = "0 45 0 * * MON", zone = "Asia/Seoul")
+    @Scheduled(cron = "0 10 1 * * MON", zone = "Asia/Seoul")
     public void summarizeWeeklyDiaries() {
-        log.info("[WEEKLY] Scheduler 시작된 시점 at {}", LocalDateTime.now());
+        log.info("[WEEKLY] 주간 분석 스케줄러 시작 시점: {}", LocalDateTime.now());
 
         List<User> allUsers = userRepository.findAll();
         LocalDate basis = LocalDate.now().minusDays(1);
@@ -42,11 +42,12 @@ public class WeeklySummaryScheduler {
 
         for (User user : allUsers) {
             try {
-
                 List<Diary> diaries = weeklyAnalysisService.extractedWeeklyDiaryData(user.getUserId(), weekRange);
-
                 String combined = weeklyAnalysisService.combineWeeklyDiary(diaries);
+
                 if (combined.isBlank()) {
+                    log.info("[WEEKLY] 사용자 {} — 이번 주({} ~ {}) 작성된 일기 없음, 분석 건너뜀",
+                            user.getUserId(), startDate, endDate);
                     continue;
                 }
 
@@ -63,9 +64,10 @@ public class WeeklySummaryScheduler {
                         .build();
 
                 weeklyDataRepository.save(weeklyData);
+                log.info("[WEEKLY] 사용자 {} — 주간 데이터 저장 완료 ({} ~ {})", user.getUserId(), startDate, endDate);
 
             } catch (Exception e) {
-                log.warn("weekly summarize failed userId={}", user.getUserId(), e);
+                log.warn("[WEEKLY] 사용자 {} — 주간 분석 중 오류 발생", user.getUserId(), e);
             }
         }
     }
