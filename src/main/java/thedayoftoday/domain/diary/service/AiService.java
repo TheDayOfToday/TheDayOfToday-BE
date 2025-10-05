@@ -235,7 +235,7 @@ public class AiService {
             case "힘든" -> Degree.HARD;
             default -> {
                 log.warn("알 수 없는 Degree 응답: {}", response);
-                yield null;
+                yield Degree.COMFORT;
             }
         };
     }

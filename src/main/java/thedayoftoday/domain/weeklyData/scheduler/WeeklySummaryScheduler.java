@@ -29,8 +29,8 @@ public class WeeklySummaryScheduler {
     private final AiService aiService;
     private final UserRepository userRepository;
     private final WeeklyDataRepository weeklyDataRepository;
-
-    @Scheduled(cron = "0 00 2 * * MON", zone = "Asia/Seoul")
+  
+    @Scheduled(cron = "0 50 7 * * MON", zone = "Asia/Seoul")
     public void summarizeWeeklyDiaries() {
         log.info("[WEEKLY] 주간 분석 스케줄러 시작 시점: {}", LocalDateTime.now());
 
@@ -68,6 +68,7 @@ public class WeeklySummaryScheduler {
 
             } catch (Exception e) {
                 log.warn("[WEEKLY] 사용자 {} — 주간 분석 중 오류 발생", user.getUserId(), e);
+                log.warn("[WEEKLY] 상세 예외", e);
             }
         }
     }
