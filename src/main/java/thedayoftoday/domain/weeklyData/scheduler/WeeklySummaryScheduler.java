@@ -22,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class WeeklySummaryScheduler {
 
@@ -30,7 +31,7 @@ public class WeeklySummaryScheduler {
     private final UserRepository userRepository;
     private final WeeklyDataRepository weeklyDataRepository;
 
-    @Scheduled(cron = "0 20 8 * * MON", zone = "Asia/Seoul")
+    @Scheduled(cron = "0 10 9 * * MON", zone = "Asia/Seoul")
     public void summarizeWeeklyDiaries() {
         log.info("[WEEKLY] 주간 분석 스케줄러 시작 시점: {}", LocalDateTime.now());
 
@@ -55,7 +56,6 @@ public class WeeklySummaryScheduler {
                 Degree degree = aiService.analyzeDegree(combined);
 
                 WeeklyData weeklyData = WeeklyData.builder()
-                        .user(user)
                         .title(feedbackDto.title())
                         .feedback(feedbackDto.feedback())
                         .degree(degree)
@@ -63,12 +63,15 @@ public class WeeklySummaryScheduler {
                         .endDate(endDate)
                         .build();
 
+                user.addWeeklyData(weeklyData);
                 weeklyDataRepository.save(weeklyData);
                 log.info("[WEEKLY] 사용자 {} — 주간 데이터 저장 완료 ({} ~ {})", user.getUserId(), startDate, endDate);
 
             } catch (Exception e) {
-                log.warn("[WEEKLY] 사용자 {} — 주간 분석 중 오류 발생", user.getUserId(), e);
-                log.warn("[WEEKLY] 상세 예외", e);
+                log.warn("[WEEKLY][ERROR] userId={} 기간:{}~{} type={} msg={}",
+                        user.getUserId(), startDate, endDate,
+                        e.getClass().getSimpleName(), e.getMessage());
+                log.debug("[WEEKLY][STACKTRACE]", e);
             }
         }
     }
