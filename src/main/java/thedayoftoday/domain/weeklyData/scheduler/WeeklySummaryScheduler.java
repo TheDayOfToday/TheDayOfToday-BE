@@ -1,5 +1,6 @@
 package thedayoftoday.domain.weeklyData.scheduler;
 
+import java.time.LocalDateTime;
 import lombok.extern.slf4j.Slf4j;
 import thedayoftoday.domain.weeklyData.dto.WeeklyTitleFeedbackResponseDto;
 import thedayoftoday.domain.diary.entity.Diary;
@@ -29,16 +30,18 @@ public class WeeklySummaryScheduler {
     private final UserRepository userRepository;
     private final WeeklyDataRepository weeklyDataRepository;
 
-    @Scheduled(cron = "59 59 23 * * SUN", zone = "Asia/Seoul")
+    @Scheduled(cron = "0 45 0 * * MON", zone = "Asia/Seoul")
     public void summarizeWeeklyDiaries() {
+        log.info("[WEEKLY] Scheduler 시작된 시점 at {}", LocalDateTime.now());
+
         List<User> allUsers = userRepository.findAll();
+        LocalDate basis = LocalDate.now().minusDays(1);
+        LocalDate[] weekRange = weeklyAnalysisService.calculateStartAndEndDate(basis);
+        LocalDate startDate = weekRange[0];
+        LocalDate endDate = weekRange[1];
 
         for (User user : allUsers) {
             try {
-                LocalDate now = LocalDate.now();
-                LocalDate[] weekRange = weeklyAnalysisService.calculateStartAndEndDate(now);
-                LocalDate startDate = weekRange[0];
-                LocalDate endDate = weekRange[1];
 
                 List<Diary> diaries = weeklyAnalysisService.extractedWeeklyDiaryData(user.getUserId(), weekRange);
 
