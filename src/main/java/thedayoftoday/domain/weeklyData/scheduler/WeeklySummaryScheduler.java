@@ -31,7 +31,7 @@ public class WeeklySummaryScheduler {
     private final UserRepository userRepository;
     private final WeeklyDataRepository weeklyDataRepository;
 
-    @Scheduled(cron = "0 45 11 * * MON", zone = "Asia/Seoul")
+    @Scheduled(cron = "0 00 00 * * MON", zone = "Asia/Seoul")
     public void summarizeWeeklyDiaries() {
         log.info("[WEEKLY] 주간 분석 스케줄러 시작 시점: {}", LocalDateTime.now());
 
