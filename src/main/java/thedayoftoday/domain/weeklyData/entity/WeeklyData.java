@@ -53,15 +53,10 @@ public class WeeklyData extends BaseEntity {
     }
 
     public void setUser(User user) {
-        if (this.user == user) return;
-
         if (this.user != null) {
             this.user.getWeeklyDataList().remove(this);
         }
 
-    }
-
-    public void linkUser(User user) {
         this.user = user;
 
         if (user != null && !user.getWeeklyDataList().contains(this)) {

@@ -66,7 +66,7 @@ public class User extends BaseEntity {
 
     public void addWeeklyData(WeeklyData weeklyData) {
         this.weeklyDataList.add(weeklyData);
-        weeklyData.linkUser(this);
+        weeklyData.setUser(this);
     }
 
     public void updatePassword(String newPassword, PasswordEncoder passwordEncoder) {
