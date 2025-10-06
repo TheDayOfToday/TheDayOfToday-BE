@@ -42,8 +42,8 @@ public class WeeklyData extends BaseEntity {
                       Degree degree,
                       String feedback,
                       LocalDate startDate,
-                      LocalDate endDate,
-                      User user) {
+                      LocalDate endDate) {
+        this.degree = degree;
         this.title = title;
         this.degree = degree;
         this.feedback = feedback;
@@ -53,8 +53,6 @@ public class WeeklyData extends BaseEntity {
     }
 
     public void setUser(User user) {
-        if (this.user == user) return;
-
         if (this.user != null) {
             this.user.getWeeklyDataList().remove(this);
         }
