@@ -64,4 +64,15 @@ public interface DiaryRepository extends JpaRepository<Diary, Long> {
     );
 
     Optional<Diary> findTopByUser_UserIdOrderByCreatedAtDesc(Long userId);
+
+    @Query("""
+    SELECT d
+    FROM Diary d
+    JOIN FETCH d.user u
+    WHERE d.createTime BETWEEN :startDate AND :endDate
+""")
+    List<Diary> findAllByCreateTimeBetweenWithUser(
+            @Param("startDate") LocalDate startDate,
+            @Param("endDate") LocalDate endDate
+    );
 }
