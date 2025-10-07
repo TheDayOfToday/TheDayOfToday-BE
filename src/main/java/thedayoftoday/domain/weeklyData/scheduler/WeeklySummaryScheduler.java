@@ -1,7 +1,10 @@
 package thedayoftoday.domain.weeklyData.scheduler;
 
 import java.time.LocalDateTime;
+import java.util.Map;
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
+import thedayoftoday.domain.diary.repository.DiaryRepository;
 import thedayoftoday.domain.weeklyData.dto.WeeklyTitleFeedbackResponseDto;
 import thedayoftoday.domain.diary.entity.Diary;
 import thedayoftoday.domain.user.entity.User;
@@ -30,25 +33,35 @@ public class WeeklySummaryScheduler {
     private final AiService aiService;
     private final UserRepository userRepository;
     private final WeeklyDataRepository weeklyDataRepository;
+    private final DiaryRepository diaryRepository;
 
     @Scheduled(cron = "0 00 00 * * MON", zone = "Asia/Seoul")
     public void summarizeWeeklyDiaries() {
         log.info("[WEEKLY] 주간 분석 스케줄러 시작 시점: {}", LocalDateTime.now());
 
-        List<User> allUsers = userRepository.findAll();
         LocalDate basis = LocalDate.now().minusDays(1);
         LocalDate[] weekRange = weeklyAnalysisService.calculateStartAndEndDate(basis);
         LocalDate startDate = weekRange[0];
         LocalDate endDate = weekRange[1];
 
-        for (User user : allUsers) {
-            try {
-                List<Diary> diaries = weeklyAnalysisService.extractedWeeklyDiaryData(user.getUserId(), weekRange);
-                String combined = weeklyAnalysisService.combineWeeklyDiary(diaries);
+        List<Diary> allDiaries = diaryRepository.findAllByCreateTimeBetweenWithUser(startDate, endDate);
+        if (allDiaries.isEmpty()) {
+            log.info("[WEEKLY] 이번 주({} ~ {}) 작성된 일기가 한 건도 없음", startDate, endDate);
+            return;
+        }
 
+        Map<Long, List<Diary>> extractDiariesWithUser = allDiaries.stream()
+                .collect(Collectors.groupingBy(d -> d.getUser().getUserId()));
+
+        for (Map.Entry<Long, List<Diary>> entry : extractDiariesWithUser.entrySet()) {
+            Long userId = entry.getKey();
+            List<Diary> diaries = entry.getValue();
+
+            try {
+                String combined = weeklyAnalysisService.combineWeeklyDiary(diaries);
                 if (combined.isBlank()) {
-                    log.info("[WEEKLY] 사용자 {} — 이번 주({} ~ {}) 작성된 일기 없음, 분석 건너뜀",
-                            user.getUserId(), startDate, endDate);
+                    log.info("[WEEKLY] 사용자 {} — 이번 주({} ~ {}) 작성된 일기 없음, 건너뜀",
+                            userId, startDate, endDate);
                     continue;
                 }
 
@@ -63,13 +76,15 @@ public class WeeklySummaryScheduler {
                         .endDate(endDate)
                         .build();
 
-                user.addWeeklyData(weeklyData);
+                User user = userRepository.getReferenceById(userId);
+                weeklyData.setUser(user);
                 weeklyDataRepository.save(weeklyData);
-                log.info("[WEEKLY] 사용자 {} — 주간 데이터 저장 완료 ({} ~ {})", user.getUserId(), startDate, endDate);
+                log.info("[WEEKLY] 사용자 {} — 주간 데이터 저장 완료 ({} ~ {})",
+                        userId, startDate, endDate);
 
             } catch (Exception e) {
                 log.warn("[WEEKLY][ERROR] userId={} 기간:{}~{} type={} msg={}",
-                        user.getUserId(), startDate, endDate,
+                        userId, startDate, endDate,
                         e.getClass().getSimpleName(), e.getMessage());
                 log.debug("[WEEKLY][STACKTRACE]", e);
             }

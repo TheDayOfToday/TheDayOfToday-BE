@@ -75,4 +75,8 @@ public class User extends BaseEntity {
         }
         this.password = passwordEncoder.encode(newPassword);
     }
+
+    public User(Long userId) {
+        this.userId = userId;
+    }
 }
